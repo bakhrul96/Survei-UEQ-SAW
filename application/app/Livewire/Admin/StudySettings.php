@@ -46,6 +46,8 @@ class StudySettings extends Component
             'instrumentSource' => ['nullable', 'string'],
         ]);
 
+        $instrumentSource = trim((string) $validated['instrumentSource']) ?: null;
+
         $period->update([
             'opens_at' => $validated['opensAt'],
             'closes_at' => $validated['closesAt'],
@@ -54,7 +56,10 @@ class StudySettings extends Component
             'target_per_unit' => $validated['targetPerUnit'],
             'target_basis' => trim($validated['targetBasis']),
             'consent_text' => trim($validated['consentText']),
-            'instrument_source' => trim((string) $validated['instrumentSource']) ?: null,
+            'instrument_source' => $instrumentSource,
+            'instrument_verified_at' => $instrumentSource === $period->instrument_source
+                ? $period->instrument_verified_at
+                : null,
         ]);
 
         $this->fillFromPeriod($period->fresh());

@@ -70,6 +70,9 @@ it('lets an admin verify, activate, and close the seeded period', function () {
     $admin = User::factory()->create();
     $period = EvaluationPeriod::firstOrFail();
     $settings = Livewire::actingAs($admin)->test(StudySettings::class)
+        ->set('opensAt', now()->format('Y-m-d\TH:i'))
+        ->set('closesAt', now()->addMonth()->format('Y-m-d\TH:i'))
+        ->call('save')
         ->set('instrumentSource', 'Sumber instrumen UEQ')
         ->call('verifyInstrument');
 
@@ -82,6 +85,20 @@ it('lets an admin verify, activate, and close the seeded period', function () {
     expect($period->fresh()->status)->toBe(PeriodStatus::Closed)
         ->and($period->fresh()->instrument_verified_at)->not->toBeNull()
         ->and(UeqBenchmark::query()->where('version', $period->instrument_version)->whereNotNull('verified_at')->count())->toBe(6);
+});
+
+it('invalidates instrument verification when its source changes', function () {
+    $admin = User::factory()->create();
+    $period = EvaluationPeriod::firstOrFail();
+    $period->update(['instrument_source' => 'Sumber lama', 'instrument_verified_at' => now()]);
+
+    Livewire::actingAs($admin)->test(StudySettings::class)
+        ->set('instrumentSource', 'Sumber baru')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($period->fresh()->instrument_source)->toBe('Sumber baru')
+        ->and($period->fresh()->instrument_verified_at)->toBeNull();
 });
 
 it('rejects malformed current-version item and wrong-version benchmark readiness', function () {

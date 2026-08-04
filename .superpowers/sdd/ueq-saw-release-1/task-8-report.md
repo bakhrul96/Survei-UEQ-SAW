@@ -120,3 +120,11 @@ reach the intended admin middleware branch. The dashboard middleware test now
 uses a verified account without confirmed two-factor authentication to assert
 the redirect to security setup. PHP remains unavailable, so these tests are
 not runtime-verified locally.
+
+## Follow-up: readiness workflow safeguards
+
+On 2026-08-04, the seeded workflow test was completed with period dates before
+verification and activation. Saving a changed instrument source now clears its
+verification timestamp, requiring explicit re-verification before activation.
+Raw-export coverage now supplies verified email and confirmed two-factor
+authentication to reach the protected route. PHP remains unavailable locally.
