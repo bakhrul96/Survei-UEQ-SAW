@@ -27,6 +27,10 @@ class ConsentScreener extends Component
 
     public function submit(SurveyContext $context): RedirectResponse
     {
+        $period = EvaluationPeriod::query()->findOrFail($this->period->id);
+        abort_unless($period->status === PeriodStatus::Active, 404);
+        $this->period = $period;
+
         $validated = $this->validate([
             'consent' => ['accepted'],
             'age' => ['required', 'integer', 'between:17,100'],

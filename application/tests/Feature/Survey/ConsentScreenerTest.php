@@ -18,9 +18,28 @@ it('stores consent and allows only eligible respondents', function () {
         ->set('isIndramayuResident', true)
         ->set('hasUsedWongReang', true)
         ->call('submit')
-        ->assertRedirect();
+        ->assertRedirect(route('survey.units', $period));
 
     expect(RespondentProfile::firstOrFail()->eligible)->toBeTrue();
+});
+
+it('rejects screening when an active period closes after the component mounts', function () {
+    $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active]);
+    $issued = app(SurveyTokenService::class)->issue();
+
+    $component = Livewire::withCookie('ueq_survey_token', $issued->plainToken)
+        ->test(ConsentScreener::class, ['period' => $period]);
+
+    $period->update(['status' => PeriodStatus::Closed]);
+
+    $component->set('consent', true)
+        ->set('age', 20)
+        ->set('isIndramayuResident', true)
+        ->set('hasUsedWongReang', true)
+        ->call('submit')
+        ->assertNotFound();
+
+    expect(RespondentProfile::count())->toBe(0);
 });
 
 it('does not store a profile when consent or age is invalid', function () {
