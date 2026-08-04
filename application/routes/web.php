@@ -1,15 +1,26 @@
 <?php
 
+use App\Domain\Study\PeriodStatus;
 use App\Http\Controllers\SurveyEntryController;
 use App\Livewire\Admin\StudySettings;
 use App\Livewire\Survey\ConsentScreener;
+use App\Models\EvaluationPeriod;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
 Route::get('/s/wong-reang/{period:slug}', SurveyEntryController::class)->name('survey.entry');
 Route::get('/s/wong-reang/{period:slug}/consent', ConsentScreener::class)->name('survey.consent');
-Route::view('/s/wong-reang/{period:slug}/ineligible', 'survey.ineligible')->name('survey.ineligible');
+Route::get('/s/wong-reang/{period:slug}/ineligible', function (EvaluationPeriod $period) {
+    abort_unless($period->status === PeriodStatus::Active, 404);
+
+    return view('survey.ineligible');
+})->name('survey.ineligible');
+Route::get('/s/wong-reang/{period:slug}/units', function (EvaluationPeriod $period) {
+    abort_unless($period->status === PeriodStatus::Active, 404);
+
+    return response()->noContent();
+})->name('survey.units');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('admin/dashboard', 'dashboard')->name('dashboard');

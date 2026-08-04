@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Survey;
 
+use App\Domain\Study\PeriodStatus;
 use App\Domain\Survey\SurveyContext;
 use App\Models\EvaluationPeriod;
 use App\Models\RespondentProfile;
@@ -19,6 +20,8 @@ class ConsentScreener extends Component
 
     public function mount(EvaluationPeriod $period): void
     {
+        abort_unless($period->status === PeriodStatus::Active, 404);
+
         $this->period = $period;
     }
 

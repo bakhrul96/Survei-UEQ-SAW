@@ -2,6 +2,7 @@
 
 namespace App\Domain\Survey;
 
+use App\Domain\Study\PeriodStatus;
 use App\Models\AnonymousRespondent;
 use App\Models\EvaluationPeriod;
 use Illuminate\Http\Request;
@@ -17,7 +18,10 @@ class SurveyContext
     {
         $period = $this->request->route('period');
 
-        abort_unless($period instanceof EvaluationPeriod, 404);
+        abort_unless(
+            $period instanceof EvaluationPeriod && $period->status === PeriodStatus::Active,
+            404,
+        );
 
         return $period;
     }

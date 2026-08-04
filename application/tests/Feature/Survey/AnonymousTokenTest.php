@@ -28,3 +28,10 @@ it('reuses a valid survey token instead of creating a second respondent', functi
 
     expect(AnonymousRespondent::count())->toBe(1);
 });
+
+it('does not expose consent or ineligible pages for an inactive period', function () {
+    $period = EvaluationPeriod::factory()->create(['slug' => 'tertutup-2026', 'status' => PeriodStatus::Closed]);
+
+    $this->get(route('survey.consent', $period))->assertNotFound();
+    $this->get(route('survey.ineligible', $period))->assertNotFound();
+});
