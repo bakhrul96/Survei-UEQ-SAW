@@ -48,3 +48,12 @@ records these blockers and the exact remaining UAT matrix.
 manual mobile UAT evidence is incomplete. A machine with PHP 8.3+, Node/npm,
 MySQL 8 clients/server, and the browser test prerequisites must run the listed
 commands and append the resulting evidence before activation.
+
+## Follow-up: critical-path labels
+
+On 2026-08-04, the browser contract and rendered UI were aligned to the
+approved strings: `Informasi Penelitian`, `Pilih Modul`, `Berikutnya`, and
+`Kirim Penilaian`. The browser test was updated before the views. Its red run
+was attempted with `php artisan test tests/Browser/SurveyHappyPathTest.php`,
+but PHP remains unavailable on PATH (exit 1: `php` is not recognized), so the
+runtime result remains unverified and the release gate remains closed.

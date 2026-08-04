@@ -1,6 +1,6 @@
 <div class="mx-auto w-full max-w-2xl space-y-6">
     <div>
-        <flux:heading size="xl">Persetujuan partisipasi</flux:heading>
+        <flux:heading size="xl">Informasi Penelitian</flux:heading>
         <flux:text>{{ $period->name }}</flux:text>
     </div>
 

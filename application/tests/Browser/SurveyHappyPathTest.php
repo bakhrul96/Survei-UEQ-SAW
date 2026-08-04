@@ -17,13 +17,13 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
 
     $page = visit(route('survey.entry', $fixture->period))
         ->resize(360, 800)
-        ->assertSee('Persetujuan partisipasi')
+        ->assertSee('Informasi Penelitian')
         ->check('[wire\\:model="consent"]')
         ->fill('[wire\\:model="age"]', '20')
         ->check('[wire\\:model="isIndramayuResident"]')
         ->check('[wire\\:model="hasUsedWongReang"]')
         ->press('Lanjutkan')
-        ->waitForText('Pilih modul layanan')
+        ->waitForText('Pilih Modul')
         ->press('Ibadah-Yu')
         ->waitForText('Langkah 1 dari 4')
         ->check('[wire\\:model="confirmedExperience"]');
@@ -32,11 +32,11 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
         $page->click('[aria-label="Item '.$itemOrder.' nilai 4"]');
 
         if (in_array($itemOrder, [7, 14, 20], true)) {
-            $page->press('Lanjut')->waitForText('Langkah '.(array_search($itemOrder, [7, 14, 20], true) + 2).' dari 4');
+            $page->press('Berikutnya')->waitForText('Langkah '.(array_search($itemOrder, [7, 14, 20], true) + 2).' dari 4');
         }
     }
 
-    $page->press('Kirim penilaian')
+    $page->press('Kirim Penilaian')
         ->waitForText('Penilaian berhasil disimpan')
         ->assertSee('Penilaian berhasil disimpan');
 });

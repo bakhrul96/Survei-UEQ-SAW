@@ -1,6 +1,6 @@
 <div class="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
     <header class="space-y-2">
-        <h1 class="text-2xl font-semibold text-zinc-900">Pilih modul layanan</h1>
+        <h1 class="text-2xl font-semibold text-zinc-900">Pilih Modul</h1>
         <p class="text-zinc-600">Pilih hanya modul Wong Reang yang benar-benar pernah Anda gunakan.</p>
     </header>
 
