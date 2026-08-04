@@ -6,12 +6,14 @@
 
 **Architecture:** Aplikasi Laravel ditempatkan di `application/` karena root workspace sudah berisi dokumen penelitian. Laravel modular monolith memakai class-based Livewire pages; interaksi UI berada di Livewire, sedangkan identitas anonim, readiness periode, sesi survei, submission transaksional, query dashboard, dan ekspor berada pada service/action terpisah. Rilis ini tidak memuat kalkulasi UEQ, SAW, sensitivitas, atau multi-aplikasi.
 
-**Tech Stack:** Laravel 13, PHP 8.3+, Livewire 4, Tailwind CSS 4, Flux UI dari starter kit Livewire, Pest 4, MySQL 8 untuk runtime/UAT, SQLite in-memory untuk test cepat, PhpSpreadsheet untuk CSV/XLSX, Vite dan Node.js.
+**Tech Stack:** Laravel 13, PHP 8.3+, Livewire 4, Tailwind CSS 4, Flux UI dari starter kit Livewire, Pest 5, MySQL 8 untuk runtime/UAT, SQLite in-memory untuk test cepat, PhpSpreadsheet untuk CSV/XLSX, Vite dan Node.js.
+
+**Dependency decision (2026-08-04):** Pest 5 menggantikan Pest 4 pada implementasi. Laravel 13 dan starter kit Livewire resmi saat ini mengunci `pestphp/pest-plugin-laravel` pada lini 5; lini 4 hanya mendukung Laravel 11/12. Menurunkan Laravel akan melanggar keputusan platform TA, sehingga perubahan ini diratifikasi sebagai deviasi dependency tanpa perubahan metodologi atau perilaku aplikasi.
 
 ## Global Constraints
 
 - Semua source aplikasi berada di `application/`; semua perintah PHP, Composer, NPM, dan Artisan dijalankan dari folder tersebut.
-- Gunakan Laravel 13, Livewire 4, Tailwind CSS 4, MySQL 8, dan Pest 4; jangan menurunkan versi untuk menghindari penyesuaian kode.
+- Gunakan Laravel 13, Livewire 4, Tailwind CSS 4, MySQL 8, dan Pest 5; jangan menurunkan versi untuk menghindari penyesuaian kode.
 - Hanya satu studi Wong Reang Apps dan satu periode aktif; jangan membuat master aplikasi, organisasi, tenant, atau penugasan banyak admin.
 - Registrasi publik wajib dinonaktifkan; akun Peneliti/Admin dibuat melalui command interaktif.
 - Responden tidak mempunyai akun dan tidak menyimpan NIK, nama, nomor telepon, atau alamat lengkap.
@@ -30,7 +32,7 @@
 
 ### Fondasi dan konfigurasi
 
-- `application/composer.json`: Laravel 13, Pest 4, Livewire 4, dan PhpSpreadsheet.
+- `application/composer.json`: Laravel 13, Pest 5, Livewire 4, dan PhpSpreadsheet.
 - `application/config/fortify.php`: menonaktifkan registrasi publik.
 - `application/config/survey.php`: nama cookie, token key, rate limit, dan masa cookie.
 - `application/.env.example`: variabel MySQL dan `SURVEY_TOKEN_KEY` tanpa secret nyata.
@@ -152,7 +154,7 @@ npx playwright install chromium
 npm run build
 ```
 
-Choose these installer answers: Livewire starter kit, built-in Laravel authentication, no teams, Pest, and MySQL. Confirm `composer.json` contains `laravel/framework:^13.0`, `livewire/livewire:^4.0`, `pestphp/pest:^4.0`, and `phpoffice/phpspreadsheet`.
+Choose these installer answers: Livewire starter kit, built-in Laravel authentication, no teams, Pest, and MySQL. Confirm `composer.json` contains `laravel/framework:^13.0`, `livewire/livewire:^4.0`, `pestphp/pest:^5.0`, and `phpoffice/phpspreadsheet`.
 
 Configure `.env.example` for runtime without a password value:
 
