@@ -4,9 +4,11 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class CreateAdmin extends Command
 {
@@ -32,34 +34,55 @@ class CreateAdmin extends Command
             return self::FAILURE;
         }
 
-        DB::transaction(function () use ($email, $name, $password): void {
-            DB::table('admin_singleton_locks')->where('id', 1)->lockForUpdate()->first();
+        retry(
+            3,
+            function () use ($email, $name, $password): void {
+                DB::transaction(function () use ($email, $name, $password): void {
+                    DB::table('admin_singleton_locks')->where('id', 1)->update(['id' => 1]);
 
-            $admin = User::query()->lockForUpdate()->orderBy('id')->first();
+                    $admin = User::query()->lockForUpdate()->orderBy('id')->first();
 
-            if ($admin === null) {
-                User::query()->create([
-                    'email' => $email,
-                    'name' => $name,
-                    'password' => Hash::make($password),
-                    'email_verified_at' => now(),
-                ]);
+                    if ($admin === null) {
+                        User::query()->create([
+                            'email' => $email,
+                            'name' => $name,
+                            'password' => Hash::make($password),
+                            'email_verified_at' => now(),
+                        ]);
 
-                return;
-            }
+                        return;
+                    }
 
-            $admin->update([
-                'email' => $email,
-                'name' => $name,
-                'password' => Hash::make($password),
-                'email_verified_at' => now(),
-            ]);
+                    $admin->update([
+                        'email' => $email,
+                        'name' => $name,
+                        'password' => Hash::make($password),
+                        'email_verified_at' => now(),
+                    ]);
 
-            User::query()->where('id', '!=', $admin->id)->delete();
-        });
+                    User::query()->where('id', '!=', $admin->id)->delete();
+                });
+            },
+            fn (int $attempt): int => $attempt * 100,
+            fn (Throwable $exception): bool => $this->isRetryableLockException($exception),
+        );
 
         $this->info('Akun Peneliti/Admin siap digunakan.');
 
         return self::SUCCESS;
+    }
+
+    private function isRetryableLockException(Throwable $exception): bool
+    {
+        if (! $exception instanceof QueryException) {
+            return false;
+        }
+
+        $message = mb_strtolower($exception->getMessage());
+
+        return str_contains($message, 'database is locked')
+            || str_contains($message, 'database table is locked')
+            || str_contains($message, 'deadlock found')
+            || str_contains($message, 'lock wait timeout');
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -76,4 +77,20 @@ it('provides the seeded sentinel row that serializes admin creation', function (
     }
 
     expect(DB::table('admin_singleton_locks')->where('id', 1)->exists())->toBeTrue();
+});
+
+it('takes a write lock on the sentinel before creating an admin', function () {
+    $queries = [];
+
+    DB::listen(function (QueryExecuted $query) use (&$queries): void {
+        $queries[] = mb_strtolower(trim($query->sql));
+    });
+
+    $this->artisan('app:create-admin', ['email' => 'peneliti@example.test'])
+        ->expectsQuestion('Nama', 'Peneliti')
+        ->expectsQuestion('Password', 'Rahasia-12345')
+        ->assertSuccessful();
+
+    expect(collect($queries)->contains(fn (string $sql): bool => str_starts_with($sql, 'update')
+        && str_contains($sql, 'admin_singleton_locks')))->toBeTrue();
 });
