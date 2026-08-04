@@ -78,3 +78,12 @@ operation. The restore runbook now includes a credential-safe `mysql` query
 that checks migration rows, required tables, and counts for
 `survey_submissions` and `survey_answers`. MySQL is still unavailable in this
 environment, so no restore evidence has been claimed.
+
+## Follow-up: restore privilege separation
+
+On 2026-08-04, the restore runbook was corrected so a DBA/root or designated
+backup operator creates `ueq_saw_restore` and grants only
+`ueq_saw_restore.*` to a separately provisioned restore operator. The import
+and evidence query use that restore operator; the production application user
+is not granted database-creation privileges. Credentials remain out of band,
+and restore evidence is still unavailable because MySQL is absent.
