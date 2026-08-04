@@ -1,6 +1,7 @@
 <?php
 
 use App\Application\Survey\SubmitSurveyData;
+use App\Application\Survey\SubmitSurvey;
 use App\Domain\Study\PeriodStatus;
 use App\Domain\Survey\SurveyTokenService;
 use App\Models\EvaluationPeriod;
@@ -8,6 +9,7 @@ use App\Models\EvaluationUnit;
 use App\Models\RespondentProfile;
 use App\Models\SurveySession;
 use App\Models\UeqItem;
+use App\Models\SurveySubmission;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -100,4 +102,61 @@ function validSubmitSurveyData(object $fixture, ?string $idempotencyKey = null):
         startedAt: CarbonImmutable::now()->subMinutes(4),
         answers: array_fill_keys(range(1, 26), 4),
     );
+}
+
+function dashboardFixture(int $uniqueRespondents, array $submissions): object
+{
+    foreach ($submissions as $code => $count) {
+        if ($count < 0 || $count > $uniqueRespondents) {
+            throw new InvalidArgumentException("Jumlah submission {$code} tidak valid untuk fixture.");
+        }
+    }
+
+    $period = EvaluationPeriod::factory()->create([
+        'status' => PeriodStatus::Active,
+        'opens_at' => now()->subDay(),
+        'closes_at' => now()->addMonth(),
+    ]);
+
+    $respondents = collect(range(1, $uniqueRespondents))->map(function () use ($period) {
+        $issued = app(SurveyTokenService::class)->issue();
+        $profile = RespondentProfile::factory()->create([
+            'evaluation_period_id' => $period->id,
+            'anonymous_respondent_id' => $issued->respondent->id,
+            'eligible' => true,
+        ]);
+        $session = SurveySession::factory()->create([
+            'evaluation_period_id' => $period->id,
+            'anonymous_respondent_id' => $issued->respondent->id,
+        ]);
+
+        return (object) ['respondent' => $issued->respondent, 'profile' => $profile, 'session' => $session];
+    });
+
+    collect($submissions)->keys()->values()->each(function (string $code, int $index) use ($period, $respondents, $submissions) {
+        $unit = EvaluationUnit::factory()->create([
+            'code' => $code,
+            'name' => Str::headline($code),
+            'display_order' => $index + 1,
+        ]);
+        foreach (range(0, $submissions[$code] - 1) as $respondentIndex) {
+            $owner = $respondents[$respondentIndex];
+            SurveySubmission::factory()->create([
+                'evaluation_period_id' => $period->id,
+                'anonymous_respondent_id' => $owner->respondent->id,
+                'survey_session_id' => $owner->session->id,
+                'evaluation_unit_id' => $unit->id,
+            ]);
+        }
+    });
+
+    return (object) ['period' => $period, 'respondents' => $respondents];
+}
+
+function completedSubmissionFixture(): object
+{
+    $fixture = surveyFixture();
+    $fixture->submission = app(SubmitSurvey::class)->handle(validSubmitSurveyData($fixture));
+
+    return $fixture;
 }
