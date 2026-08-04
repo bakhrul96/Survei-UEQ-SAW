@@ -22,18 +22,19 @@ mysqldump --single-transaction --routines --triggers -u ueq_saw_app -p ueq_saw >
 ```powershell
 $surveyBackupPath = Get-ChildItem -File 'ueq_saw_*.sql' | Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
 # DBA/root or the designated backup operator: create the restore database and grant only this database to the pre-provisioned restore operator.
-mysql -u <dba_or_backup_operator> -p -e "CREATE DATABASE ueq_saw_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON ueq_saw_restore.* TO 'ueq_saw_restore_operator'@'localhost'; FLUSH PRIVILEGES;"
+mysql -u dba_or_backup_operator -p -e "CREATE DATABASE ueq_saw_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON ueq_saw_restore.* TO 'ueq_saw_restore_operator'@'localhost'; FLUSH PRIVILEGES;"
 Get-Content -Raw -LiteralPath $surveyBackupPath | mysql -u ueq_saw_restore_operator -p ueq_saw_restore
 php artisan migrate:status --database=mysql
 mysql -u ueq_saw_restore_operator -p ueq_saw_restore -e "SELECT COUNT(*) AS migration_rows FROM migrations; SHOW TABLES LIKE 'survey_submissions'; SHOW TABLES LIKE 'survey_answers'; SELECT COUNT(*) AS survey_submissions FROM survey_submissions; SELECT COUNT(*) AS survey_answers FROM survey_answers;"
 ```
 
-The DBA/root or backup operator must provision the restore operator credential
-out of band and must not print it in the shell. Its grant is scoped only to
-`ueq_saw_restore.*`; the production `ueq_saw_app` account retains least
-privilege on the production database. The final `mysql` query targets
-`ueq_saw_restore`; `migrate:status` checks the configured application database
-separately.
+Replace `dba_or_backup_operator` only with the DBA/root or backup-operator
+name provisioned out of band. That operator must provision the restore
+operator credential out of band and must not print it in the shell. Its grant
+is scoped only to `ueq_saw_restore.*`; the production `ueq_saw_app` account
+retains least privilege on the production database. The final `mysql` query
+targets `ueq_saw_restore`; `migrate:status` checks the configured application
+database separately.
 
 ## Daily operation
 
