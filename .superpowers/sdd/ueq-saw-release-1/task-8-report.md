@@ -111,3 +111,12 @@ contract. Admin routes require verified email and confirmed two-factor
 authentication while public survey routes remain unaffected. The GitHub Actions
 workflow was moved to the workspace root and runs Composer from `application`.
 PHP is absent locally, so the added regression tests could not be executed.
+
+## Follow-up: admin route fixtures
+
+On 2026-08-04, dashboard and raw-export test fixtures were made explicit about
+verified email and confirmed two-factor authentication, so their assertions
+reach the intended admin middleware branch. The dashboard middleware test now
+uses a verified account without confirmed two-factor authentication to assert
+the redirect to security setup. PHP remains unavailable, so these tests are
+not runtime-verified locally.

@@ -5,7 +5,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 it('exports 26 item columns without token hashes', function () {
     $fixture = completedSubmissionFixture();
-    $admin = User::factory()->create();
+    $admin = User::factory()->create(['two_factor_secret' => 'secret', 'two_factor_confirmed_at' => now()]);
 
     $response = $this->actingAs($admin)->get(route('admin.exports.raw.xlsx', $fixture->period));
     $response->assertOk();

@@ -11,6 +11,10 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/database.sqlite
+      CACHE_STORE: array
     defaults:
       run:
         working-directory: application
@@ -23,5 +27,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: touch database/database.sqlite
       - run: composer setup
       - run: composer ci:check
