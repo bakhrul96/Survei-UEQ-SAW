@@ -57,3 +57,12 @@ approved strings: `Informasi Penelitian`, `Pilih Modul`, `Berikutnya`, and
 was attempted with `php artisan test tests/Browser/SurveyHappyPathTest.php`,
 but PHP remains unavailable on PATH (exit 1: `php` is not recognized), so the
 runtime result remains unverified and the release gate remains closed.
+
+## Follow-up: browser Pest bootstrap
+
+On 2026-08-04, `tests/Pest.php` was updated to bind both `Feature` and
+`Browser` tests to `Tests\\TestCase` with `RefreshDatabase`. The browser test's
+local duplicate `uses(RefreshDatabase::class)` declaration was removed because
+the shared Pest configuration now supplies both requirements. Runtime
+verification remains blocked: `php artisan test tests/Browser/SurveyHappyPathTest.php`
+exits 1 because `php` is not recognized on PATH.

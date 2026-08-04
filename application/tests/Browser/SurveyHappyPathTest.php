@@ -1,9 +1,6 @@
 <?php
 
 use App\Domain\Study\PeriodStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 it('submits an eligible respondent evaluation on a 360 by 800 viewport', function () {
     $fixture = surveyFixture();
