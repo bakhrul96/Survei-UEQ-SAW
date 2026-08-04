@@ -19,7 +19,8 @@ it('creates an admin with a hashed password', function () {
     $admin = User::query()->where('email', 'peneliti@example.test')->firstOrFail();
 
     expect($admin->name)->toBe('Peneliti')
-        ->and(Hash::check('Rahasia-12345', $admin->password))->toBeTrue();
+        ->and(Hash::check('Rahasia-12345', $admin->password))->toBeTrue()
+        ->and($admin->email_verified_at)->not->toBeNull();
 });
 
 it('replaces the existing admin when a different email is supplied', function () {

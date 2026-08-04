@@ -17,6 +17,10 @@ it('renders survey entry and consent for an unauthenticated respondent', functio
         ->assertOk()
         ->assertSee('Informasi Penelitian')
         ->assertDontSee('Dashboard');
+
+    $this->get(route('survey.ineligible', $period))
+        ->assertOk()
+        ->assertSee('Anda belum memenuhi kriteria');
 });
 
 it('stores consent and allows only eligible respondents', function () {

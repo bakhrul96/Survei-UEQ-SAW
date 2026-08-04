@@ -13,7 +13,7 @@ class WongReangStudySeeder extends Seeder
 {
     public function run(): void
     {
-        $period = EvaluationPeriod::query()->updateOrCreate(
+        $period = EvaluationPeriod::query()->firstOrCreate(
             ['slug' => 'wong-reang-2026'],
             [
                 'name' => 'Evaluasi Wong Reang Apps 2026',
@@ -39,7 +39,7 @@ class WongReangStudySeeder extends Seeder
         ];
 
         foreach ($units as $index => [$code, $name]) {
-            EvaluationUnit::query()->updateOrCreate(
+            EvaluationUnit::query()->firstOrCreate(
                 ['code' => $code],
                 ['name' => $name, 'display_order' => $index + 1, 'is_active' => true],
             );
@@ -75,7 +75,7 @@ class WongReangStudySeeder extends Seeder
         ];
 
         foreach ($items as [$order, $leftLabel, $rightLabel, $scale, $positivePole]) {
-            UeqItem::query()->updateOrCreate(
+            UeqItem::query()->firstOrCreate(
                 ['version' => $period->instrument_version, 'order' => $order],
                 [
                     'left_label' => $leftLabel,
@@ -96,7 +96,7 @@ class WongReangStudySeeder extends Seeder
         ];
 
         foreach ($benchmarks as $scale => $goodThreshold) {
-            UeqBenchmark::query()->updateOrCreate(
+            UeqBenchmark::query()->firstOrCreate(
                 ['version' => $period->instrument_version, 'scale' => $scale],
                 [
                     'good_threshold' => $goodThreshold,

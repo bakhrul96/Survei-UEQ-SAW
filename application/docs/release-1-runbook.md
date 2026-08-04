@@ -44,7 +44,8 @@ database separately.
 
 ## Close and rollback
 
-- Change active period to closed before maintenance that affects submissions.
+- In Admin > Pengaturan Studi, use **Tutup periode** to change an active period
+  to closed before maintenance that affects submissions.
 - Roll back only the latest application release; never roll back a migration that would drop collected responses.
 
 ## Bukti restore

@@ -74,6 +74,39 @@ class StudySettings extends Component
         }
     }
 
+    public function verifyInstrument(): void
+    {
+        $period = $this->period();
+        abort_unless($period->status === PeriodStatus::Draft, 403);
+
+        $source = trim($this->instrumentSource);
+        throw_unless($source !== '', DomainException::class, 'Sumber instrumen wajib diisi sebelum verifikasi.');
+
+        $period->update(['instrument_source' => $source, 'instrument_verified_at' => now()]);
+        $this->fillFromPeriod($period->fresh());
+    }
+
+    public function verifyBenchmark(int $benchmarkId): void
+    {
+        $period = $this->period();
+        abort_unless($period->status === PeriodStatus::Draft, 403);
+
+        UeqBenchmark::query()
+            ->whereKey($benchmarkId)
+            ->where('version', $period->instrument_version)
+            ->update(['verified_at' => now()]);
+    }
+
+    public function close(): void
+    {
+        $period = $this->period();
+        abort_unless($period->status === PeriodStatus::Active, 403);
+
+        $period->update(['status' => PeriodStatus::Closed]);
+        $this->fillFromPeriod($period->fresh());
+        session()->flash('status', 'Periode berhasil ditutup.');
+    }
+
     public function render(PeriodReadinessService $readiness): View
     {
         $period = $this->period();
@@ -82,7 +115,7 @@ class StudySettings extends Component
             'period' => $period,
             'issues' => $readiness->issues($period),
             'isDraft' => $period->status === PeriodStatus::Draft,
-            'benchmarks' => UeqBenchmark::query()->orderBy('scale')->get(),
+            'benchmarks' => UeqBenchmark::query()->where('version', $period->instrument_version)->orderBy('scale')->get(),
         ])->layout('layouts.app', ['title' => 'Pengaturan Studi']);
     }
 

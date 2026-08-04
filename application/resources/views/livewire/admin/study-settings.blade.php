@@ -58,11 +58,19 @@
             <div><dt class="font-medium">Konfigurasi dikunci</dt><dd>{{ $period->configuration_locked_at?->format('d M Y H:i') ?? 'Belum dikunci' }}</dd></div>
             <div><dt class="font-medium">Benchmark terverifikasi</dt><dd>{{ $benchmarks->whereNotNull('verified_at')->count() }} dari 6</dd></div>
         </dl>
+        @if ($isDraft)
+            <flux:button wire:click="verifyInstrument" variant="filled">Verifikasi instrumen</flux:button>
+        @endif
         <ul class="divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
             @foreach ($benchmarks as $benchmark)
                 <li class="flex justify-between gap-4 py-2">
                     <span>{{ $benchmark->scale }}</span>
-                    <span>{{ $benchmark->verified_at?->format('d M Y H:i') ?? 'Belum diverifikasi' }}</span>
+                    <span class="flex items-center gap-2">
+                        {{ $benchmark->verified_at?->format('d M Y H:i') ?? 'Belum diverifikasi' }}
+                        @if ($isDraft && ! $benchmark->verified_at)
+                            <flux:button size="sm" wire:click="verifyBenchmark({{ $benchmark->id }})">Verifikasi</flux:button>
+                        @endif
+                    </span>
                 </li>
             @endforeach
         </ul>
@@ -72,5 +80,9 @@
         <flux:button wire:click="activate" wire:confirm="Aktifkan periode ini? Konfigurasi tidak dapat diubah setelah aktivasi." variant="primary">
             Aktifkan dan kunci konfigurasi
         </flux:button>
+    @endif
+
+    @if ($period->status === \App\Domain\Study\PeriodStatus::Active)
+        <flux:button wire:click="close" wire:confirm="Tutup periode ini?" variant="danger">Tutup periode</flux:button>
     @endif
 </div>

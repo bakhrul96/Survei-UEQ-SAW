@@ -65,3 +65,43 @@ it('does not let an active period change locked fields', function () {
 
     expect($period->fresh()->minimum_per_unit)->toBe(20);
 });
+
+it('lets an admin verify, activate, and close the seeded period', function () {
+    $admin = User::factory()->create();
+    $period = EvaluationPeriod::firstOrFail();
+    $settings = Livewire::actingAs($admin)->test(StudySettings::class)
+        ->set('instrumentSource', 'Sumber instrumen UEQ')
+        ->call('verifyInstrument');
+
+    UeqBenchmark::query()->where('version', $period->instrument_version)->pluck('id')->each(
+        fn (int $id) => $settings->call('verifyBenchmark', $id),
+    );
+
+    $settings->call('activate')->call('close')->assertHasNoErrors();
+
+    expect($period->fresh()->status)->toBe(PeriodStatus::Closed)
+        ->and($period->fresh()->instrument_verified_at)->not->toBeNull()
+        ->and(UeqBenchmark::query()->where('version', $period->instrument_version)->whereNotNull('verified_at')->count())->toBe(6);
+});
+
+it('rejects malformed current-version item and wrong-version benchmark readiness', function () {
+    $period = EvaluationPeriod::firstOrFail();
+    $period->update(['instrument_source' => 'Sumber', 'instrument_verified_at' => now()]);
+    UeqBenchmark::query()->where('version', $period->instrument_version)->update(['verified_at' => null]);
+    foreach (['Attractiveness', 'Perspicuity', 'Efficiency', 'Dependability', 'Stimulation', 'Novelty'] as $scale) {
+        UeqBenchmark::query()->create([
+            'version' => 'UEQ-LAIN',
+            'scale' => $scale,
+            'good_threshold' => 1.50,
+            'source' => 'Sumber lain',
+            'verified_at' => now(),
+        ]);
+    }
+    \App\Models\UeqItem::query()->where('version', $period->instrument_version)->where('order', 1)->update(['order' => 27, 'scale' => 'Invalid', 'positive_pole' => 'middle']);
+
+    expect(app(PeriodReadinessService::class)->issues($period->fresh()))
+        ->toContain('Nomor item instrumen harus tepat 1 sampai 26.')
+        ->toContain('Skala item instrumen tidak valid.')
+        ->toContain('Kutub positif item instrumen tidak valid.')
+        ->toContain('Enam benchmark belum diverifikasi.');
+});

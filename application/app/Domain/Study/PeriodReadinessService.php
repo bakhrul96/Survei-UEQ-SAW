@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class PeriodReadinessService
 {
+    private const UEQ_SCALES = ['Attractiveness', 'Perspicuity', 'Efficiency', 'Dependability', 'Stimulation', 'Novelty'];
+
     /**
      * @return array<string>
      */
@@ -42,10 +44,28 @@ class PeriodReadinessService
         if (EvaluationUnit::query()->where('is_active', true)->count() !== 13) {
             $issues[] = 'Harus tersedia tepat 13 modul aktif.';
         }
-        if (UeqItem::query()->where('version', $period->instrument_version)->count() !== 26) {
+        $items = UeqItem::query()->where('version', $period->instrument_version)->get(['order', 'scale', 'positive_pole']);
+
+        if ($items->count() !== 26) {
             $issues[] = 'Versi instrumen harus memiliki tepat 26 item.';
         }
-        if (UeqBenchmark::query()->whereNotNull('verified_at')->count() !== 6) {
+        if ($items->count() === 26 && $items->pluck('order')->sort()->values()->all() !== range(1, 26)) {
+            $issues[] = 'Nomor item instrumen harus tepat 1 sampai 26.';
+        }
+        if ($items->contains(fn (UeqItem $item): bool => ! in_array($item->scale, self::UEQ_SCALES, true))) {
+            $issues[] = 'Skala item instrumen tidak valid.';
+        }
+        if ($items->contains(fn (UeqItem $item): bool => ! in_array($item->positive_pole, ['left', 'right'], true))) {
+            $issues[] = 'Kutub positif item instrumen tidak valid.';
+        }
+
+        $verifiedBenchmarks = UeqBenchmark::query()
+            ->where('version', $period->instrument_version)
+            ->whereNotNull('verified_at')
+            ->get(['scale']);
+
+        if ($verifiedBenchmarks->count() !== 6
+            || $verifiedBenchmarks->pluck('scale')->unique()->sort()->values()->all() !== collect(self::UEQ_SCALES)->sort()->values()->all()) {
             $issues[] = 'Enam benchmark belum diverifikasi.';
         }
         if (EvaluationPeriod::query()

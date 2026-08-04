@@ -98,3 +98,16 @@ authentication. The admin-only layout, dashboard test, and welcome link were
 corrected to use the actual `admin.dashboard` route; no unguarded dashboard
 alias was added. The regression command is blocked because PHP is unavailable
 on PATH, so this result remains runtime-unverified.
+
+## Follow-up: final R1 review fixes
+
+On 2026-08-04, the study seeder was made create-only so reruns do not mutate
+configured, locked, or verified records. Admin study settings now support
+instrument verification, per-benchmark verification, and closing an active
+period; readiness validates exact UEQ item orders, allowed scales and poles,
+and six verified benchmarks scoped to the period's instrument version.
+`CreateAdmin` now persists `email_verified_at` through the User fillable
+contract. Admin routes require verified email and confirmed two-factor
+authentication while public survey routes remain unaffected. The GitHub Actions
+workflow was moved to the workspace root and runs Composer from `application`.
+PHP is absent locally, so the added regression tests could not be executed.
