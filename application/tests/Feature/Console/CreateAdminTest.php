@@ -1,0 +1,119 @@
+<?php
+
+use App\Console\Commands\CreateAdmin;
+use App\Models\User;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use PDOException;
+use ReflectionMethod;
+
+it('creates an admin with a hashed password', function () {
+    $this->artisan('app:create-admin', ['email' => '  PENELITI@EXAMPLE.TEST  '])
+        ->expectsQuestion('Nama', 'Peneliti')
+        ->expectsQuestion('Password', 'Rahasia-12345')
+        ->assertSuccessful();
+
+    $admin = User::query()->where('email', 'peneliti@example.test')->firstOrFail();
+
+    expect($admin->name)->toBe('Peneliti')
+        ->and(Hash::check('Rahasia-12345', $admin->password))->toBeTrue()
+        ->and($admin->email_verified_at)->not->toBeNull();
+});
+
+it('replaces the existing admin when a different email is supplied', function () {
+    User::factory()->create([
+        'email' => 'lama@example.test',
+        'name' => 'Admin Lama',
+        'password' => Hash::make('Rahasia-Lama'),
+    ]);
+
+    $this->artisan('app:create-admin', ['email' => 'baru@example.test'])
+        ->expectsQuestion('Nama', 'Peneliti Baru')
+        ->expectsQuestion('Password', 'Rahasia-Baru-123')
+        ->assertSuccessful();
+
+    expect(User::query()->count())->toBe(1);
+
+    $admin = User::query()->sole();
+
+    expect($admin->email)->toBe('baru@example.test')
+        ->and($admin->name)->toBe('Peneliti Baru')
+        ->and(Hash::check('Rahasia-Baru-123', $admin->password))->toBeTrue();
+});
+
+it('does not mutate users for an invalid email address', function () {
+    User::factory()->create(['email' => 'tetap@example.test', 'name' => 'Tetap']);
+
+    $this->artisan('app:create-admin', ['email' => 'bukan-email'])
+        ->expectsQuestion('Nama', 'Tidak Dipakai')
+        ->expectsQuestion('Password', 'Rahasia-Baru-123')
+        ->assertFailed();
+
+    expect(User::query()->count())->toBe(1)
+        ->and(User::query()->sole()->email)->toBe('tetap@example.test');
+});
+
+it('does not mutate users when the email address is empty', function () {
+    $this->artisan('app:create-admin', ['email' => '   '])
+        ->expectsQuestion('Nama', 'Tidak Dipakai')
+        ->expectsQuestion('Password', 'Rahasia-Baru-123')
+        ->assertFailed();
+
+    expect(User::query()->count())->toBe(0);
+});
+
+it('does not create an admin without a valid name and password', function () {
+    $this->artisan('app:create-admin', ['email' => 'peneliti@example.test'])
+        ->expectsQuestion('Nama', '')
+        ->expectsQuestion('Password', 'singkat')
+        ->assertFailed();
+
+    expect(User::query()->count())->toBe(0);
+});
+
+it('provides the seeded sentinel row that serializes admin creation', function () {
+    if (! Schema::hasTable('admin_singleton_locks')) {
+        expect(false)->toBeTrue();
+
+        return;
+    }
+
+    expect(DB::table('admin_singleton_locks')->where('id', 1)->exists())->toBeTrue();
+});
+
+it('takes a write lock on the sentinel before creating an admin', function () {
+    $queries = [];
+
+    DB::listen(function (QueryExecuted $query) use (&$queries): void {
+        $queries[] = mb_strtolower(trim($query->sql));
+    });
+
+    $this->artisan('app:create-admin', ['email' => 'peneliti@example.test'])
+        ->expectsQuestion('Nama', 'Peneliti')
+        ->expectsQuestion('Password', 'Rahasia-12345')
+        ->assertSuccessful();
+
+    $sentinelUpdateIndex = collect($queries)->search(fn (string $sql): bool => str_starts_with($sql, 'update')
+        && str_contains($sql, 'admin_singleton_locks'));
+    $firstUsersQueryIndex = collect($queries)->search(fn (string $sql): bool => str_contains($sql, 'users'));
+
+    expect($sentinelUpdateIndex)->not->toBeFalse()
+        ->and($firstUsersQueryIndex)->not->toBeFalse()
+        ->and($sentinelUpdateIndex)->toBeLessThan($firstUsersQueryIndex);
+});
+
+it('retries SQLite busy database exceptions', function () {
+    $method = new ReflectionMethod(CreateAdmin::class, 'isRetryableLockException');
+    $command = app(CreateAdmin::class);
+    $exception = new QueryException(
+        'sqlite',
+        'update "admin_singleton_locks" set "id" = ? where "id" = ?',
+        [1, 1],
+        new PDOException('SQLSTATE[HY000]: General error: 5 database is busy'),
+    );
+
+    expect($method->invoke($command, $exception))->toBeTrue();
+});
