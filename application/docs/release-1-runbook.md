@@ -7,6 +7,9 @@
 - Set `SESSION_SECURE_COOKIE=true` and a random `SURVEY_TOKEN_KEY`.
 - Set `CACHE_STORE=database`; the database cache store provides the atomic
   increment used by the respondent-keyed submit limiter.
+- Run `php artisan app:create-admin peneliti@example.test`; confirm the admin
+  email is verified and two-factor authentication is configured and confirmed
+  before accessing any Admin route.
 - Run `php artisan migrate --force` and `php artisan optimize`.
 - Verify 13 units, 26 verified items, six verified benchmark rows, dates, target basis, and HTTPS.
 

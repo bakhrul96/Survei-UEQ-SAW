@@ -61,6 +61,9 @@
         @if ($isDraft)
             <flux:button wire:click="verifyInstrument" variant="filled">Verifikasi instrumen</flux:button>
         @endif
+        @error('instrumentVerification')
+            <flux:callout variant="danger" icon="exclamation-triangle">{{ $message }}</flux:callout>
+        @enderror
         <ul class="divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
             @foreach ($benchmarks as $benchmark)
                 <li class="flex justify-between gap-4 py-2">

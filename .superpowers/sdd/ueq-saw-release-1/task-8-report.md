@@ -128,3 +128,12 @@ verification and activation. Saving a changed instrument source now clears its
 verification timestamp, requiring explicit re-verification before activation.
 Raw-export coverage now supplies verified email and confirmed two-factor
 authentication to reach the protected route. PHP remains unavailable locally.
+
+## Follow-up: route and CI completion
+
+On 2026-08-04, remaining dashboard route references were updated to
+`admin.dashboard`. Blank instrument verification now displays a Livewire error
+instead of surfacing an exception. The runbook documents admin creation,
+verified email, and mandatory confirmed two-factor authentication. CI now
+installs Chromium and explicitly runs the Browser survey test after the main
+suite. Local PHP remains unavailable, so these checks are not runtime-verified.

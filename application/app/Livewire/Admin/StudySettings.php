@@ -84,11 +84,15 @@ class StudySettings extends Component
         $period = $this->period();
         abort_unless($period->status === PeriodStatus::Draft, 403);
 
-        $source = trim($this->instrumentSource);
-        throw_unless($source !== '', DomainException::class, 'Sumber instrumen wajib diisi sebelum verifikasi.');
+        try {
+            $source = trim($this->instrumentSource);
+            throw_unless($source !== '', DomainException::class, 'Sumber instrumen wajib diisi sebelum verifikasi.');
 
-        $period->update(['instrument_source' => $source, 'instrument_verified_at' => now()]);
-        $this->fillFromPeriod($period->fresh());
+            $period->update(['instrument_source' => $source, 'instrument_verified_at' => now()]);
+            $this->fillFromPeriod($period->fresh());
+        } catch (DomainException $exception) {
+            $this->addError('instrumentVerification', $exception->getMessage());
+        }
     }
 
     public function verifyBenchmark(int $benchmarkId): void

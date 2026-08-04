@@ -29,4 +29,6 @@ jobs:
           node-version: '22'
       - run: touch database/database.sqlite
       - run: composer setup
+      - run: npx playwright install --with-deps chromium
       - run: composer ci:check
+      - run: php artisan test tests/Browser/SurveyHappyPathTest.php

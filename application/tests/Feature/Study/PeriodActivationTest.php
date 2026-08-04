@@ -101,6 +101,15 @@ it('invalidates instrument verification when its source changes', function () {
         ->and($period->fresh()->instrument_verified_at)->toBeNull();
 });
 
+it('shows an actionable error when instrument verification has no source', function () {
+    $admin = User::factory()->create();
+
+    Livewire::actingAs($admin)->test(StudySettings::class)
+        ->set('instrumentSource', '   ')
+        ->call('verifyInstrument')
+        ->assertHasErrors(['instrumentVerification']);
+});
+
 it('rejects malformed current-version item and wrong-version benchmark readiness', function () {
     $period = EvaluationPeriod::firstOrFail();
     $period->update(['instrument_source' => 'Sumber', 'instrument_verified_at' => now()]);
