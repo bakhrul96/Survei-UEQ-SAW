@@ -7,11 +7,25 @@ use App\Models\SurveySubmission;
 use DomainException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 
 class SubmitSurvey
 {
     public function handle(SubmitSurveyData $data): SurveySubmission
     {
+        $allowed = RateLimiter::attempt(
+            'survey-submit:'.$data->respondentId,
+            (int) config('survey.submit_attempts_per_minute'),
+            fn (): bool => true,
+            60,
+        );
+
+        throw_unless(
+            $allowed,
+            DomainException::class,
+            'Terlalu banyak percobaan submit. Coba kembali dalam satu menit.',
+        );
+
         try {
             return DB::transaction(function () use ($data): SurveySubmission {
                 $existing = SurveySubmission::query()
