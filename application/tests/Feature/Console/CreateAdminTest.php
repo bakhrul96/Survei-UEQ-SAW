@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 it('creates an admin with a hashed password', function () {
     $this->artisan('app:create-admin', ['email' => '  PENELITI@EXAMPLE.TEST  '])
@@ -64,4 +66,14 @@ it('does not create an admin without a valid name and password', function () {
         ->assertFailed();
 
     expect(User::query()->count())->toBe(0);
+});
+
+it('provides the seeded sentinel row that serializes admin creation', function () {
+    if (! Schema::hasTable('admin_singleton_locks')) {
+        expect(false)->toBeTrue();
+
+        return;
+    }
+
+    expect(DB::table('admin_singleton_locks')->where('id', 1)->exists())->toBeTrue();
 });

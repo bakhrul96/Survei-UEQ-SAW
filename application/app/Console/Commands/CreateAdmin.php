@@ -33,6 +33,8 @@ class CreateAdmin extends Command
         }
 
         DB::transaction(function () use ($email, $name, $password): void {
+            DB::table('admin_singleton_locks')->where('id', 1)->lockForUpdate()->first();
+
             $admin = User::query()->lockForUpdate()->orderBy('id')->first();
 
             if ($admin === null) {
