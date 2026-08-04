@@ -2,9 +2,9 @@
 
 ## Implementation
 
-- Added a respondent-keyed `RateLimiter::attempt` before the idempotency
-  lookup in `SubmitSurvey::handle`. It allows ten attempts per minute and
-  rejects the eleventh with the specified Indonesian error message.
+- Added a respondent-keyed atomic `RateLimiter::increment` before the
+  idempotency lookup in `SubmitSurvey::handle`. It allows ten attempts per
+  minute and rejects the eleventh with the specified Indonesian error message.
 - Added `SurveyRateLimitTest` for repeated submissions using the same
   idempotency key, proving that those clicks are counted before the original
   submission is returned.
@@ -66,3 +66,15 @@ local duplicate `uses(RefreshDatabase::class)` declaration was removed because
 the shared Pest configuration now supplies both requirements. Runtime
 verification remains blocked: `php artisan test tests/Browser/SurveyHappyPathTest.php`
 exits 1 because `php` is not recognized on PATH.
+
+## Follow-up: atomic limiter and restore verification
+
+On 2026-08-04, the limiter was changed from `RateLimiter::attempt` to the
+atomic `RateLimiter::increment` return-value pattern: the eleventh hit is
+rejected when the returned count exceeds the configured maximum. It remains
+before idempotency lookup, so repeated clicks are counted. Production must use
+`CACHE_STORE=database`, whose database cache increment supports this atomic
+operation. The restore runbook now includes a credential-safe `mysql` query
+that checks migration rows, required tables, and counts for
+`survey_submissions` and `survey_answers`. MySQL is still unavailable in this
+environment, so no restore evidence has been claimed.

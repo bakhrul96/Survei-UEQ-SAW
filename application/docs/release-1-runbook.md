@@ -5,6 +5,8 @@
 - Set `APP_ENV=production` and `APP_DEBUG=false`.
 - Confirm `APP_URL` exactly matches the approved deployed HTTPS domain.
 - Set `SESSION_SECURE_COOKIE=true` and a random `SURVEY_TOKEN_KEY`.
+- Set `CACHE_STORE=database`; the database cache store provides the atomic
+  increment used by the respondent-keyed submit limiter.
 - Run `php artisan migrate --force` and `php artisan optimize`.
 - Verify 13 units, 26 verified items, six verified benchmark rows, dates, target basis, and HTTPS.
 
@@ -22,7 +24,11 @@ $surveyBackupPath = Get-ChildItem -File 'ueq_saw_*.sql' | Sort-Object LastWriteT
 mysql -u ueq_saw_app -p -e "CREATE DATABASE ueq_saw_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 Get-Content -Raw -LiteralPath $surveyBackupPath | mysql -u ueq_saw_app -p ueq_saw_restore
 php artisan migrate:status --database=mysql
+mysql -u ueq_saw_app -p ueq_saw_restore -e "SELECT COUNT(*) AS migration_rows FROM migrations; SHOW TABLES LIKE 'survey_submissions'; SHOW TABLES LIKE 'survey_answers'; SELECT COUNT(*) AS survey_submissions FROM survey_submissions; SELECT COUNT(*) AS survey_answers FROM survey_answers;"
 ```
+
+The final `mysql` query targets `ueq_saw_restore`; `migrate:status` checks the
+configured application database separately.
 
 ## Daily operation
 
@@ -44,7 +50,7 @@ no backup file was produced, and `survey_submissions` / `survey_answers` row
 counts are unavailable. Restore evidence is a release blocker; the activation
 gate remains closed until a MySQL 8 operator executes the backup and restore
 commands above, records the date and both row counts, and confirms the status
-command.
+command plus the restore query's migration/table/count results.
 
 ## Verification evidence
 

@@ -13,15 +13,13 @@ class SubmitSurvey
 {
     public function handle(SubmitSurveyData $data): SurveySubmission
     {
-        $allowed = RateLimiter::attempt(
+        $attempts = RateLimiter::increment(
             'survey-submit:'.$data->respondentId,
-            (int) config('survey.submit_attempts_per_minute'),
-            fn (): bool => true,
             60,
         );
 
-        throw_unless(
-            $allowed,
+        throw_if(
+            $attempts > (int) config('survey.submit_attempts_per_minute'),
             DomainException::class,
             'Terlalu banyak percobaan submit. Coba kembali dalam satu menit.',
         );
