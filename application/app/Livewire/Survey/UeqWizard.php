@@ -117,7 +117,7 @@ class UeqWizard extends Component
             ->get();
 
         return view('livewire.survey.ueq-wizard', compact('items'))
-            ->layout('layouts.app', ['title' => 'Penilaian UEQ']);
+            ->layout('layouts.survey', ['title' => 'Penilaian UEQ']);
     }
 
     /** @return array<string, array<int, string>> */

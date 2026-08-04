@@ -27,6 +27,6 @@ class Complete extends Component
     public function render(): View
     {
         return view('livewire.survey.complete')
-            ->layout('layouts.app', ['title' => 'Penilaian Tersimpan']);
+            ->layout('layouts.survey', ['title' => 'Penilaian Tersimpan']);
     }
 }

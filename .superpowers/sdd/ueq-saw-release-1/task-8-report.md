@@ -87,3 +87,14 @@ backup operator creates `ueq_saw_restore` and grants only
 and evidence query use that restore operator; the production application user
 is not granted database-creation privileges. Credentials remain out of band,
 and restore evidence is still unavailable because MySQL is absent.
+
+## Follow-up: guest survey layout and dashboard route
+
+On 2026-08-04, public survey components and the ineligible page were moved to
+the new guest-safe `layouts.survey` layout, which includes the shared head,
+Vite, Flux toast, and Flux scripts without dashboard routes or authenticated
+user access. A regression test now requests survey entry and consent without
+authentication. The admin-only layout, dashboard test, and welcome link were
+corrected to use the actual `admin.dashboard` route; no unguarded dashboard
+alias was added. The regression command is blocked because PHP is unavailable
+on PATH, so this result remains runtime-unverified.

@@ -66,6 +66,6 @@ class ConsentScreener extends Component
     public function render(): View
     {
         return view('livewire.survey.consent-screener')
-            ->layout('layouts.app', ['title' => 'Persetujuan dan Kelayakan']);
+            ->layout('layouts.survey', ['title' => 'Persetujuan dan Kelayakan']);
     }
 }

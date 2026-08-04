@@ -63,7 +63,7 @@ class UnitChooser extends Component
     public function render(): View
     {
         return view('livewire.survey.unit-chooser')
-            ->layout('layouts.app', ['title' => 'Pilih Modul Layanan']);
+            ->layout('layouts.survey', ['title' => 'Pilih Modul Layanan']);
     }
 
     private function ensureEligible(AnonymousRespondent $respondent): void

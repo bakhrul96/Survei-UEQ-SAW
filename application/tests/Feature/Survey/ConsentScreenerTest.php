@@ -7,6 +7,18 @@ use App\Models\EvaluationPeriod;
 use App\Models\RespondentProfile;
 use Livewire\Livewire;
 
+it('renders survey entry and consent for an unauthenticated respondent', function () {
+    $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active]);
+
+    $this->get(route('survey.entry', $period))
+        ->assertRedirect(route('survey.consent', $period));
+
+    $this->get(route('survey.consent', $period))
+        ->assertOk()
+        ->assertSee('Informasi Penelitian')
+        ->assertDontSee('Dashboard');
+});
+
 it('stores consent and allows only eligible respondents', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'minimum_age' => 17]);
     $issued = app(SurveyTokenService::class)->issue();
