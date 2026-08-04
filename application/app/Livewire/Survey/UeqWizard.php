@@ -75,6 +75,8 @@ class UeqWizard extends Component
         $respondent = $context->respondent();
         abort_unless($respondent->id === $this->respondentId, 403);
         $this->ensureEligible($period, $respondent);
+        $unit = EvaluationUnit::query()->findOrFail($this->unit->id);
+        abort_unless($unit->is_active, 404);
         abort_unless(SurveySession::query()
             ->whereKey($this->sessionId)
             ->where('evaluation_period_id', $period->id)
@@ -82,12 +84,13 @@ class UeqWizard extends Component
             ->exists(), 403);
 
         $this->period = $period;
+        $this->unit = $unit;
         $this->validate($this->rulesForRange(1, 26));
         $submitSurvey->handle(new SubmitSurveyData(
             periodId: $period->id,
             respondentId: $respondent->id,
             sessionId: $this->sessionId,
-            unitId: $this->unit->id,
+            unitId: $unit->id,
             idempotencyKey: $this->idempotencyKey,
             instrumentVersion: $period->instrument_version,
             startedAt: CarbonImmutable::parse($this->startedAt),

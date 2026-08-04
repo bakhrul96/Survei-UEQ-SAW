@@ -37,3 +37,13 @@ it('normalizes browser radio values before submitting', function () {
     $wizard->call('submit')
         ->assertRedirect(route('survey.complete', $fixture->period));
 });
+
+it('rejects submission when the selected unit is deactivated after mount', function () {
+    $fixture = surveyFixture();
+    $wizard = Livewire::withCookie('ueq_survey_token', $fixture->plainToken)
+        ->test(UeqWizard::class, ['period' => $fixture->period, 'unit' => $fixture->unit]);
+
+    $fixture->unit->update(['is_active' => false]);
+
+    $wizard->call('submit')->assertNotFound();
+});
