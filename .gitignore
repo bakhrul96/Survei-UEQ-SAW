@@ -1,0 +1,7 @@
+/.worktrees/
+/.codex-work/
+/application/.env
+/application/vendor/
+/application/node_modules/
+/application/public/build/
+/application/storage/*.key
