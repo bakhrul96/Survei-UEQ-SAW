@@ -82,6 +82,8 @@ class CreateAdmin extends Command
 
         return str_contains($message, 'database is locked')
             || str_contains($message, 'database table is locked')
+            || str_contains($message, 'database is busy')
+            || str_contains($message, 'sqlite_busy')
             || str_contains($message, 'deadlock found')
             || str_contains($message, 'lock wait timeout');
     }

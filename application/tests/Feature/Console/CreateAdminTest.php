@@ -1,10 +1,14 @@
 <?php
 
+use App\Console\Commands\CreateAdmin;
 use App\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use PDOException;
+use ReflectionMethod;
 
 it('creates an admin with a hashed password', function () {
     $this->artisan('app:create-admin', ['email' => '  PENELITI@EXAMPLE.TEST  '])
@@ -91,6 +95,24 @@ it('takes a write lock on the sentinel before creating an admin', function () {
         ->expectsQuestion('Password', 'Rahasia-12345')
         ->assertSuccessful();
 
-    expect(collect($queries)->contains(fn (string $sql): bool => str_starts_with($sql, 'update')
-        && str_contains($sql, 'admin_singleton_locks')))->toBeTrue();
+    $sentinelUpdateIndex = collect($queries)->search(fn (string $sql): bool => str_starts_with($sql, 'update')
+        && str_contains($sql, 'admin_singleton_locks'));
+    $firstUsersQueryIndex = collect($queries)->search(fn (string $sql): bool => str_contains($sql, 'users'));
+
+    expect($sentinelUpdateIndex)->not->toBeFalse()
+        ->and($firstUsersQueryIndex)->not->toBeFalse()
+        ->and($sentinelUpdateIndex)->toBeLessThan($firstUsersQueryIndex);
+});
+
+it('retries SQLite busy database exceptions', function () {
+    $method = new ReflectionMethod(CreateAdmin::class, 'isRetryableLockException');
+    $command = app(CreateAdmin::class);
+    $exception = new QueryException(
+        'sqlite',
+        'update "admin_singleton_locks" set "id" = ? where "id" = ?',
+        [1, 1],
+        new PDOException('SQLSTATE[HY000]: General error: 5 database is busy'),
+    );
+
+    expect($method->invoke($command, $exception))->toBeTrue();
 });
