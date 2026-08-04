@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Application\Survey;
+
+use App\Models\SurveySession;
+use App\Models\SurveySubmission;
+use DomainException;
+use Illuminate\Support\Facades\DB;
+
+class SubmitSurvey
+{
+    public function handle(SubmitSurveyData $data): SurveySubmission
+    {
+        return DB::transaction(function () use ($data): SurveySubmission {
+            $existing = SurveySubmission::query()
+                ->where('idempotency_key', $data->idempotencyKey)
+                ->first();
+
+            if ($existing instanceof SurveySubmission) {
+                return $existing;
+            }
+
+            throw_unless(count($data->answers) === 26, DomainException::class, 'Jawaban harus tepat 26 item.');
+            throw_unless(array_keys($data->answers) === range(1, 26), DomainException::class, 'Nomor item harus lengkap 1 sampai 26.');
+            throw_unless(collect($data->answers)->every(fn (mixed $score): bool => is_int($score) && $score >= 1 && $score <= 7), DomainException::class, 'Nilai jawaban harus 1 sampai 7.');
+
+            $duplicate = SurveySubmission::query()
+                ->where('evaluation_period_id', $data->periodId)
+                ->where('anonymous_respondent_id', $data->respondentId)
+                ->where('evaluation_unit_id', $data->unitId)
+                ->lockForUpdate()
+                ->exists();
+            throw_if($duplicate, DomainException::class, 'Modul ini sudah pernah dinilai.');
+
+            $completedAt = now();
+            $session = SurveySession::query()->lockForUpdate()->findOrFail($data->sessionId);
+            throw_unless(
+                $session->evaluation_period_id === $data->periodId && $session->anonymous_respondent_id === $data->respondentId,
+                DomainException::class,
+                'Sesi survei tidak sesuai.',
+            );
+
+            $submission = SurveySubmission::query()->create([
+                'evaluation_period_id' => $data->periodId,
+                'anonymous_respondent_id' => $data->respondentId,
+                'survey_session_id' => $data->sessionId,
+                'evaluation_unit_id' => $data->unitId,
+                'idempotency_key' => $data->idempotencyKey,
+                'instrument_version' => $data->instrumentVersion,
+                'started_at' => $data->startedAt,
+                'completed_at' => $completedAt,
+                'duration_seconds' => max(1, $data->startedAt->diffInSeconds($completedAt)),
+                'session_sequence' => $session->submitted_count + 1,
+                'status' => 'submitted',
+            ]);
+
+            $submission->answers()->createMany(collect($data->answers)->map(
+                fn (int $score, int $itemOrder): array => ['item_order' => $itemOrder, 'raw_score' => $score],
+            )->values()->all());
+
+            $session->update([
+                'submitted_count' => $session->submitted_count + 1,
+                'last_activity_at' => $completedAt,
+            ]);
+
+            return $submission;
+        }, attempts: 3);
+    }
+}

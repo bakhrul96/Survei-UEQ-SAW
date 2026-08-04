@@ -1,6 +1,16 @@
 <?php
 
+use App\Application\Survey\SubmitSurveyData;
+use App\Domain\Study\PeriodStatus;
+use App\Domain\Survey\SurveyTokenService;
+use App\Models\EvaluationPeriod;
+use App\Models\EvaluationUnit;
+use App\Models\RespondentProfile;
+use App\Models\SurveySession;
+use App\Models\UeqItem;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /*
@@ -44,7 +54,50 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function surveyFixture(): object
 {
-    // ..
+    $version = 'UEQ-TEST-'.Str::uuid();
+    $period = EvaluationPeriod::factory()->create([
+        'status' => PeriodStatus::Active,
+        'instrument_version' => $version,
+        'opens_at' => now()->subDay(),
+        'closes_at' => now()->addMonth(),
+        'configuration_locked_at' => now(),
+    ]);
+    $unit = EvaluationUnit::factory()->create(['code' => 'unit-'.Str::lower(Str::random(8))]);
+    foreach (range(1, 26) as $order) {
+        UeqItem::factory()->create(['version' => $version, 'order' => $order]);
+    }
+    $issued = app(SurveyTokenService::class)->issue();
+    RespondentProfile::factory()->create([
+        'evaluation_period_id' => $period->id,
+        'anonymous_respondent_id' => $issued->respondent->id,
+        'eligible' => true,
+    ]);
+    $session = SurveySession::factory()->create([
+        'evaluation_period_id' => $period->id,
+        'anonymous_respondent_id' => $issued->respondent->id,
+    ]);
+
+    return (object) [
+        'period' => $period,
+        'unit' => $unit,
+        'respondent' => $issued->respondent,
+        'plainToken' => $issued->plainToken,
+        'session' => $session,
+    ];
+}
+
+function validSubmitSurveyData(object $fixture, ?string $idempotencyKey = null): SubmitSurveyData
+{
+    return new SubmitSurveyData(
+        periodId: $fixture->period->id,
+        respondentId: $fixture->respondent->id,
+        sessionId: $fixture->session->id,
+        unitId: $fixture->unit->id,
+        idempotencyKey: $idempotencyKey ?? (string) Str::uuid(),
+        instrumentVersion: $fixture->period->instrument_version,
+        startedAt: CarbonImmutable::now()->subMinutes(4),
+        answers: array_fill_keys(range(1, 26), 4),
+    );
 }
