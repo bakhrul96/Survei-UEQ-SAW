@@ -6,6 +6,7 @@ use App\Livewire\Admin\StudySettings;
 use App\Livewire\Survey\ConsentScreener;
 use App\Livewire\Survey\UnitChooser;
 use App\Models\EvaluationPeriod;
+use App\Models\EvaluationUnit;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -19,7 +20,11 @@ Route::get('/s/wong-reang/{period:slug}/ineligible', function (EvaluationPeriod 
 })->name('survey.ineligible');
 Route::get('/s/wong-reang/{period:slug}/units', UnitChooser::class)
     ->name('survey.units');
-Route::get('/s/wong-reang/{period:slug}/units/{unit:code}', \App\Livewire\Survey\UeqWizard::class)
+Route::get('/s/wong-reang/{period:slug}/units/{unit:code}', function (EvaluationPeriod $period, EvaluationUnit $unit) {
+    abort_unless($period->status === PeriodStatus::Active && $unit->is_active, 404);
+
+    return response()->noContent();
+})
     ->name('survey.wizard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
