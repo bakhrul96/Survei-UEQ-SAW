@@ -43,17 +43,17 @@ class SubmitSurvey
                 );
 
                 $submission = SurveySubmission::query()->create([
-                'evaluation_period_id' => $data->periodId,
-                'anonymous_respondent_id' => $data->respondentId,
-                'survey_session_id' => $data->sessionId,
-                'evaluation_unit_id' => $data->unitId,
-                'idempotency_key' => $data->idempotencyKey,
-                'instrument_version' => $data->instrumentVersion,
-                'started_at' => $data->startedAt,
-                'completed_at' => $completedAt,
-                'duration_seconds' => max(1, $data->startedAt->diffInSeconds($completedAt)),
-                'session_sequence' => $session->submitted_count + 1,
-                'status' => 'submitted',
+                    'evaluation_period_id' => $data->periodId,
+                    'anonymous_respondent_id' => $data->respondentId,
+                    'survey_session_id' => $data->sessionId,
+                    'evaluation_unit_id' => $data->unitId,
+                    'idempotency_key' => $data->idempotencyKey,
+                    'instrument_version' => $data->instrumentVersion,
+                    'started_at' => $data->startedAt,
+                    'completed_at' => $completedAt,
+                    'duration_seconds' => max(1, $data->startedAt->diffInSeconds($completedAt)),
+                    'session_sequence' => $session->submitted_count + 1,
+                    'status' => 'submitted',
                 ]);
 
                 $submission->answers()->createMany(collect($data->answers)->map(
