@@ -23,6 +23,15 @@ function includedAnswersForUnit(array $fixture, string $unit): array
     );
 }
 
+function rawAnswersForTransformedScore(array $items, int $score): array
+{
+    return array_reduce($items, function (array $answers, array $item) use ($score): array {
+        $answers[$item['order']] = $item['positive_pole'] === 'right' ? $score + 4 : 4 - $score;
+
+        return $answers;
+    }, []);
+}
+
 it('matches all golden UEQ scale statistics for included answers', function (string $unit): void {
     $fixture = ueqGoldenFixture();
     $calculator = app(UeqStatisticsCalculator::class);
@@ -72,3 +81,38 @@ it('marks a scale with no response variation unavailable instead of using zero s
         ->and($result->cronbachAlpha)->toBeNull()
         ->and($result->unavailableReason)->toBe('zero_variance');
 });
+
+it('uses scale-specific fixture answers instead of treating all 26 items as one scale', function (string $unit): void {
+    $fixture = ueqGoldenFixture();
+    $calculator = app(UeqStatisticsCalculator::class);
+    $answers = includedAnswersForUnit($fixture, $unit);
+    $means = [];
+    $alphas = [];
+
+    foreach (array_keys($fixture['benchmarks']) as $scale) {
+        $result = $calculator->forScale($fixture['items'], $answers, $scale);
+        $means[] = $result->mean;
+        $alphas[] = $result->cronbachAlpha;
+    }
+
+    expect(count(array_unique($means)))->toBeGreaterThan(1)
+        ->and(count(array_unique($alphas)))->toBeGreaterThan(1);
+})->with(['ibadah-yu', 'info-yu']);
+
+it('uses the documented two-sided critical t at boundary degrees of freedom', function (int $n, float $expectedCriticalT): void {
+    $fixture = ueqGoldenFixture();
+    $scores = array_merge(array_fill(0, intdiv($n + 1, 2), 1), array_fill(0, intdiv($n, 2), 2));
+    $answers = array_map(
+        fn (int $score): array => rawAnswersForTransformedScore($fixture['items'], $score),
+        $scores,
+    );
+
+    $result = app(UeqStatisticsCalculator::class)->forScale($fixture['items'], $answers, 'Attractiveness');
+
+    expect(($result->ci95Upper - $result->mean) / $result->standardError)
+        ->toEqualWithDelta($expectedCriticalT, $fixture['tolerance']);
+})->with([
+    [2, 12.706204736432095],
+    [31, 2.0422724563012373],
+    [32, 1.959963984540054],
+]);
