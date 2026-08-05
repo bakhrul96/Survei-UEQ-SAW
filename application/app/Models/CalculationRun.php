@@ -54,4 +54,10 @@ class CalculationRun extends Model
     {
         return $this->hasMany(UeqResult::class);
     }
+
+    /** @return HasMany<SawResult, $this> */
+    public function sawResults(): HasMany
+    {
+        return $this->hasMany(SawResult::class);
+    }
 }

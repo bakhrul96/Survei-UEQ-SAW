@@ -3,6 +3,7 @@
 use App\Domain\Study\PeriodStatus;
 use App\Http\Controllers\Admin\RawSurveyExportController;
 use App\Http\Controllers\SurveyEntryController;
+use App\Livewire\Admin\Calculations;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Responses;
 use App\Livewire\Admin\StudySettings;
@@ -36,6 +37,7 @@ Route::middleware(['auth', 'verified', 'admin.2fa'])->prefix('admin')->name('adm
     Route::get('/periods/{period}/exports/raw.csv', [RawSurveyExportController::class, 'csv'])->name('exports.raw.csv');
     Route::get('/periods/{period}/exports/raw.xlsx', [RawSurveyExportController::class, 'xlsx'])->name('exports.raw.xlsx');
     Route::get('/study', StudySettings::class)->name('study-settings');
+    Route::get('/calculations', Calculations::class)->name('calculations');
     Route::get('/technical-assessments', TechnicalAssessments::class)->name('technical-assessments');
 });
 

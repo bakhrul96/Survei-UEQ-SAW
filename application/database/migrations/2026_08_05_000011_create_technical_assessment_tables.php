@@ -25,7 +25,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('architecture_urgency');
             $table->timestamps();
 
-            $table->unique(['technical_informant_id', 'evaluation_unit_id']);
+            $table->unique(['technical_informant_id', 'evaluation_unit_id'], 'ta_informant_unit_unique');
         });
 
         Schema::create('criteria_weights', function (Blueprint $table) {

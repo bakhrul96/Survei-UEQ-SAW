@@ -6,6 +6,7 @@ use App\Domain\Quality\QualityDecision;
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
 use App\Models\SurveySubmission;
+use App\Models\TechnicalInformant;
 use App\Models\UeqBenchmark;
 use App\Models\UeqItem;
 use DomainException;
@@ -109,6 +110,16 @@ class CalculationInputSnapshot
                 'is_active' => $unit->is_active,
             ])->all();
 
+        $technical = [];
+        foreach (TechnicalInformant::query()->where('evaluation_period_id', $period->id)->with(['assessments' => fn ($query) => $query->orderBy('evaluation_unit_id'), 'criteriaWeight'])->orderBy('id')->get() as $informant) {
+            $technical[] = [
+                'id' => $informant->id,
+                'anonymous_code' => $informant->anonymous_code,
+                'assessments' => $informant->assessments->map(fn ($row): array => ['evaluation_unit_id' => $row->evaluation_unit_id, 'estimated_days' => (string) $row->estimated_days, 'architecture_urgency' => $row->architecture_urgency])->all(),
+                'weights' => $informant->criteriaWeight === null ? null : ['c1' => $informant->criteriaWeight->c1_points, 'c2' => $informant->criteriaWeight->c2_points, 'c3' => $informant->criteriaWeight->c3_points],
+            ];
+        }
+
         return $this->canonicalize([
             'algorithm_version' => $algorithmVersion,
             'configuration' => [
@@ -126,6 +137,7 @@ class CalculationInputSnapshot
             'included_submission_ids' => $includedIds,
             'excluded_submission_ids' => $excludedIds,
             'included_raw_answers' => $includedRawAnswers,
+            'technical_informants' => $technical,
             'warnings' => $warnings,
         ]);
     }

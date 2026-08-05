@@ -14,6 +14,7 @@ class CalculationRunService
     public function __construct(
         private readonly CalculationInputSnapshot $snapshots,
         private readonly UeqResultWriter $resultWriter,
+        private readonly SawResultWriter $sawWriter,
     ) {}
 
     public function preview(EvaluationPeriod $period, User $actor): CalculationRun
@@ -24,6 +25,7 @@ class CalculationRunService
             $snapshot = $this->snapshots->for($lockedPeriod, self::ALGORITHM_VERSION);
             $inputHash = $this->snapshots->hash($snapshot);
             $calculation = $this->resultWriter->calculate($snapshot);
+            $sawCalculation = $this->sawWriter->calculate($snapshot, $calculation['rows']);
             $currentRevision = EvaluationPeriod::query()
                 ->lockForUpdate()
                 ->findOrFail($lockedPeriod->id)
@@ -42,7 +44,7 @@ class CalculationRunService
                 'status' => $status,
                 'input_hash' => $inputHash,
                 'input_snapshot' => $snapshot,
-                'warnings' => $calculation['warnings'],
+                'warnings' => array_values(array_unique([...$calculation['warnings'], ...$sawCalculation['warnings']])),
                 'included_count' => count($snapshot['included_submission_ids']),
                 'excluded_count' => count($snapshot['excluded_submission_ids']),
                 'created_by' => $actor->id,
@@ -50,8 +52,9 @@ class CalculationRunService
             ]);
 
             $this->resultWriter->write($run, $calculation['rows']);
+            $this->sawWriter->write($run, $sawCalculation['rows']);
 
-            return $run->load('ueqResults');
+            return $run->load(['ueqResults', 'sawResults']);
         });
     }
 }

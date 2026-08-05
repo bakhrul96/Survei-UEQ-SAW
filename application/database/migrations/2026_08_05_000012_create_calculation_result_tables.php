@@ -43,10 +43,31 @@ return new class extends Migration
 
             $table->unique(['calculation_run_id', 'evaluation_unit_id', 'scale']);
         });
+
+        Schema::create('saw_results', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('calculation_run_id')->constrained()->restrictOnDelete();
+            $table->foreignId('evaluation_unit_id')->constrained()->restrictOnDelete();
+            $table->decimal('x1_gap', 18, 10);
+            $table->decimal('x2_days', 18, 10);
+            $table->decimal('x3_urgency', 18, 10);
+            $table->decimal('r1', 18, 10);
+            $table->decimal('r2', 18, 10);
+            $table->decimal('r3', 18, 10);
+            $table->decimal('contribution_c1', 18, 10);
+            $table->decimal('contribution_c2', 18, 10);
+            $table->decimal('contribution_c3', 18, 10);
+            $table->decimal('preference_value', 18, 10);
+            $table->unsignedInteger('rank');
+            $table->boolean('is_tied');
+            $table->timestamps();
+            $table->unique(['calculation_run_id', 'evaluation_unit_id']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('saw_results');
         Schema::dropIfExists('ueq_results');
         Schema::dropIfExists('calculation_runs');
     }
