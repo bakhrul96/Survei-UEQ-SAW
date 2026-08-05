@@ -9,13 +9,18 @@ use App\Models\RespondentProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\Features\SupportRedirects\Redirector;
 
 class ConsentScreener extends Component
 {
     public EvaluationPeriod $period;
+
     public bool $consent = false;
+
     public ?int $age = null;
+
     public bool $isIndramayuResident = false;
+
     public bool $hasUsedWongReang = false;
 
     public function mount(EvaluationPeriod $period): void
@@ -25,7 +30,7 @@ class ConsentScreener extends Component
         $this->period = $period;
     }
 
-    public function submit(SurveyContext $context): RedirectResponse
+    public function submit(SurveyContext $context): Redirector|RedirectResponse
     {
         $period = EvaluationPeriod::query()->findOrFail($this->period->id);
         abort_unless($period->status === PeriodStatus::Active, 404);

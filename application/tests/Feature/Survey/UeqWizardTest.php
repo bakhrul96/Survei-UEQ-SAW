@@ -15,6 +15,15 @@ it('uses four steps with boundaries 7 7 6 6', function () {
         ->assertHasErrors(['answers.2']);
 });
 
+it('opens a global unit from the period scoped wizard route', function () {
+    $fixture = surveyFixture();
+
+    $this->withCookie('ueq_survey_token', $fixture->plainToken)
+        ->get(route('survey.wizard', ['period' => $fixture->period, 'unit' => $fixture->unit]))
+        ->assertOk()
+        ->assertSee('Langkah 1 dari 4');
+});
+
 it('does not expose converted scores to the respondent', function () {
     $fixture = surveyFixture();
 

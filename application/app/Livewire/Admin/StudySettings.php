@@ -13,13 +13,21 @@ use Livewire\Component;
 class StudySettings extends Component
 {
     public int $periodId;
+
     public string $opensAt = '';
+
     public string $closesAt = '';
+
     public int $minimumAge;
+
     public int $minimumPerUnit;
+
     public int $targetPerUnit;
+
     public string $targetBasis = '';
+
     public string $consentText = '';
+
     public string $instrumentSource = '';
 
     public function mount(): void

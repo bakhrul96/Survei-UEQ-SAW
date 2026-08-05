@@ -3,10 +3,16 @@
 namespace App\Models;
 
 use App\Domain\Study\PeriodStatus;
+use Carbon\CarbonInterface;
 use Database\Factories\EvaluationPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property PeriodStatus $status
+ * @property CarbonInterface|null $opens_at
+ * @property CarbonInterface|null $closes_at
+ */
 class EvaluationPeriod extends Model
 {
     /** @use HasFactory<EvaluationPeriodFactory> */

@@ -26,11 +26,13 @@ class RespondentProfile extends Model
         ];
     }
 
+    /** @return BelongsTo<EvaluationPeriod, $this> */
     public function period(): BelongsTo
     {
         return $this->belongsTo(EvaluationPeriod::class, 'evaluation_period_id');
     }
 
+    /** @return BelongsTo<AnonymousRespondent, $this> */
     public function respondent(): BelongsTo
     {
         return $this->belongsTo(AnonymousRespondent::class, 'anonymous_respondent_id');

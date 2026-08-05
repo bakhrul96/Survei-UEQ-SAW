@@ -11,6 +11,7 @@ use Livewire\Component;
 class Complete extends Component
 {
     public EvaluationPeriod $period;
+
     public SurveySubmission $submission;
 
     public function mount(EvaluationPeriod $period, SurveyContext $context): void

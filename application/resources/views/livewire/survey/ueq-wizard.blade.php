@@ -26,8 +26,8 @@
             </div>
             <div class="grid grid-cols-7 gap-2" role="radiogroup" aria-label="Item {{ $item->order }}">
                 @foreach (range(1, 7) as $value)
-                    <label class="flex min-h-11 cursor-pointer items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-900 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50 focus-within:ring-2 focus-within:ring-indigo-500">
-                        <input type="radio" wire:model="answers.{{ $item->order }}" value="{{ $value }}" aria-label="Item {{ $item->order }} nilai {{ $value }}" class="sr-only">
+                    <label for="ueq-item-{{ $item->order }}-value-{{ $value }}" class="flex min-h-11 cursor-pointer items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-900 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50 focus-within:ring-2 focus-within:ring-indigo-500">
+                        <input id="ueq-item-{{ $item->order }}-value-{{ $value }}" type="radio" wire:model="answers.{{ $item->order }}" value="{{ $value }}" aria-label="Item {{ $item->order }} nilai {{ $value }}" class="sr-only">
                         <span aria-hidden="true">{{ $value }}</span>
                     </label>
                 @endforeach

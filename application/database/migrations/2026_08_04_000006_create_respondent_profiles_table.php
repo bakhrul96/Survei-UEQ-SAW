@@ -19,7 +19,10 @@ return new class extends Migration
             $table->boolean('eligible');
             $table->timestamp('screened_at');
             $table->timestamps();
-            $table->unique(['evaluation_period_id', 'anonymous_respondent_id']);
+            $table->unique(
+                ['evaluation_period_id', 'anonymous_respondent_id'],
+                'respondent_profiles_period_respondent_unique',
+            );
         });
     }
 

@@ -20,20 +20,29 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\Features\SupportRedirects\Redirector;
 
 class UeqWizard extends Component
 {
     private const STEP_RANGES = [1 => [1, 7], 2 => [8, 14], 3 => [15, 20], 4 => [21, 26]];
 
     public EvaluationPeriod $period;
+
     public EvaluationUnit $unit;
+
     public int $step = 1;
+
     /** @var array<int, int> */
     public array $answers = [];
+
     public bool $confirmedExperience = false;
+
     public string $idempotencyKey;
+
     public string $startedAt;
+
     public string $sessionId;
+
     public int $respondentId;
 
     public function mount(EvaluationPeriod $period, EvaluationUnit $unit, SurveyContext $context, StartSurveySession $startSession): void
@@ -68,7 +77,7 @@ class UeqWizard extends Component
         }
     }
 
-    public function submit(SubmitSurvey $submitSurvey, SurveyContext $context): RedirectResponse
+    public function submit(SubmitSurvey $submitSurvey, SurveyContext $context): Redirector|RedirectResponse
     {
         $period = EvaluationPeriod::query()->findOrFail($this->period->id);
         abort_unless($period->status === PeriodStatus::Active, 404);
@@ -97,7 +106,7 @@ class UeqWizard extends Component
             answers: array_map(static fn (mixed $answer): int => (int) $answer, $this->answers),
         ));
 
-        $this->dispatch('survey-submitted', key: $this->draftKey);
+        $this->dispatch('survey-submitted', key: $this->getDraftKeyProperty());
 
         return redirect()->route('survey.complete', ['period' => $this->period]);
     }

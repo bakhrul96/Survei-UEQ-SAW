@@ -36,7 +36,7 @@ class SubmitSurvey
 
                 throw_unless(count($data->answers) === 26, DomainException::class, 'Jawaban harus tepat 26 item.');
                 throw_unless(array_keys($data->answers) === range(1, 26), DomainException::class, 'Nomor item harus lengkap 1 sampai 26.');
-                throw_unless(collect($data->answers)->every(fn (mixed $score): bool => is_int($score) && $score >= 1 && $score <= 7), DomainException::class, 'Nilai jawaban harus 1 sampai 7.');
+                throw_unless(collect($data->answers)->every(fn (int $score): bool => $score >= 1 && $score <= 7), DomainException::class, 'Nilai jawaban harus 1 sampai 7.');
 
                 $duplicate = SurveySubmission::query()
                     ->where('evaluation_period_id', $data->periodId)
@@ -47,6 +47,7 @@ class SubmitSurvey
                 throw_if($duplicate, DomainException::class, 'Modul ini sudah pernah dinilai.');
 
                 $completedAt = now();
+                $durationSeconds = max(1, (int) ceil($data->startedAt->diffInSeconds($completedAt)));
                 $session = SurveySession::query()->lockForUpdate()->findOrFail($data->sessionId);
                 throw_unless(
                     $session->evaluation_period_id === $data->periodId && $session->anonymous_respondent_id === $data->respondentId,
@@ -63,7 +64,7 @@ class SubmitSurvey
                     'instrument_version' => $data->instrumentVersion,
                     'started_at' => $data->startedAt,
                     'completed_at' => $completedAt,
-                    'duration_seconds' => max(1, $data->startedAt->diffInSeconds($completedAt)),
+                    'duration_seconds' => $durationSeconds,
                     'session_sequence' => $session->submitted_count + 1,
                     'status' => 'submitted',
                 ]);

@@ -28,7 +28,8 @@ class SurveyContext
 
     public function respondent(): AnonymousRespondent
     {
-        $plainToken = (string) $this->request->cookie(config('survey.cookie_name'));
+        $cookie = $this->request->cookie(config()->string('survey.cookie_name'));
+        $plainToken = is_string($cookie) ? $cookie : '';
         $respondent = $plainToken === '' ? null : $this->tokens->resolve($plainToken);
 
         abort_unless($respondent instanceof AnonymousRespondent, 403);

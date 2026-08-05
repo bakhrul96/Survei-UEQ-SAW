@@ -5,6 +5,7 @@ use App\Domain\Study\PeriodStatus;
 use App\Livewire\Admin\StudySettings;
 use App\Models\EvaluationPeriod;
 use App\Models\UeqBenchmark;
+use App\Models\UeqItem;
 use App\Models\User;
 use Database\Seeders\WongReangStudySeeder;
 use DomainException;
@@ -93,6 +94,8 @@ it('invalidates instrument verification when its source changes', function () {
     $period->update(['instrument_source' => 'Sumber lama', 'instrument_verified_at' => now()]);
 
     Livewire::actingAs($admin)->test(StudySettings::class)
+        ->set('opensAt', now()->format('Y-m-d\TH:i'))
+        ->set('closesAt', now()->addMonth()->format('Y-m-d\TH:i'))
         ->set('instrumentSource', 'Sumber baru')
         ->call('save')
         ->assertHasNoErrors();
@@ -123,7 +126,7 @@ it('rejects malformed current-version item and wrong-version benchmark readiness
             'verified_at' => now(),
         ]);
     }
-    \App\Models\UeqItem::query()->where('version', $period->instrument_version)->where('order', 1)->update(['order' => 27, 'scale' => 'Invalid', 'positive_pole' => 'middle']);
+    UeqItem::query()->where('version', $period->instrument_version)->where('order', 1)->update(['order' => 27, 'scale' => 'Invalid', 'positive_pole' => 'middle']);
 
     expect(app(PeriodReadinessService::class)->issues($period->fresh()))
         ->toContain('Nomor item instrumen harus tepat 1 sampai 26.')

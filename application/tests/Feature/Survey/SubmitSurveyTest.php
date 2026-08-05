@@ -4,6 +4,8 @@ use App\Application\Survey\SubmitSurvey;
 use App\Application\Survey\SubmitSurveyData;
 use App\Models\SurveyAnswer;
 use App\Models\SurveySubmission;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 it('stores one submission and exactly 26 answers atomically', function () {
     $fixture = surveyFixture();
@@ -40,4 +42,30 @@ it('rejects a second submission for the same respondent period and unit', functi
 
     expect(fn () => app(SubmitSurvey::class)->handle($second))
         ->toThrow(DomainException::class, 'Modul ini sudah pernah dinilai.');
+});
+
+it('rejects a non-integer score before opening a submission transaction', function () {
+    $fixture = surveyFixture();
+    $answers = array_fill_keys(range(1, 26), 4);
+    $answers[1] = '4';
+
+    expect(fn () => new SubmitSurveyData(
+        periodId: $fixture->period->id,
+        respondentId: $fixture->respondent->id,
+        sessionId: $fixture->session->id,
+        unitId: $fixture->unit->id,
+        idempotencyKey: '33333333-3333-4333-8333-333333333333',
+        instrumentVersion: $fixture->period->instrument_version,
+        startedAt: now()->subMinutes(4)->toImmutable(),
+        answers: $answers,
+    ))->toThrow(InvalidArgumentException::class, 'Nilai jawaban harus berupa bilangan bulat.');
+});
+
+it('stores duration in whole seconds', function () {
+    $fixture = surveyFixture();
+
+    $submission = app(SubmitSurvey::class)->handle(validSubmitSurveyData($fixture));
+    $duration = DB::table('survey_submissions')->where('id', $submission->id)->value('duration_seconds');
+
+    expect($duration)->toBeInt();
 });

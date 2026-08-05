@@ -22,6 +22,7 @@ class AnonymousRespondent extends Model
         ];
     }
 
+    /** @return HasMany<RespondentProfile, $this> */
     public function profiles(): HasMany
     {
         return $this->hasMany(RespondentProfile::class);

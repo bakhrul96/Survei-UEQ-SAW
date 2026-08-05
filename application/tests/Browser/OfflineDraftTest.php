@@ -2,7 +2,7 @@
 
 use App\Domain\Study\PeriodStatus;
 
-it('submits an eligible respondent evaluation on a 360 by 800 viewport', function () {
+it('keeps a UEQ draft when the browser reports an offline interruption', function () {
     $fixture = surveyFixture();
     $fixture->period->update([
         'status' => PeriodStatus::Active,
@@ -14,7 +14,6 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
 
     $page = visit(route('survey.entry', $fixture->period))
         ->resize(360, 800)
-        ->assertSee('Informasi Penelitian')
         ->click('ui-checkbox[wire\\:model="consent"]')
         ->fill('[wire\\:model="age"]', '20')
         ->click('ui-checkbox[wire\\:model="isIndramayuResident"]')
@@ -23,17 +22,16 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
         ->waitForText('Pilih Modul')
         ->press('Ibadah-Yu')
         ->waitForText('Langkah 1 dari 4')
-        ->check('[wire\\:model="confirmedExperience"]');
+        ->check('[wire\\:model="confirmedExperience"]')
+        ->click('label[for="ueq-item-1-value-4"]')
+        ->wait(1)
+        ->assertScript("Object.keys(localStorage).some((key) => key.startsWith('ueq-draft-v1:') && JSON.parse(localStorage.getItem(key)).answers['1'] === '4')");
 
-    foreach (range(1, 26) as $itemOrder) {
-        $page->click('label[for="ueq-item-'.$itemOrder.'-value-4"]');
+    $page->script("() => { window.dispatchEvent(new Event('offline')); return true; }");
+    $page->assertSee('Koneksi terputus');
 
-        if (in_array($itemOrder, [7, 14, 20], true)) {
-            $page->press('Berikutnya')->waitForText('Langkah '.(array_search($itemOrder, [7, 14, 20], true) + 2).' dari 4');
-        }
-    }
-
-    $page->press('Kirim Penilaian')
-        ->waitForText('Penilaian berhasil disimpan')
-        ->assertSee('Penilaian berhasil disimpan');
+    $page->page()->reload();
+    $page->waitForText('Langkah 1 dari 4');
+    $page->page()->waitForFunction("() => document.querySelector('#ueq-item-1-value-4')?.checked === true");
+    $page->assertChecked('#ueq-item-1-value-4');
 });

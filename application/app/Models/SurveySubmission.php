@@ -25,26 +25,31 @@ class SurveySubmission extends Model
         ];
     }
 
+    /** @return BelongsTo<EvaluationPeriod, $this> */
     public function period(): BelongsTo
     {
         return $this->belongsTo(EvaluationPeriod::class, 'evaluation_period_id');
     }
 
+    /** @return BelongsTo<AnonymousRespondent, $this> */
     public function respondent(): BelongsTo
     {
         return $this->belongsTo(AnonymousRespondent::class, 'anonymous_respondent_id');
     }
 
+    /** @return BelongsTo<SurveySession, $this> */
     public function session(): BelongsTo
     {
         return $this->belongsTo(SurveySession::class, 'survey_session_id');
     }
 
+    /** @return BelongsTo<EvaluationUnit, $this> */
     public function unit(): BelongsTo
     {
         return $this->belongsTo(EvaluationUnit::class, 'evaluation_unit_id');
     }
 
+    /** @return HasMany<SurveyAnswer, $this> */
     public function answers(): HasMany
     {
         return $this->hasMany(SurveyAnswer::class);

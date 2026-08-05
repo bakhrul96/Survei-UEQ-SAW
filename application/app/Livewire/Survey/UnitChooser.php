@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\Features\SupportRedirects\Redirector;
 
 class UnitChooser extends Component
 {
@@ -35,7 +36,7 @@ class UnitChooser extends Component
         $this->loadUnits($respondent);
     }
 
-    public function choose(int $unitId, SurveyContext $context, StartSurveySession $startSession): RedirectResponse
+    public function choose(int $unitId, SurveyContext $context, StartSurveySession $startSession): Redirector|RedirectResponse
     {
         $period = EvaluationPeriod::query()->findOrFail($this->period->id);
         abort_unless($period->status === PeriodStatus::Active, 404);

@@ -5,10 +5,10 @@ use App\Http\Controllers\Admin\RawSurveyExportController;
 use App\Http\Controllers\SurveyEntryController;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\StudySettings;
-use App\Livewire\Survey\ConsentScreener;
 use App\Livewire\Survey\Complete;
-use App\Livewire\Survey\UnitChooser;
+use App\Livewire\Survey\ConsentScreener;
 use App\Livewire\Survey\UeqWizard;
+use App\Livewire\Survey\UnitChooser;
 use App\Models\EvaluationPeriod;
 use Illuminate\Support\Facades\Route;
 
@@ -23,7 +23,8 @@ Route::get('/s/wong-reang/{period:slug}/ineligible', function (EvaluationPeriod 
 })->name('survey.ineligible');
 Route::get('/s/wong-reang/{period:slug}/units', UnitChooser::class)
     ->name('survey.units');
-Route::get('/s/wong-reang/{period:slug}/units/{unit:code}', UeqWizard::class)
+Route::get('/s/wong-reang/{period:slug}/units/{unit}', UeqWizard::class)
+    ->withoutScopedBindings()
     ->name('survey.wizard');
 Route::get('/s/wong-reang/{period:slug}/complete', Complete::class)->name('survey.complete');
 

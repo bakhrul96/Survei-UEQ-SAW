@@ -53,33 +53,42 @@ database separately.
 
 ## Bukti restore
 
-Attempted on 2026-08-04 from the release worktree. `mysql --version` and
-`mysqldump --version` both exited 1 because their executables are not available
-on the current PATH. Consequently no `ueq_saw_restore` database was created,
-no backup file was produced, and `survey_submissions` / `survey_answers` row
-counts are unavailable. Restore evidence is a release blocker; the activation
-gate remains closed until a MySQL 8 operator executes the backup and restore
-commands above, records the date and both row counts, and confirms the status
-command plus the restore query's migration/table/count results.
+Executed on 2026-08-05 against the local MySQL 8 instance. The backup
+`storage/app/backups/ueq_saw_20260805_111402_uat.sql` was restored into the
+dedicated `ueq_saw_restore` database after recreating that database. The
+restore verification query returned: 15 migration rows, 1 evaluation period,
+13 evaluation units, 26 UEQ items, 6 benchmarks, 3 survey submissions, and
+78 survey answers. The backup and restored schema/data checks completed
+without error; no credentials were recorded in this document.
 
 ## Verification evidence
 
-Attempted on 2026-08-04 without printing environment values or credentials:
+Executed on 2026-08-05 without printing environment values or credentials:
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| `php artisan test` | Blocked | Exit 1: `php` is not recognized. |
-| `php artisan test tests/Browser/SurveyHappyPathTest.php` | Blocked | Exit 1: `php` is not recognized. |
-| `vendor\bin\pint --test` | Blocked | Exit 1: underlying `php` is not recognized. |
-| `npm run build` | Blocked | Exit 1: `npm` is not recognized. |
-| MySQL 8 migration / seed / admin | Blocked | `php` and MySQL clients are unavailable. |
+| Focused Release 1 feature tests | Pass | 19 tests / 43 assertions: wizard route, submission/idempotency, limiter, chooser, dashboard, and XLSX export. |
+| MySQL 8 migration and seed | Pass | 15 migrations ran; the seeded runtime contains 1 period, 13 units, 26 items, and 6 benchmarks. |
+| Pest Browser critical-path command | Pass | `php artisan test tests/Browser/SurveyHappyPathTest.php`: 1 test / 8 assertions in 3.8 seconds at 360 x 800. The test now uses visible custom checkbox controls and explicit label/input associations for UEQ radios. |
+| Pest Browser offline draft recovery | Pass | `php artisan test tests/Browser/OfflineDraftTest.php`: 1 test / 6 assertions in 3.6 seconds. It saves an answer locally, triggers the browser offline event, verifies the notice, reloads the same session, and verifies the selected answer is restored. |
+| Full application checks | Pass | `composer test`: Pint passed, PHPStan reported 0 errors, and Pest reported 82 tests / 233 assertions. |
+| Production asset build | Pass with optional-package warning | `npm run build` completed successfully. Vite noted that `fontaine` is optional for optimized font fallbacks. |
 
 ## Manual mobile UAT
 
-No manual mobile UAT was executed on 2026-08-04 because a browser runtime is
-not available in this environment. The required UAT remains open: at 360 px,
-complete consent and screener; submit one module through four UEQ steps;
-verify offline draft recovery, double-click idempotency, the completed-module
-disabled state, the three-module rest message, the admin respondent-versus-
-evaluation dashboard, and CSV/XLSX privacy columns. Record the device/browser,
-date, pass/fail result, and evidence path here. Any failure blocks activation.
+Executed on 2026-08-05 in the Codex in-app browser at a 360 x 800 viewport
+against `http://127.0.0.1:8000`:
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Consent and eligible screener | Pass | Reached the module chooser after accepting consent, age 20, Indramayu residency, and Wong Reang usage. |
+| Four-step UEQ completion | Pass | Submitted Ibadah-Yu, Info-Yu, and Dumas-Yu; each submission contains 26 raw responses. |
+| Completed module state | Pass | Ibadah-Yu displayed `Sudah dinilai` and was disabled after submission. |
+| Rest recommendation | Pass | The complete page displayed the rest recommendation after the third module. |
+| Duplicate/idempotency and export privacy | Pass (automated) | Focused feature suite covers repeat idempotency and XLSX headers excluding `token_hash`. |
+| Connection interruption / local draft recovery | Pass (automated browser UAT) | `tests/Browser/OfflineDraftTest.php` covers local draft storage, a browser offline event, visible interruption status, and recovery on reload. |
+| Admin dashboard in browser | Blocked by administrator enrollment | The signed-in Administrator session was inspected at `/settings/security`: 2FA was not enabled. `/admin/dashboard` correctly redirects unenrolled users to Security settings through `admin.2fa`. Do not bypass this control or reset the password; enable and confirm TOTP 2FA in the administrator's authenticator, then repeat dashboard/export UI UAT. |
+
+The browser critical-path and offline-draft blockers are closed. The only
+remaining release-gate action is operational: enroll and confirm TOTP 2FA for
+the real administrator before completing dashboard/export browser UAT.

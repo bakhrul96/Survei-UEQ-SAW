@@ -20,4 +20,9 @@ class EvaluationUnit extends Model
             'is_active' => 'boolean',
         ];
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'code';
+    }
 }
