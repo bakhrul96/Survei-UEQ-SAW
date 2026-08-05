@@ -6,6 +6,7 @@ use App\Http\Controllers\SurveyEntryController;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Responses;
 use App\Livewire\Admin\StudySettings;
+use App\Livewire\Admin\TechnicalAssessments;
 use App\Livewire\Survey\Complete;
 use App\Livewire\Survey\ConsentScreener;
 use App\Livewire\Survey\UeqWizard;
@@ -35,6 +36,7 @@ Route::middleware(['auth', 'verified', 'admin.2fa'])->prefix('admin')->name('adm
     Route::get('/periods/{period}/exports/raw.csv', [RawSurveyExportController::class, 'csv'])->name('exports.raw.csv');
     Route::get('/periods/{period}/exports/raw.xlsx', [RawSurveyExportController::class, 'xlsx'])->name('exports.raw.xlsx');
     Route::get('/study', StudySettings::class)->name('study-settings');
+    Route::get('/technical-assessments', TechnicalAssessments::class)->name('technical-assessments');
 });
 
 require __DIR__.'/settings.php';

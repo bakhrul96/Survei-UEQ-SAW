@@ -2,6 +2,7 @@
     <div>
         <flux:heading size="xl">Dashboard progres</flux:heading>
         <flux:text>{{ $period->name }} · Rilis 1 menampilkan respons yang telah dikirim.</flux:text>
+        <flux:button class="mt-3" :href="route('admin.technical-assessments')" icon="users">Informan</flux:button>
     </div>
 
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
