@@ -1,7 +1,6 @@
 <?php
 
 use App\Application\Survey\SubmitSurvey;
-use DomainException;
 use Illuminate\Support\Facades\RateLimiter;
 
 it('blocks more than ten submit attempts per respondent per minute', function () {

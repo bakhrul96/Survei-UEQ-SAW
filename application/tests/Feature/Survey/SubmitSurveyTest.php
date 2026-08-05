@@ -5,7 +5,6 @@ use App\Application\Survey\SubmitSurveyData;
 use App\Models\SurveyAnswer;
 use App\Models\SurveySubmission;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 it('stores one submission and exactly 26 answers atomically', function () {
     $fixture = surveyFixture();

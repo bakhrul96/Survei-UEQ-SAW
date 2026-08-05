@@ -8,7 +8,6 @@ use App\Models\UeqBenchmark;
 use App\Models\UeqItem;
 use App\Models\User;
 use Database\Seeders\WongReangStudySeeder;
-use DomainException;
 use Livewire\Livewire;
 
 beforeEach(function () {

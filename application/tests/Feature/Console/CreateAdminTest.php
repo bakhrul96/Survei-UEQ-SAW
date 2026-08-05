@@ -7,8 +7,6 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use PDOException;
-use ReflectionMethod;
 
 it('creates an admin with a hashed password', function () {
     $this->artisan('app:create-admin', ['email' => '  PENELITI@EXAMPLE.TEST  '])

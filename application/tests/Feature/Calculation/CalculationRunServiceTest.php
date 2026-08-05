@@ -17,7 +17,6 @@ use App\Models\UeqBenchmark;
 use App\Models\UeqResult;
 use App\Models\User;
 use Database\Seeders\WongReangStudySeeder;
-use DomainException;
 use Illuminate\Support\Str;
 
 beforeEach(function () {
