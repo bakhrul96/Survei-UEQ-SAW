@@ -2,8 +2,13 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $source
+ * @property CarbonInterface|null $verified_at
+ */
 class UeqBenchmark extends Model
 {
     protected $guarded = [];

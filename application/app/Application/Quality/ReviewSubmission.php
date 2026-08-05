@@ -5,6 +5,7 @@ namespace App\Application\Quality;
 use App\Domain\Quality\QualityDecision;
 use App\Domain\Quality\QualityFlagger;
 use App\Models\AuditEvent;
+use App\Models\CalculationRun;
 use App\Models\QualityReview;
 use App\Models\SurveySubmission;
 use App\Models\User;
@@ -52,6 +53,11 @@ class ReviewSubmission
                 'old_values' => $oldValues,
                 'new_values' => $review->only(['flags', 'decision', 'reason', 'reviewed_by', 'reviewed_at']),
             ]);
+
+            CalculationRun::query()
+                ->where('evaluation_period_id', $submission->evaluation_period_id)
+                ->where('status', 'preview')
+                ->update(['status' => 'stale']);
 
             return $review;
         });
