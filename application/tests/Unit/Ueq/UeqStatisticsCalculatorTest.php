@@ -86,17 +86,20 @@ it('uses scale-specific fixture answers instead of treating all 26 items as one 
     $fixture = ueqGoldenFixture();
     $calculator = app(UeqStatisticsCalculator::class);
     $answers = includedAnswersForUnit($fixture, $unit);
-    $means = [];
-    $alphas = [];
+    $signatures = [];
 
     foreach (array_keys($fixture['benchmarks']) as $scale) {
         $result = $calculator->forScale($fixture['items'], $answers, $scale);
-        $means[] = $result->mean;
-        $alphas[] = $result->cronbachAlpha;
+        $signatures[] = implode('|', [
+            $result->mean,
+            $result->standardDeviation,
+            $result->ci95Lower,
+            $result->ci95Upper,
+            $result->cronbachAlpha,
+        ]);
     }
 
-    expect(count(array_unique($means)))->toBeGreaterThan(1)
-        ->and(count(array_unique($alphas)))->toBeGreaterThan(1);
+    expect(count(array_unique($signatures)))->toBe(6);
 })->with(['ibadah-yu', 'info-yu']);
 
 it('uses the documented two-sided critical t at boundary degrees of freedom', function (int $n, float $expectedCriticalT): void {
