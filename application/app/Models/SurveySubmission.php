@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SurveySubmission extends Model
 {
@@ -53,5 +54,11 @@ class SurveySubmission extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(SurveyAnswer::class);
+    }
+
+    /** @return HasOne<QualityReview, $this> */
+    public function qualityReview(): HasOne
+    {
+        return $this->hasOne(QualityReview::class);
     }
 }
