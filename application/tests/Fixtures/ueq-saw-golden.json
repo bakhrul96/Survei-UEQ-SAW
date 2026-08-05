@@ -1,0 +1,59 @@
+{
+  "algorithm_version": "ueq-saw-v1",
+  "tolerance": 0.000001,
+  "items": [
+    {"order": 1, "left_label": "menyusahkan", "right_label": "menyenangkan", "scale": "Attractiveness", "positive_pole": "right"},
+    {"order": 2, "left_label": "tak dapat dipahami", "right_label": "dapat dipahami", "scale": "Perspicuity", "positive_pole": "right"},
+    {"order": 3, "left_label": "kreatif", "right_label": "monoton", "scale": "Novelty", "positive_pole": "left"},
+    {"order": 4, "left_label": "mudah dipelajari", "right_label": "sulit dipelajari", "scale": "Perspicuity", "positive_pole": "left"},
+    {"order": 5, "left_label": "bermanfaat", "right_label": "kurang bermanfaat", "scale": "Stimulation", "positive_pole": "left"},
+    {"order": 6, "left_label": "membosankan", "right_label": "mengasyikkan", "scale": "Stimulation", "positive_pole": "right"},
+    {"order": 7, "left_label": "tidak menarik", "right_label": "menarik", "scale": "Stimulation", "positive_pole": "right"},
+    {"order": 8, "left_label": "tak dapat diprediksi", "right_label": "dapat diprediksi", "scale": "Dependability", "positive_pole": "right"},
+    {"order": 9, "left_label": "cepat", "right_label": "lambat", "scale": "Efficiency", "positive_pole": "left"},
+    {"order": 10, "left_label": "berdaya cipta", "right_label": "konvensional", "scale": "Novelty", "positive_pole": "left"},
+    {"order": 11, "left_label": "menghalangi", "right_label": "mendukung", "scale": "Dependability", "positive_pole": "right"},
+    {"order": 12, "left_label": "baik", "right_label": "buruk", "scale": "Attractiveness", "positive_pole": "left"},
+    {"order": 13, "left_label": "rumit", "right_label": "sederhana", "scale": "Perspicuity", "positive_pole": "right"},
+    {"order": 14, "left_label": "tidak disukai", "right_label": "menggembirakan", "scale": "Attractiveness", "positive_pole": "right"},
+    {"order": 15, "left_label": "lazim", "right_label": "terdepan", "scale": "Novelty", "positive_pole": "right"},
+    {"order": 16, "left_label": "tidak nyaman", "right_label": "nyaman", "scale": "Attractiveness", "positive_pole": "right"},
+    {"order": 17, "left_label": "aman", "right_label": "tidak aman", "scale": "Dependability", "positive_pole": "left"},
+    {"order": 18, "left_label": "memotivasi", "right_label": "tidak memotivasi", "scale": "Stimulation", "positive_pole": "left"},
+    {"order": 19, "left_label": "memenuhi ekspektasi", "right_label": "tidak memenuhi ekspektasi", "scale": "Dependability", "positive_pole": "left"},
+    {"order": 20, "left_label": "tidak efisien", "right_label": "efisien", "scale": "Efficiency", "positive_pole": "right"},
+    {"order": 21, "left_label": "jelas", "right_label": "membingungkan", "scale": "Perspicuity", "positive_pole": "left"},
+    {"order": 22, "left_label": "tidak praktis", "right_label": "praktis", "scale": "Efficiency", "positive_pole": "right"},
+    {"order": 23, "left_label": "terorganisasi", "right_label": "berantakan", "scale": "Efficiency", "positive_pole": "left"},
+    {"order": 24, "left_label": "atraktif", "right_label": "tidak atraktif", "scale": "Attractiveness", "positive_pole": "left"},
+    {"order": 25, "left_label": "ramah pengguna", "right_label": "tidak ramah pengguna", "scale": "Attractiveness", "positive_pole": "left"},
+    {"order": 26, "left_label": "konservatif", "right_label": "inovatif", "scale": "Novelty", "positive_pole": "right"}
+  ],
+  "benchmarks": {"Attractiveness": 1.58, "Perspicuity": 1.73, "Efficiency": 1.5, "Dependability": 1.48, "Stimulation": 1.35, "Novelty": 1.12},
+  "submissions": [
+    {"id": "IB-01", "unit": "ibadah-yu", "decision": "included", "answers": {"1": 6, "2": 6, "3": 2, "4": 2, "5": 2, "6": 6, "7": 6, "8": 6, "9": 2, "10": 2, "11": 6, "12": 2, "13": 6, "14": 6, "15": 6, "16": 6, "17": 2, "18": 2, "19": 2, "20": 6, "21": 2, "22": 6, "23": 2, "24": 2, "25": 2, "26": 6}},
+    {"id": "IB-02", "unit": "ibadah-yu", "decision": "included", "answers": {"1": 6, "2": 6, "3": 2, "4": 2, "5": 2, "6": 6, "7": 6, "8": 6, "9": 2, "10": 2, "11": 6, "12": 2, "13": 6, "14": 6, "15": 6, "16": 6, "17": 2, "18": 2, "19": 2, "20": 6, "21": 2, "22": 6, "23": 2, "24": 2, "25": 2, "26": 6}},
+    {"id": "IB-03", "unit": "ibadah-yu", "decision": "included", "answers": {"1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "11": 4, "12": 4, "13": 4, "14": 4, "15": 4, "16": 4, "17": 4, "18": 4, "19": 4, "20": 4, "21": 4, "22": 4, "23": 4, "24": 4, "25": 4, "26": 4}},
+    {"id": "IB-04", "unit": "ibadah-yu", "decision": "included", "answers": {"1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "11": 4, "12": 4, "13": 4, "14": 4, "15": 4, "16": 4, "17": 4, "18": 4, "19": 4, "20": 4, "21": 4, "22": 4, "23": 4, "24": 4, "25": 4, "26": 4}},
+    {"id": "IB-05", "unit": "ibadah-yu", "decision": "excluded", "answers": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1, "10": 1, "11": 1, "12": 1, "13": 1, "14": 1, "15": 1, "16": 1, "17": 1, "18": 1, "19": 1, "20": 1, "21": 1, "22": 1, "23": 1, "24": 1, "25": 1, "26": 1}},
+    {"id": "IN-01", "unit": "info-yu", "decision": "included", "answers": {"1": 6, "2": 6, "3": 2, "4": 2, "5": 2, "6": 6, "7": 6, "8": 6, "9": 2, "10": 2, "11": 6, "12": 2, "13": 6, "14": 6, "15": 6, "16": 6, "17": 2, "18": 2, "19": 2, "20": 6, "21": 2, "22": 6, "23": 2, "24": 2, "25": 2, "26": 6}},
+    {"id": "IN-02", "unit": "info-yu", "decision": "included", "answers": {"1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "11": 4, "12": 4, "13": 4, "14": 4, "15": 4, "16": 4, "17": 4, "18": 4, "19": 4, "20": 4, "21": 4, "22": 4, "23": 4, "24": 4, "25": 4, "26": 4}},
+    {"id": "IN-03", "unit": "info-yu", "decision": "included", "answers": {"1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "11": 4, "12": 4, "13": 4, "14": 4, "15": 4, "16": 4, "17": 4, "18": 4, "19": 4, "20": 4, "21": 4, "22": 4, "23": 4, "24": 4, "25": 4, "26": 4}},
+    {"id": "IN-04", "unit": "info-yu", "decision": "included", "answers": {"1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "11": 4, "12": 4, "13": 4, "14": 4, "15": 4, "16": 4, "17": 4, "18": 4, "19": 4, "20": 4, "21": 4, "22": 4, "23": 4, "24": 4, "25": 4, "26": 4}},
+    {"id": "IN-05", "unit": "info-yu", "decision": "excluded", "answers": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1, "10": 1, "11": 1, "12": 1, "13": 1, "14": 1, "15": 1, "16": 1, "17": 1, "18": 1, "19": 1, "20": 1, "21": 1, "22": 1, "23": 1, "24": 1, "25": 1, "26": 1}}
+  ],
+  "technical_informants": [
+    {"code": "TI-01", "weights": {"c1": 24, "c2": 48, "c3": 28}, "assessments": {"ibadah-yu": {"days": 4, "urgency": 3}, "info-yu": {"days": 8, "urgency": 5}}},
+    {"code": "TI-02", "weights": {"c1": 24, "c2": 48, "c3": 28}, "assessments": {"ibadah-yu": {"days": 4, "urgency": 3}, "info-yu": {"days": 8, "urgency": 5}}},
+    {"code": "TI-03", "weights": {"c1": 24, "c2": 47, "c3": 29}, "assessments": {"ibadah-yu": {"days": 4, "urgency": 3}, "info-yu": {"days": 8, "urgency": 5}}}
+  ],
+  "expected": {
+    "transform_right_7": 3,
+    "transform_left_1": 3,
+    "ueq": {
+      "ibadah-yu": {"Attractiveness": {"n": 4, "mean": 1.0, "standard_deviation": 1.1547005383792515, "standard_error": 0.5773502691896258, "ci95_lower": -0.837386231037399, "ci95_upper": 2.837386231037399, "alpha": 1.0}, "Perspicuity": {"n": 4, "mean": 1.0, "standard_deviation": 1.1547005383792515, "standard_error": 0.5773502691896258, "ci95_lower": -0.837386231037399, "ci95_upper": 2.837386231037399, "alpha": 1.0}, "Efficiency": {"n": 4, "mean": 1.0, "standard_deviation": 1.1547005383792515, "standard_error": 0.5773502691896258, "ci95_lower": -0.837386231037399, "ci95_upper": 2.837386231037399, "alpha": 1.0}, "Dependability": {"n": 4, "mean": 1.0, "standard_deviation": 1.1547005383792515, "standard_error": 0.5773502691896258, "ci95_lower": -0.837386231037399, "ci95_upper": 2.837386231037399, "alpha": 1.0}, "Stimulation": {"n": 4, "mean": 1.0, "standard_deviation": 1.1547005383792515, "standard_error": 0.5773502691896258, "ci95_lower": -0.837386231037399, "ci95_upper": 2.837386231037399, "alpha": 1.0}, "Novelty": {"n": 4, "mean": 1.0, "standard_deviation": 1.1547005383792515, "standard_error": 0.5773502691896258, "ci95_lower": -0.837386231037399, "ci95_upper": 2.837386231037399, "alpha": 1.0}},
+      "info-yu": {"Attractiveness": {"n": 4, "mean": 0.5, "standard_deviation": 1.0, "standard_error": 0.5, "ci95_lower": -1.0912231526421314, "ci95_upper": 2.0912231526421312, "alpha": 1.0}, "Perspicuity": {"n": 4, "mean": 0.5, "standard_deviation": 1.0, "standard_error": 0.5, "ci95_lower": -1.0912231526421314, "ci95_upper": 2.0912231526421312, "alpha": 1.0}, "Efficiency": {"n": 4, "mean": 0.5, "standard_deviation": 1.0, "standard_error": 0.5, "ci95_lower": -1.0912231526421314, "ci95_upper": 2.0912231526421312, "alpha": 1.0}, "Dependability": {"n": 4, "mean": 0.5, "standard_deviation": 1.0, "standard_error": 0.5, "ci95_lower": -1.0912231526421314, "ci95_upper": 2.0912231526421312, "alpha": 1.0}, "Stimulation": {"n": 4, "mean": 0.5, "standard_deviation": 1.0, "standard_error": 0.5, "ci95_lower": -1.0912231526421314, "ci95_upper": 2.0912231526421312, "alpha": 1.0}, "Novelty": {"n": 4, "mean": 0.5, "standard_deviation": 1.0, "standard_error": 0.5, "ci95_lower": -1.0912231526421314, "ci95_upper": 2.0912231526421312, "alpha": 1.0}}
+    },
+    "saw": {"weights": {"c1": 0.24, "c2": 0.4766666666666667, "c3": 0.2833333333333333}, "ibadah-yu": {"x1_gap": 0.46, "x2_days": 4.0, "x3_urgency": 3.0, "r1": 0.4791666666666667, "r2": 1.0, "r3": 0.6, "contribution_c1": 0.115, "contribution_c2": 0.4766666666666667, "contribution_c3": 0.17, "vi": 0.7616666666666667, "rank": 1, "is_tied": true}, "info-yu": {"x1_gap": 0.96, "x2_days": 8.0, "x3_urgency": 5.0, "r1": 1.0, "r2": 0.5, "r3": 1.0, "contribution_c1": 0.24, "contribution_c2": 0.23833333333333334, "contribution_c3": 0.2833333333333333, "vi": 0.7616666666666667, "rank": 1, "is_tied": true}}
+  }
+}
