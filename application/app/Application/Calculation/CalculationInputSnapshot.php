@@ -117,6 +117,7 @@ class CalculationInputSnapshot
                 'minimum_per_unit' => $period->minimum_per_unit,
                 'target_per_unit' => $period->target_per_unit,
                 'fast_response_seconds' => $period->fast_response_seconds,
+                'calculation_input_revision' => $period->calculation_input_revision,
             ],
             'items' => $items,
             'benchmarks' => $benchmarkSnapshot,

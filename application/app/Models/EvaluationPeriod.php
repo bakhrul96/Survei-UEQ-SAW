@@ -32,6 +32,7 @@ class EvaluationPeriod extends Model
             'minimum_per_unit' => 'integer',
             'target_per_unit' => 'integer',
             'fast_response_seconds' => 'integer',
+            'calculation_input_revision' => 'integer',
         ];
     }
 }

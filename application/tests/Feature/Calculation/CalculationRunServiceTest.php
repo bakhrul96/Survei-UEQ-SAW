@@ -1,5 +1,6 @@
 <?php
 
+use App\Application\Calculation\CalculationInputSnapshot;
 use App\Application\Calculation\CalculationRunService;
 use App\Application\Quality\ReviewSubmission;
 use App\Application\Survey\SubmitSurvey;
@@ -66,6 +67,34 @@ it('writes a preview with non-negative gaps and reproducible input hash', functi
 it('marks older preview stale after quality change', function () {
     $run = app(CalculationRunService::class)->preview($this->period, $this->admin);
     app(ReviewSubmission::class)->handle($this->submission, $this->admin, QualityDecision::Excluded, 'Pola tidak layak.');
+
+    expect($run->fresh()->status)->toBe('stale');
+});
+
+it('does not leave a preview current when a quality change happens after its snapshot', function () {
+    app()->instance(CalculationInputSnapshot::class, new class($this->submission, $this->admin) extends CalculationInputSnapshot
+    {
+        public function __construct(
+            private readonly SurveySubmission $submission,
+            private readonly User $admin,
+        ) {}
+
+        public function for(EvaluationPeriod $period, string $algorithmVersion): array
+        {
+            $snapshot = parent::for($period, $algorithmVersion);
+
+            app(ReviewSubmission::class)->handle(
+                $this->submission,
+                $this->admin,
+                QualityDecision::Excluded,
+                'Pola berubah sesudah snapshot.',
+            );
+
+            return $snapshot;
+        }
+    });
+
+    $run = app(CalculationRunService::class)->preview($this->period, $this->admin);
 
     expect($run->fresh()->status)->toBe('stale');
 });

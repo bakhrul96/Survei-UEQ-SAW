@@ -19,20 +19,27 @@ class CalculationRunService
     public function preview(EvaluationPeriod $period, User $actor): CalculationRun
     {
         return DB::transaction(function () use ($period, $actor): CalculationRun {
-            $snapshot = $this->snapshots->for($period, self::ALGORITHM_VERSION);
+            $lockedPeriod = EvaluationPeriod::query()->lockForUpdate()->findOrFail($period->id);
+            $snapshotRevision = $lockedPeriod->calculation_input_revision;
+            $snapshot = $this->snapshots->for($lockedPeriod, self::ALGORITHM_VERSION);
             $inputHash = $this->snapshots->hash($snapshot);
             $calculation = $this->resultWriter->calculate($snapshot);
+            $currentRevision = EvaluationPeriod::query()
+                ->lockForUpdate()
+                ->findOrFail($lockedPeriod->id)
+                ->calculation_input_revision;
+            $status = $currentRevision === $snapshotRevision ? 'preview' : 'stale';
 
             CalculationRun::query()
-                ->where('evaluation_period_id', $period->id)
+                ->where('evaluation_period_id', $lockedPeriod->id)
                 ->where('status', 'preview')
                 ->where('input_hash', '!=', $inputHash)
                 ->update(['status' => 'stale']);
 
             $run = CalculationRun::query()->create([
-                'evaluation_period_id' => $period->id,
+                'evaluation_period_id' => $lockedPeriod->id,
                 'algorithm_version' => self::ALGORITHM_VERSION,
-                'status' => 'preview',
+                'status' => $status,
                 'input_hash' => $inputHash,
                 'input_snapshot' => $snapshot,
                 'warnings' => $calculation['warnings'],

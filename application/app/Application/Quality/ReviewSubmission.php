@@ -6,6 +6,7 @@ use App\Domain\Quality\QualityDecision;
 use App\Domain\Quality\QualityFlagger;
 use App\Models\AuditEvent;
 use App\Models\CalculationRun;
+use App\Models\EvaluationPeriod;
 use App\Models\QualityReview;
 use App\Models\SurveySubmission;
 use App\Models\User;
@@ -31,6 +32,11 @@ class ReviewSubmission
         }
 
         return DB::transaction(function () use ($submission, $reviewer, $decision, $reason): QualityReview {
+            EvaluationPeriod::query()
+                ->lockForUpdate()
+                ->findOrFail($submission->evaluation_period_id)
+                ->increment('calculation_input_revision');
+
             $existing = $submission->qualityReview()->first();
             $oldValues = $existing?->only(['flags', 'decision', 'reason', 'reviewed_by', 'reviewed_at']);
             $attributes = [
