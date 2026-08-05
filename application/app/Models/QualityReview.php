@@ -3,9 +3,19 @@
 namespace App\Models;
 
 use App\Domain\Quality\QualityDecision;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property array{fast_completion: bool, identical_answers: bool} $flags
+ * @property QualityDecision $decision
+ * @property string|null $reason
+ * @property int $reviewed_by
+ * @property CarbonInterface $reviewed_at
+ * @property-read SurveySubmission $submission
+ * @property-read User $reviewer
+ */
 class QualityReview extends Model
 {
     protected $guarded = [];

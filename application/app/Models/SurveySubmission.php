@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/** @property-read QualityReview|null $qualityReview */
 class SurveySubmission extends Model
 {
     /** @use HasFactory<SurveySubmissionFactory> */
