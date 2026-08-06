@@ -5,3 +5,4 @@
 /application/node_modules/
 /application/public/build/
 /application/storage/*.key
+.superdesign/tmp/
