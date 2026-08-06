@@ -15,7 +15,7 @@ class EvaluationUnitFactory extends Factory
         return [
             'code' => fake()->unique()->slug(2),
             'name' => fake()->words(2, true),
-            'display_order' => fake()->unique()->numberBetween(1, 200),
+            'display_order' => fake()->unique()->numberBetween(1000, 9999),
             'is_active' => true,
         ];
     }

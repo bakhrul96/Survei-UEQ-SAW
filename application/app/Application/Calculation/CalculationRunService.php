@@ -2,9 +2,11 @@
 
 namespace App\Application\Calculation;
 
+use App\Domain\Sensitivity\SensitivityCalculator;
 use App\Models\CalculationRun;
 use App\Models\EvaluationPeriod;
 use App\Models\User;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class CalculationRunService
@@ -15,6 +17,8 @@ class CalculationRunService
         private readonly CalculationInputSnapshot $snapshots,
         private readonly UeqResultWriter $resultWriter,
         private readonly SawResultWriter $sawWriter,
+        private readonly SensitivityCalculator $sensitivityCalculator = new SensitivityCalculator,
+        private readonly SensitivityResultWriter $sensitivityWriter = new SensitivityResultWriter,
     ) {}
 
     public function preview(EvaluationPeriod $period, User $actor): CalculationRun
@@ -54,7 +58,40 @@ class CalculationRunService
             $this->resultWriter->write($run, $calculation['rows']);
             $this->sawWriter->write($run, $sawCalculation['rows']);
 
-            return $run->load(['ueqResults', 'sawResults']);
+            if ($sawCalculation['alternatives'] !== []) {
+                $sensitivityScenarios = $this->sensitivityCalculator->calculate(
+                    $sawCalculation['alternatives'],
+                    $sawCalculation['weights']
+                );
+                $this->sensitivityWriter->write($run, $sensitivityScenarios);
+            }
+
+            return $run->load(['ueqResults', 'sawResults', 'sensitivityResults']);
+        });
+    }
+
+    public function lockAsOfficial(CalculationRun $run, User $actor): CalculationRun
+    {
+        return DB::transaction(function () use ($run, $actor): CalculationRun {
+            $lockedRun = CalculationRun::query()->lockForUpdate()->findOrFail($run->id);
+
+            if ($lockedRun->status === 'stale') {
+                throw new DomainException('Kalkulasi berstatus stale tidak dapat dikunci sebagai hasil resmi.');
+            }
+
+            CalculationRun::query()
+                ->where('evaluation_period_id', $lockedRun->evaluation_period_id)
+                ->where('status', 'official')
+                ->where('id', '!=', $lockedRun->id)
+                ->update(['status' => 'archived']);
+
+            $lockedRun->update([
+                'status' => 'official',
+                'locked_by' => $actor->id,
+                'official_locked_at' => now(),
+            ]);
+
+            return $lockedRun->fresh();
         });
     }
 }

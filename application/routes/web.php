@@ -1,10 +1,12 @@
 <?php
 
 use App\Domain\Study\PeriodStatus;
+use App\Http\Controllers\Admin\AggregateReportExportController;
 use App\Http\Controllers\Admin\RawSurveyExportController;
 use App\Http\Controllers\SurveyEntryController;
 use App\Livewire\Admin\Calculations;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Reports;
 use App\Livewire\Admin\Responses;
 use App\Livewire\Admin\StudySettings;
 use App\Livewire\Admin\TechnicalAssessments;
@@ -36,9 +38,12 @@ Route::middleware(['auth', 'verified', 'admin.2fa'])->prefix('admin')->name('adm
     Route::get('/responses', Responses::class)->name('responses');
     Route::get('/periods/{period}/exports/raw.csv', [RawSurveyExportController::class, 'csv'])->name('exports.raw.csv');
     Route::get('/periods/{period}/exports/raw.xlsx', [RawSurveyExportController::class, 'xlsx'])->name('exports.raw.xlsx');
+    Route::get('/periods/{period}/exports/aggregate.csv', [AggregateReportExportController::class, 'csv'])->name('exports.aggregate.csv');
+    Route::get('/periods/{period}/exports/aggregate.xlsx', [AggregateReportExportController::class, 'xlsx'])->name('exports.aggregate.xlsx');
     Route::get('/study', StudySettings::class)->name('study-settings');
     Route::get('/calculations', Calculations::class)->name('calculations');
     Route::get('/technical-assessments', TechnicalAssessments::class)->name('technical-assessments');
+    Route::get('/reports', Reports::class)->name('reports');
 });
 
 require __DIR__.'/settings.php';

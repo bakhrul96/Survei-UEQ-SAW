@@ -19,13 +19,14 @@ class CalculationRun extends Model
             'included_count' => 'integer',
             'excluded_count' => 'integer',
             'calculated_at' => 'datetime',
+            'official_locked_at' => 'datetime',
         ];
     }
 
     protected static function booted(): void
     {
         static::updating(function (self $run): void {
-            $immutableAttributes = array_diff(array_keys($run->getDirty()), ['status', 'updated_at']);
+            $immutableAttributes = array_diff(array_keys($run->getDirty()), ['status', 'locked_by', 'official_locked_at', 'updated_at']);
 
             if ($immutableAttributes !== []) {
                 throw new LogicException('Calculation run inputs are immutable.');
@@ -49,6 +50,12 @@ class CalculationRun extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** @return BelongsTo<User, $this> */
+    public function lockedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'locked_by');
+    }
+
     /** @return HasMany<UeqResult, $this> */
     public function ueqResults(): HasMany
     {
@@ -59,5 +66,17 @@ class CalculationRun extends Model
     public function sawResults(): HasMany
     {
         return $this->hasMany(SawResult::class);
+    }
+
+    /** @return HasMany<SensitivityResult, $this> */
+    public function sensitivityResults(): HasMany
+    {
+        return $this->hasMany(SensitivityResult::class);
+    }
+
+    /** @return HasMany<ExpertJudgment, $this> */
+    public function expertJudgments(): HasMany
+    {
+        return $this->hasMany(ExpertJudgment::class);
     }
 }

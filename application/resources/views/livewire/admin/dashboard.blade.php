@@ -1,9 +1,13 @@
 <div class="mx-auto w-full max-w-6xl space-y-6">
     <div>
         <flux:heading size="xl">Dashboard progres</flux:heading>
-        <flux:text>{{ $period->name }} · Rilis 1 menampilkan respons yang telah dikirim.</flux:text>
-        <flux:button class="mt-3" :href="route('admin.technical-assessments')" icon="users">Informan</flux:button>
-        <flux:button class="mt-3" :href="route('admin.calculations')" icon="calculator">Kalkulasi</flux:button>
+        <flux:text>{{ $period->name }} · Rilis 1 - 3 Sistem Penelitian UEQ-SAW Wong Reang Apps.</flux:text>
+        <div class="mt-3 flex flex-wrap gap-2">
+            <flux:button :href="route('admin.responses')" icon="chat-bubble-left-right">Respons</flux:button>
+            <flux:button :href="route('admin.technical-assessments')" icon="users">Informan</flux:button>
+            <flux:button :href="route('admin.calculations')" icon="calculator">Kalkulasi</flux:button>
+            <flux:button :href="route('admin.reports')" icon="document-chart-bar" variant="primary">Laporan Bab IV</flux:button>
+        </div>
     </div>
 
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -15,7 +19,7 @@
 
     <flux:card class="space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <div><flux:heading size="lg">Progres per modul</flux:heading><flux:text>Nilai valid sama dengan evaluasi terkirim pada Rilis 1.</flux:text></div>
+            <div><flux:heading size="lg">Progres per modul</flux:heading><flux:text>Nilai valid sama dengan evaluasi terkirim.</flux:text></div>
             <div class="flex gap-2"><flux:button :href="route('admin.exports.raw.csv', $period)">CSV</flux:button><flux:button :href="route('admin.exports.raw.xlsx', $period)" variant="primary">XLSX</flux:button></div>
         </div>
         <div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr class="border-b"><th class="p-2">Kode</th><th class="p-2">Modul</th><th class="p-2">Valid</th><th class="p-2">Minimum</th><th class="p-2">Target</th><th class="p-2">Status</th></tr></thead><tbody>

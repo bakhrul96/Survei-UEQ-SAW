@@ -3,8 +3,11 @@
 namespace App\Livewire\Admin;
 
 use App\Application\Calculation\CalculationRunService;
+use App\Application\Quality\RecordExpertJudgment;
 use App\Models\CalculationRun;
 use App\Models\EvaluationPeriod;
+use App\Models\EvaluationUnit;
+use DomainException;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -14,9 +17,25 @@ class Calculations extends Component
 
     public ?int $runId = null;
 
-    public function mount(): void
+    // Expert Judgment Form State
+    public ?int $selectedUnitId = null;
+
+    public int $operationalOrder = 1;
+
+    public string $expertReason = '';
+
+    public function mount(?int $periodId = null): void
     {
-        $this->periodId = EvaluationPeriod::query()->firstOrFail()->id;
+        $this->periodId = $periodId ?? EvaluationPeriod::query()->firstOrFail()->id;
+
+        $latestRun = CalculationRun::query()
+            ->where('evaluation_period_id', $this->periodId)
+            ->latest('id')
+            ->first();
+
+        if ($latestRun) {
+            $this->runId = $latestRun->id;
+        }
     }
 
     public function runPreview(CalculationRunService $service): void
@@ -25,11 +44,80 @@ class Calculations extends Component
         session()->flash('status', 'Preview berhasil dibuat.');
     }
 
+    public function lockOfficial(CalculationRunService $service): void
+    {
+        if (! $this->runId) {
+            return;
+        }
+
+        try {
+            $run = CalculationRun::query()->findOrFail($this->runId);
+            $locked = $service->lockAsOfficial($run, auth()->user());
+            $this->runId = $locked->id;
+            session()->flash('status', 'Kalkulasi berhasil dikunci sebagai Hasil Resmi (Official).');
+        } catch (DomainException $e) {
+            session()->flash('error', $e->getMessage());
+        }
+    }
+
+    public function saveExpertJudgment(RecordExpertJudgment $action): void
+    {
+        if (! $this->runId || ! $this->selectedUnitId) {
+            session()->flash('error', 'Pilih modul terlebih dahulu.');
+
+            return;
+        }
+
+        try {
+            $run = CalculationRun::query()->findOrFail($this->runId);
+            $unit = EvaluationUnit::query()->findOrFail($this->selectedUnitId);
+
+            $action->handle(
+                run: $run,
+                unit: $unit,
+                operationalOrder: $this->operationalOrder,
+                reason: $this->expertReason,
+                reviewer: auth()->user(),
+            );
+
+            $this->reset(['expertReason', 'selectedUnitId']);
+            session()->flash('status', 'Catatan Expert Judgment berhasil disimpan.');
+        } catch (DomainException $e) {
+            session()->flash('error', $e->getMessage());
+        }
+    }
+
     public function render(): View
     {
-        $run = $this->runId === null ? null : CalculationRun::query()->with(['ueqResults.unit', 'sawResults.unit'])->findOrFail($this->runId);
+        $run = $this->runId === null
+            ? null
+            : CalculationRun::query()
+                ->with(['ueqResults.unit', 'sawResults.unit', 'sensitivityResults.evaluationUnit', 'expertJudgments.evaluationUnit', 'lockedBy'])
+                ->findOrFail($this->runId);
 
-        return view('livewire.admin.calculations', ['period' => $this->period(), 'run' => $run])->layout('layouts.app', ['title' => 'Kalkulasi UEQ dan SAW']);
+        $sensitivityGrid = [];
+        if ($run && $run->sensitivityResults->isNotEmpty()) {
+            foreach ($run->sensitivityResults as $row) {
+                $unitId = $row->evaluation_unit_id;
+                $sensitivityGrid[$unitId]['name'] = $row->evaluationUnit->name ?? 'Modul';
+                $sensitivityGrid[$unitId]['code'] = $row->evaluationUnit->code ?? '';
+                $sensitivityGrid[$unitId][$row->scenario->value] = [
+                    'rank' => $row->rank,
+                    'preferenceValue' => $row->preference_value,
+                    'deltaRank' => $row->delta_rank,
+                    'isTied' => $row->is_tied,
+                ];
+            }
+        }
+
+        $allUnits = EvaluationUnit::query()->orderBy('display_order')->get();
+
+        return view('livewire.admin.calculations', [
+            'period' => $this->period(),
+            'run' => $run,
+            'sensitivityGrid' => $sensitivityGrid,
+            'allUnits' => $allUnits,
+        ])->layout('layouts.app', ['title' => 'Kalkulasi UEQ dan SAW']);
     }
 
     private function period(): EvaluationPeriod
