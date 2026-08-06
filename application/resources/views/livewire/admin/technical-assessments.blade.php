@@ -11,7 +11,7 @@
     <form wire:submit="save" class="space-y-6">
         <flux:card class="space-y-4">
             <flux:input wire:model="anonymousCode" label="Kode anonim informan" placeholder="Contoh: TEK-01" />
-            <flux:text class="text-sm">Biarkan nilai unit kosong jika belum tersedia; nilai kosong tidak akan digantikan dengan angka lain.</flux:text>
+            <flux:text class="text-sm">Setiap informan wajib menilai seluruh 13 modul. Nilai tidak lengkap tidak dapat disimpan.</flux:text>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
@@ -45,10 +45,30 @@
 
     <flux:card class="space-y-4">
         <flux:heading size="lg">Konsensus teknis</flux:heading>
-        <div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr class="border-b"><th class="p-2">Modul</th><th class="p-2">Rata-rata hari</th><th class="p-2">Rata-rata urgensi</th></tr></thead><tbody>
+        <div class="flex flex-wrap items-center gap-3">
+            <flux:text>{{ $consensus->informantCount }} informan</flux:text>
+            <flux:badge color="{{ $consensus->isComplete ? 'green' : 'amber' }}">{{ $consensus->isComplete ? 'Lengkap' : 'Belum lengkap' }}</flux:badge>
+        </div>
+        @if (! $consensus->isComplete)
+            <flux:callout variant="warning" icon="exclamation-triangle">
+                <ul class="list-disc pl-5">
+                    @foreach ($consensus->incompleteReasons as $reason)
+                        <li>{{ $reason }}</li>
+                    @endforeach
+                </ul>
+            </flux:callout>
+        @endif
+        <div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr class="border-b"><th class="p-2">Modul</th><th class="p-2">n</th><th class="p-2">Rata-rata hari</th><th class="p-2">SD hari</th><th class="p-2">Rata-rata urgensi</th><th class="p-2">SD urgensi</th></tr></thead><tbody>
             @foreach ($units as $unit)
-                @php($summary = $consensus->assessments[$unit->id])
-                <tr class="border-b border-zinc-200 dark:border-zinc-700"><td class="p-2">{{ $unit->name }}</td><td class="p-2">{{ $summary['mean_days'] ?? 'Belum ada' }}</td><td class="p-2">{{ $summary['mean_urgency'] ?? 'Belum ada' }}</td></tr>
+                @php($summary = $consensus->units[$unit->id])
+                <tr class="border-b border-zinc-200 dark:border-zinc-700">
+                    <td class="p-2">{{ $unit->name }}</td>
+                    <td class="p-2">{{ $summary->n }}</td>
+                    <td class="p-2">{{ $summary->meanDays === null ? 'Belum ada' : number_format($summary->meanDays, 4) }}</td>
+                    <td class="p-2">{{ $summary->standardDeviationDays === null ? 'Belum tersedia' : number_format($summary->standardDeviationDays, 4) }}</td>
+                    <td class="p-2">{{ $summary->meanUrgency === null ? 'Belum ada' : number_format($summary->meanUrgency, 4) }}</td>
+                    <td class="p-2">{{ $summary->standardDeviationUrgency === null ? 'Belum tersedia' : number_format($summary->standardDeviationUrgency, 4) }}</td>
+                </tr>
             @endforeach
         </tbody></table></div>
         <dl class="grid gap-3 text-sm md:grid-cols-3">

@@ -8,6 +8,7 @@ use App\Models\TechnicalAssessment;
 use App\Models\TechnicalInformant;
 use App\Models\User;
 use Livewire\Livewire;
+use Tests\Support\ReleaseTwoFixture;
 
 it('requires authentication to open technical assessments', function () {
     $this->get('/admin/technical-assessments')->assertRedirect('/login');
@@ -110,6 +111,20 @@ it('rejects assessment keys outside the fixed Wong Reang units', function () {
         ->set('weights', ['c1' => 50, 'c2' => 30, 'c3' => 20])
         ->call('save')
         ->assertHasErrors('assessments');
+});
+
+it('renders informant completeness and per-unit consensus evidence', function () {
+    $period = EvaluationPeriod::factory()->create();
+    technicalUnits();
+    $admin = User::factory()->create();
+    ReleaseTwoFixture::seedInformants($period, $admin, 3);
+
+    Livewire::actingAs($admin)
+        ->test(TechnicalAssessments::class)
+        ->assertSee('3 informan')
+        ->assertSee('Lengkap')
+        ->assertSee('SD hari')
+        ->assertSee('SD urgensi');
 });
 
 function technicalUnits()

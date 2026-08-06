@@ -3,6 +3,7 @@
 namespace App\Application\Calculation;
 
 use App\Domain\Quality\QualityDecision;
+use App\Domain\Technical\TechnicalConsensus;
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
 use App\Models\SurveySubmission;
@@ -119,6 +120,7 @@ class CalculationInputSnapshot
                 'weights' => $informant->criteriaWeight === null ? null : ['c1' => $informant->criteriaWeight->c1_points, 'c2' => $informant->criteriaWeight->c2_points, 'c3' => $informant->criteriaWeight->c3_points],
             ];
         }
+        $technicalConsensus = app(TechnicalConsensus::class)->for($period);
 
         return $this->canonicalize([
             'algorithm_version' => $algorithmVersion,
@@ -138,6 +140,7 @@ class CalculationInputSnapshot
             'excluded_submission_ids' => $excludedIds,
             'included_raw_answers' => $includedRawAnswers,
             'technical_informants' => $technical,
+            'technical_consensus' => $technicalConsensus->toArray(),
             'warnings' => $warnings,
         ]);
     }

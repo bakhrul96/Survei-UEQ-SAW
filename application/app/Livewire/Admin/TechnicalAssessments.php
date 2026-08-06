@@ -6,9 +6,10 @@ use App\Domain\Technical\SaveTechnicalAssessment;
 use App\Domain\Technical\TechnicalConsensus;
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
+use App\Models\User;
+use DomainException;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
-use InvalidArgumentException;
 use Livewire\Component;
 
 class TechnicalAssessments extends Component
@@ -42,14 +43,18 @@ class TechnicalAssessments extends Component
             return;
         }
 
+        $actor = auth()->user();
+        abort_unless($actor instanceof User, 403);
+
         try {
             $saver->handle(
                 $this->period(),
                 trim($this->anonymousCode),
                 $this->providedAssessments(),
                 $weights,
+                $actor,
             );
-        } catch (InvalidArgumentException $exception) {
+        } catch (DomainException $exception) {
             $this->addError('assessments', $exception->getMessage());
 
             return;
@@ -80,9 +85,9 @@ class TechnicalAssessments extends Component
     {
         return [
             'anonymousCode' => ['required', 'string', 'max:100'],
-            'assessments' => ['required', 'array'],
-            'assessments.*.days' => ['nullable', 'numeric', 'gt:0', 'required_with:assessments.*.urgency'],
-            'assessments.*.urgency' => ['nullable', 'integer', 'between:1,5', 'required_with:assessments.*.days'],
+            'assessments' => ['required', 'array', 'size:13'],
+            'assessments.*.days' => ['required', 'numeric', 'gt:0'],
+            'assessments.*.urgency' => ['required', 'integer', 'between:1,5'],
             'weights' => ['required', 'array'],
             ...$this->weightRules(),
         ];
@@ -117,7 +122,6 @@ class TechnicalAssessments extends Component
     private function providedAssessments(): array
     {
         return collect($this->assessments)
-            ->filter(fn (array $assessment) => $assessment['days'] !== null && $assessment['urgency'] !== null)
             ->map(fn (array $assessment) => ['days' => (float) $assessment['days'], 'urgency' => (int) $assessment['urgency']])
             ->all();
     }
