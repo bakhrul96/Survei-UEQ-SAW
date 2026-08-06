@@ -4,6 +4,7 @@ namespace App\Domain\Sensitivity;
 
 use App\Domain\Saw\SawAlternative;
 use App\Domain\Saw\SawCalculator;
+use DomainException;
 
 class SensitivityCalculator
 {
@@ -14,10 +15,12 @@ class SensitivityCalculator
     /**
      * @param  list<SawAlternative>  $alternatives
      * @param  array{c1: float, c2: float, c3: float}  $consensusWeights
+     * @param  array<string, mixed>  $configuredScenarios
      * @return array<string, list<SensitivityResultData>>
      */
-    public function calculate(array $alternatives, array $consensusWeights): array
+    public function calculate(array $alternatives, array $consensusWeights, array $configuredScenarios): array
     {
+        $scenarioWeights = $this->validateConfiguredScenarios($configuredScenarios);
         $s0Results = $this->sawCalculator->rank($alternatives, $consensusWeights);
 
         $s0Ranks = [];
@@ -26,9 +29,9 @@ class SensitivityCalculator
         }
 
         $scenarios = [
-            [SensitivityScenario::S0, SensitivityScenario::S0->resolvedWeights($consensusWeights)],
-            [SensitivityScenario::S1, SensitivityScenario::S1->resolvedWeights($consensusWeights)],
-            [SensitivityScenario::S2, SensitivityScenario::S2->resolvedWeights($consensusWeights)],
+            [SensitivityScenario::S0, $consensusWeights],
+            [SensitivityScenario::S1, $scenarioWeights['S1']],
+            [SensitivityScenario::S2, $scenarioWeights['S2']],
         ];
 
         $output = [];
@@ -61,5 +64,52 @@ class SensitivityCalculator
         }
 
         return $output;
+    }
+
+    /**
+     * @param  array<string, mixed>  $configuredScenarios
+     * @return array{S1: array{c1: float, c2: float, c3: float}, S2: array{c1: float, c2: float, c3: float}}
+     */
+    private function validateConfiguredScenarios(array $configuredScenarios): array
+    {
+        if (! isset($configuredScenarios['S1'], $configuredScenarios['S2'])
+            || ! is_array($configuredScenarios['S1'])
+            || ! is_array($configuredScenarios['S2'])) {
+            throw new DomainException('Konfigurasi sensitivitas S1 dan S2 wajib tersedia.');
+        }
+
+        return [
+            'S1' => $this->validateWeights('S1', $configuredScenarios['S1']),
+            'S2' => $this->validateWeights('S2', $configuredScenarios['S2']),
+        ];
+    }
+
+    /**
+     * @param  array<mixed>  $weights
+     * @return array{c1: float, c2: float, c3: float}
+     */
+    private function validateWeights(string $scenario, array $weights): array
+    {
+        foreach (['c1', 'c2', 'c3'] as $criterion) {
+            if (! array_key_exists($criterion, $weights) || ! is_numeric($weights[$criterion])) {
+                throw new DomainException("Bobot sensitivitas {$scenario} harus memuat C1, C2, dan C3 numerik.");
+            }
+        }
+
+        $validated = [
+            'c1' => (float) $weights['c1'],
+            'c2' => (float) $weights['c2'],
+            'c3' => (float) $weights['c3'],
+        ];
+
+        if (collect($validated)->contains(fn (float $weight): bool => $weight < 0.0)) {
+            throw new DomainException("Bobot sensitivitas {$scenario} tidak boleh negatif.");
+        }
+
+        if (abs(array_sum($validated) - 1.0) > 0.000001) {
+            throw new DomainException("Bobot sensitivitas {$scenario} harus berjumlah satu.");
+        }
+
+        return $validated;
     }
 }

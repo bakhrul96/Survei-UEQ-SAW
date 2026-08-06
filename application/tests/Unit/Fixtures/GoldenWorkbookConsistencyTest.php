@@ -59,6 +59,22 @@ it('keeps every machine-readable golden value equal to the independent workbook'
         expect($technical->getCell($tieCell)->getCalculatedValue())->toBe('1 (tied)')
             ->and($json['expected']['saw'][$unit]['rank'])->toBe(1)
             ->and($json['expected']['saw'][$unit]['is_tied'])->toBeTrue();
+
+        $sensitivityColumns = [
+            'S0' => ['vi' => 'L', 'rank' => 'M', 'delta' => null],
+            'S1' => ['vi' => 'N', 'rank' => 'O', 'delta' => 'R'],
+            'S2' => ['vi' => 'P', 'rank' => 'Q', 'delta' => 'S'],
+        ];
+        foreach ($sensitivityColumns as $scenario => $columns) {
+            expect((float) $technical->getCell("{$columns['vi']}{$sawRow}")->getCalculatedValue())
+                ->toEqualWithDelta($json['expected']['sensitivity'][$scenario][$unit]['vi'], $json['tolerance'])
+                ->and((int) $technical->getCell("{$columns['rank']}{$sawRow}")->getCalculatedValue())
+                ->toBe($json['expected']['sensitivity'][$scenario][$unit]['rank']);
+            if ($columns['delta'] !== null) {
+                expect((int) $technical->getCell("{$columns['delta']}{$sawRow}")->getCalculatedValue())
+                    ->toBe($json['expected']['sensitivity'][$scenario][$unit]['delta_rank']);
+            }
+        }
     }
 });
 
@@ -71,6 +87,7 @@ it('retains formulas across every calculation stage in the workbook', function (
         ['Technical and SAW', 'H4:H9'],
         ['Technical and SAW', 'B12:D12'],
         ['Technical and SAW', 'B15:K16'],
+        ['Technical and SAW', 'L15:S16'],
         ['Technical and SAW', 'B19:B20'],
     ];
 

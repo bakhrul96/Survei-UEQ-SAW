@@ -48,6 +48,18 @@ class StudySettings extends Component
 
     public bool $identicalAnswersFlagEnabled = true;
 
+    public float $sensitivityS1C1 = 0.60;
+
+    public float $sensitivityS1C2 = 0.20;
+
+    public float $sensitivityS1C3 = 0.20;
+
+    public float $sensitivityS2C1 = 0.20;
+
+    public float $sensitivityS2C2 = 0.40;
+
+    public float $sensitivityS2C3 = 0.40;
+
     public string $instrumentSource = '';
 
     /** @var array<string, string> */
@@ -94,7 +106,36 @@ class StudySettings extends Component
             'qualityRulesVersion' => ['required', 'string'],
             'identicalAnswersFlagEnabled' => ['accepted'],
             'instrumentSource' => ['nullable', 'string'],
+            'sensitivityS1C1' => ['required', 'numeric', 'min:0', 'max:1'],
+            'sensitivityS1C2' => ['required', 'numeric', 'min:0', 'max:1'],
+            'sensitivityS1C3' => ['required', 'numeric', 'min:0', 'max:1'],
+            'sensitivityS2C1' => ['required', 'numeric', 'min:0', 'max:1'],
+            'sensitivityS2C2' => ['required', 'numeric', 'min:0', 'max:1'],
+            'sensitivityS2C3' => ['required', 'numeric', 'min:0', 'max:1'],
         ]);
+
+        $scenarioWeights = [
+            'S1' => [
+                (float) $validated['sensitivityS1C1'],
+                (float) $validated['sensitivityS1C2'],
+                (float) $validated['sensitivityS1C3'],
+            ],
+            'S2' => [
+                (float) $validated['sensitivityS2C1'],
+                (float) $validated['sensitivityS2C2'],
+                (float) $validated['sensitivityS2C3'],
+            ],
+        ];
+        $hasInvalidScenario = false;
+        foreach ($scenarioWeights as $scenario => $weights) {
+            if (abs(array_sum($weights) - 1.0) > 0.000001) {
+                $this->addError("sensitivity{$scenario}", "Bobot {$scenario} harus berjumlah tepat 1,000000.");
+                $hasInvalidScenario = true;
+            }
+        }
+        if ($hasInvalidScenario) {
+            return;
+        }
 
         $instrumentSource = trim((string) $validated['instrumentSource']) ?: null;
 
@@ -118,6 +159,12 @@ class StudySettings extends Component
             'instrument_verified_at' => $instrumentSource === $period->instrument_source
                 ? $period->instrument_verified_at
                 : null,
+            'sensitivity_s1_c1' => $scenarioWeights['S1'][0],
+            'sensitivity_s1_c2' => $scenarioWeights['S1'][1],
+            'sensitivity_s1_c3' => $scenarioWeights['S1'][2],
+            'sensitivity_s2_c1' => $scenarioWeights['S2'][0],
+            'sensitivity_s2_c2' => $scenarioWeights['S2'][1],
+            'sensitivity_s2_c3' => $scenarioWeights['S2'][2],
         ]);
 
         $this->fillFromPeriod($period->fresh());
@@ -253,5 +300,11 @@ class StudySettings extends Component
         $this->qualityRulesVersion = $period->quality_rules_version;
         $this->identicalAnswersFlagEnabled = $period->identical_answers_flag_enabled;
         $this->instrumentSource = $period->instrument_source ?? '';
+        $this->sensitivityS1C1 = (float) $period->sensitivity_s1_c1;
+        $this->sensitivityS1C2 = (float) $period->sensitivity_s1_c2;
+        $this->sensitivityS1C3 = (float) $period->sensitivity_s1_c3;
+        $this->sensitivityS2C1 = (float) $period->sensitivity_s2_c1;
+        $this->sensitivityS2C2 = (float) $period->sensitivity_s2_c2;
+        $this->sensitivityS2C3 = (float) $period->sensitivity_s2_c3;
     }
 }

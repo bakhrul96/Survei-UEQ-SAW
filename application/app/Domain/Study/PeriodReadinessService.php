@@ -66,6 +66,20 @@ class PeriodReadinessService
         if (! $period->identical_answers_flag_enabled) {
             $issues[] = 'Aturan jawaban identik wajib diaktifkan.';
         }
+        if (! $this->weightsTotalOne([
+            $period->sensitivity_s1_c1,
+            $period->sensitivity_s1_c2,
+            $period->sensitivity_s1_c3,
+        ])) {
+            $issues[] = 'Bobot S1 harus berjumlah tepat 1,000000.';
+        }
+        if (! $this->weightsTotalOne([
+            $period->sensitivity_s2_c1,
+            $period->sensitivity_s2_c2,
+            $period->sensitivity_s2_c3,
+        ])) {
+            $issues[] = 'Bobot S2 harus berjumlah tepat 1,000000.';
+        }
         if (User::query()
             ->whereNotNull('email_verified_at')
             ->whereNotNull('two_factor_secret')
@@ -153,5 +167,18 @@ class PeriodReadinessService
 
             return $lockedPeriod;
         });
+    }
+
+    /** @param list<mixed> $weights */
+    private function weightsTotalOne(array $weights): bool
+    {
+        if (count(array_filter($weights, is_numeric(...))) !== 3) {
+            return false;
+        }
+
+        $numericWeights = array_map('floatval', $weights);
+
+        return ! collect($numericWeights)->contains(fn (float $weight): bool => $weight < 0.0 || $weight > 1.0)
+            && abs(array_sum($numericWeights) - 1.0) <= 0.000001;
     }
 }

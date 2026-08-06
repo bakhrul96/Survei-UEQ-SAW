@@ -131,6 +131,18 @@ class CalculationInputSnapshot
                 'target_per_unit' => $period->target_per_unit,
                 'fast_response_seconds' => $period->fast_response_seconds,
                 'calculation_input_revision' => $period->calculation_input_revision,
+                'sensitivity_scenarios' => [
+                    'S1' => [
+                        'c1' => number_format((float) $period->sensitivity_s1_c1, 6, '.', ''),
+                        'c2' => number_format((float) $period->sensitivity_s1_c2, 6, '.', ''),
+                        'c3' => number_format((float) $period->sensitivity_s1_c3, 6, '.', ''),
+                    ],
+                    'S2' => [
+                        'c1' => number_format((float) $period->sensitivity_s2_c1, 6, '.', ''),
+                        'c2' => number_format((float) $period->sensitivity_s2_c2, 6, '.', ''),
+                        'c3' => number_format((float) $period->sensitivity_s2_c3, 6, '.', ''),
+                    ],
+                ],
             ],
             'items' => $items,
             'benchmarks' => $benchmarkSnapshot,

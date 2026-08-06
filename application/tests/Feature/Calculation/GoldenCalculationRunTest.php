@@ -40,10 +40,26 @@ it('persists the complete golden calculation from raw answers to ranked results'
         ->and($snapshot['technical_consensus']['is_complete'])->toBeTrue()
         ->and($snapshot['technical_consensus']['units'])->toHaveCount(13)
         ->and($snapshot['quality_decisions'])->toHaveCount(10)
-        ->and($snapshot['included_raw_answers'])->toHaveCount(8);
+        ->and($snapshot['included_raw_answers'])->toHaveCount(8)
+        ->and($snapshot['configuration']['sensitivity_scenarios'])->toBe([
+            'S1' => ['c1' => '0.600000', 'c2' => '0.200000', 'c3' => '0.200000'],
+            'S2' => ['c1' => '0.200000', 'c2' => '0.400000', 'c3' => '0.400000'],
+        ]);
 
     foreach ($fixture['expected']['saw']['weights'] as $criterion => $expectedWeight) {
         expect($snapshot['technical_consensus']['weights'][$criterion])
             ->toEqualWithDelta($expectedWeight, $fixture['tolerance']);
+    }
+
+    foreach ($fixture['expected']['sensitivity'] as $scenario => $units) {
+        foreach ($units as $unitCode => $expected) {
+            $persisted = $run->sensitivityResults->first(
+                fn ($row): bool => $row->scenario->value === $scenario && $row->evaluationUnit->code === $unitCode,
+            );
+            expect($persisted)->not->toBeNull()
+                ->and((float) $persisted->preference_value)->toEqualWithDelta($expected['vi'], $fixture['tolerance'])
+                ->and($persisted->rank)->toBe($expected['rank'])
+                ->and($persisted->delta_rank)->toBe($expected['delta_rank']);
+        }
     }
 });

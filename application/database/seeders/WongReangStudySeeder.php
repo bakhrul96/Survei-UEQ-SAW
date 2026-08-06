@@ -32,6 +32,12 @@ class WongReangStudySeeder extends Seeder
                 'quality_rules_version' => 'quality-rules-v1',
                 'identical_answers_flag_enabled' => true,
                 'instrument_version' => 'UEQ-ID-26-v1',
+                'sensitivity_s1_c1' => 0.600000,
+                'sensitivity_s1_c2' => 0.200000,
+                'sensitivity_s1_c3' => 0.200000,
+                'sensitivity_s2_c1' => 0.200000,
+                'sensitivity_s2_c2' => 0.400000,
+                'sensitivity_s2_c3' => 0.400000,
             ],
         );
 

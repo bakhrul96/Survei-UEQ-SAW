@@ -97,6 +97,43 @@ it('does not let an active period change locked fields', function () {
     expect($period->fresh()->minimum_per_unit)->toBe(20);
 });
 
+it('lets an admin save sensitivity scenario weights while the period is draft', function () {
+    $admin = User::factory()->create();
+    $period = EvaluationPeriod::firstOrFail();
+
+    Livewire::actingAs($admin)->test(StudySettings::class)
+        ->set('opensAt', now()->format('Y-m-d\TH:i'))
+        ->set('closesAt', now()->addMonth()->format('Y-m-d\TH:i'))
+        ->set('sensitivityS1C1', 0.50)
+        ->set('sensitivityS1C2', 0.25)
+        ->set('sensitivityS1C3', 0.25)
+        ->set('sensitivityS2C1', 0.10)
+        ->set('sensitivityS2C2', 0.45)
+        ->set('sensitivityS2C3', 0.45)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect((float) $period->fresh()->sensitivity_s1_c1)->toBe(0.50)
+        ->and((float) $period->fresh()->sensitivity_s1_c2)->toBe(0.25)
+        ->and((float) $period->fresh()->sensitivity_s1_c3)->toBe(0.25)
+        ->and((float) $period->fresh()->sensitivity_s2_c1)->toBe(0.10)
+        ->and((float) $period->fresh()->sensitivity_s2_c2)->toBe(0.45)
+        ->and((float) $period->fresh()->sensitivity_s2_c3)->toBe(0.45);
+});
+
+it('rejects sensitivity scenario weights that do not total one in settings', function () {
+    $admin = User::factory()->create();
+
+    Livewire::actingAs($admin)->test(StudySettings::class)
+        ->set('opensAt', now()->format('Y-m-d\TH:i'))
+        ->set('closesAt', now()->addMonth()->format('Y-m-d\TH:i'))
+        ->set('sensitivityS1C1', 0.50)
+        ->set('sensitivityS1C2', 0.20)
+        ->set('sensitivityS1C3', 0.20)
+        ->call('save')
+        ->assertHasErrors(['sensitivityS1']);
+});
+
 it('lets an admin verify, activate, and close the seeded period', function () {
     $period = EvaluationPeriod::firstOrFail();
     $admin = releaseOneReadyAdminAndEvidence($period);
@@ -188,4 +225,18 @@ it('rejects incomplete consent and quality configuration before activation', fun
     'quality rules version' => ['quality_rules_version', '', 'Versi aturan kualitas wajib diisi.'],
     'identical-answer rule' => ['identical_answers_flag_enabled', false, 'Aturan jawaban identik wajib diaktifkan.'],
     'fast-response threshold' => ['fast_response_seconds', 0, 'Ambang respons cepat harus lebih besar dari nol.'],
+]);
+
+it('rejects sensitivity scenario weights that do not total one', function (string $scenario, array $weights, string $message): void {
+    $period = EvaluationPeriod::firstOrFail();
+    $period->forceFill([
+        "sensitivity_{$scenario}_c1" => $weights[0],
+        "sensitivity_{$scenario}_c2" => $weights[1],
+        "sensitivity_{$scenario}_c3" => $weights[2],
+    ]);
+
+    expect(app(PeriodReadinessService::class)->issues($period))->toContain($message);
+})->with([
+    'S1 total below one' => ['s1', [0.50, 0.20, 0.20], 'Bobot S1 harus berjumlah tepat 1,000000.'],
+    'S2 total above one' => ['s2', [0.30, 0.40, 0.40], 'Bobot S2 harus berjumlah tepat 1,000000.'],
 ]);

@@ -60,9 +60,12 @@ class CalculationRunService
             $this->sawWriter->write($run, $sawCalculation['rows']);
 
             if ($sawCalculation['alternatives'] !== []) {
+                /** @var array{S1: array{c1: string, c2: string, c3: string}, S2: array{c1: string, c2: string, c3: string}} $configuredScenarios */
+                $configuredScenarios = $snapshot['configuration']['sensitivity_scenarios'];
                 $sensitivityScenarios = $this->sensitivityCalculator->calculate(
                     $sawCalculation['alternatives'],
-                    $sawCalculation['weights']
+                    $sawCalculation['weights'],
+                    $configuredScenarios,
                 );
                 $this->sensitivityWriter->write($run, $sensitivityScenarios);
             }

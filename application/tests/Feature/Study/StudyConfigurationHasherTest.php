@@ -33,4 +33,5 @@ it('changes the hash when locked study input changes', function (Closure $mutate
     'unit name' => [fn () => EvaluationUnit::query()->firstOrFail()->update(['name' => 'Nama modul berubah'])],
     'item polarity' => [fn () => UeqItem::query()->firstOrFail()->update(['positive_pole' => 'left'])],
     'benchmark threshold' => [fn () => UeqBenchmark::query()->firstOrFail()->update(['good_threshold' => 9.9999])],
+    'S1 sensitivity weight' => [fn (EvaluationPeriod $period) => $period->update(['sensitivity_s1_c1' => 0.55])],
 ]);

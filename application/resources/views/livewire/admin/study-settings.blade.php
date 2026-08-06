@@ -62,6 +62,35 @@
                 <flux:checkbox wire:model="identicalAnswersFlagEnabled" label="Aktifkan penanda jawaban identik" :disabled="! $isDraft" />
             </div>
 
+            <div class="space-y-4 border-t border-zinc-200 pt-4 dark:border-zinc-700">
+                <div>
+                    <flux:heading size="md">Skenario sensitivitas</flux:heading>
+                    <flux:text>Bobot C1, C2, dan C3 pada setiap skenario harus berjumlah tepat 1,000000.</flux:text>
+                </div>
+                <div class="space-y-2">
+                    <flux:heading size="sm">S1 · Dominasi UX</flux:heading>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <flux:input wire:model="sensitivityS1C1" type="number" min="0" max="1" step="0.000001" label="S1 C1" :disabled="! $isDraft" />
+                        <flux:input wire:model="sensitivityS1C2" type="number" min="0" max="1" step="0.000001" label="S1 C2" :disabled="! $isDraft" />
+                        <flux:input wire:model="sensitivityS1C3" type="number" min="0" max="1" step="0.000001" label="S1 C3" :disabled="! $isDraft" />
+                    </div>
+                    @error('sensitivityS1')
+                        <flux:callout variant="danger" icon="exclamation-triangle">{{ $message }}</flux:callout>
+                    @enderror
+                </div>
+                <div class="space-y-2">
+                    <flux:heading size="sm">S2 · Dominasi pertimbangan teknis</flux:heading>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <flux:input wire:model="sensitivityS2C1" type="number" min="0" max="1" step="0.000001" label="S2 C1" :disabled="! $isDraft" />
+                        <flux:input wire:model="sensitivityS2C2" type="number" min="0" max="1" step="0.000001" label="S2 C2" :disabled="! $isDraft" />
+                        <flux:input wire:model="sensitivityS2C3" type="number" min="0" max="1" step="0.000001" label="S2 C3" :disabled="! $isDraft" />
+                    </div>
+                    @error('sensitivityS2')
+                        <flux:callout variant="danger" icon="exclamation-triangle">{{ $message }}</flux:callout>
+                    @enderror
+                </div>
+            </div>
+
             @if ($isDraft)
                 <flux:button type="submit" variant="primary">Simpan konfigurasi</flux:button>
             @else

@@ -37,6 +37,12 @@ class EvaluationPeriod extends Model
             'consent_estimated_minutes' => 'integer',
             'identical_answers_flag_enabled' => 'boolean',
             'calculation_input_revision' => 'integer',
+            'sensitivity_s1_c1' => 'decimal:6',
+            'sensitivity_s1_c2' => 'decimal:6',
+            'sensitivity_s1_c3' => 'decimal:6',
+            'sensitivity_s2_c1' => 'decimal:6',
+            'sensitivity_s2_c2' => 'decimal:6',
+            'sensitivity_s2_c3' => 'decimal:6',
         ];
     }
 

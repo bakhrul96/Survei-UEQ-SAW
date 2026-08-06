@@ -31,6 +31,12 @@ final class StudyConfigurationHasher
                 'identical_answers_flag_enabled' => $period->identical_answers_flag_enabled,
                 'instrument_version' => $period->instrument_version,
                 'instrument_source' => $period->instrument_source,
+                'sensitivity_s1_c1' => number_format((float) $period->sensitivity_s1_c1, 6, '.', ''),
+                'sensitivity_s1_c2' => number_format((float) $period->sensitivity_s1_c2, 6, '.', ''),
+                'sensitivity_s1_c3' => number_format((float) $period->sensitivity_s1_c3, 6, '.', ''),
+                'sensitivity_s2_c1' => number_format((float) $period->sensitivity_s2_c1, 6, '.', ''),
+                'sensitivity_s2_c2' => number_format((float) $period->sensitivity_s2_c2, 6, '.', ''),
+                'sensitivity_s2_c3' => number_format((float) $period->sensitivity_s2_c3, 6, '.', ''),
             ],
             'active_units' => EvaluationUnit::query()
                 ->where('is_active', true)

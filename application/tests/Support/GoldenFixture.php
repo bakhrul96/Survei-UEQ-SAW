@@ -177,6 +177,6 @@ final class GoldenFixture
 
         return app(CalculationRunService::class)
             ->preview($period->fresh(), $admin)
-            ->load(['ueqResults.unit', 'ueqPooledResults', 'sawResults.unit']);
+            ->load(['ueqResults.unit', 'ueqPooledResults', 'sawResults.unit', 'sensitivityResults.evaluationUnit']);
     }
 }
