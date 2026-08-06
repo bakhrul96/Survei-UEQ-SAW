@@ -23,7 +23,7 @@ it('shows the complete sidebar on desktop', function () {
         ->assertSee('Penilaian Teknis')
         ->assertDontSee('Repository')
         ->assertDontSee('Documentation')
-        ->assertScript('document.querySelector(\'a[href*="/admin/dashboard"]\').hasAttribute(\'data-current\')');
+        ->assertScript('document.querySelector(\'a[data-flux-sidebar-item][href*="/admin/dashboard"]\').hasAttribute(\'data-current\')');
 });
 
 it('opens the complete sidebar from the hamburger at 360 pixels', function () {

@@ -31,3 +31,69 @@ The authenticated application shell is implemented in `application/resources/vie
 - Use these verified icons: `home`, `adjustments-horizontal`, `clipboard-document-check`, `document-chart-bar`, `calculator`, `wrench-screwdriver`, `cog-6-tooth`.
 - No disabled, placeholder, repository, framework documentation, or external starter-kit links.
 - Keep logout in the profile menu rather than the main survey navigation.
+
+## Source: `application/resources/views/components/app-logo.blade.php`
+
+```blade
+@props([
+    'sidebar' => false,
+])
+
+@if($sidebar)
+    <flux:sidebar.brand :name="config('app.name', 'Laravel')" {{ $attributes }}>
+        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
+            <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
+        </x-slot>
+    </flux:sidebar.brand>
+@else
+    <flux:brand :name="config('app.name', 'Laravel')" {{ $attributes }}>
+        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
+            <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
+        </x-slot>
+    </flux:brand>
+@endif
+```
+
+## Source: `application/resources/views/components/desktop-user-menu.blade.php`
+
+```blade
+<flux:dropdown position="bottom" align="start">
+    <flux:sidebar.profile
+        :name="auth()->user()->name"
+        :initials="auth()->user()->initials()"
+        icon:trailing="chevrons-up-down"
+        data-test="sidebar-menu-button"
+    />
+
+    <flux:menu>
+        <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
+            <flux:avatar
+                :name="auth()->user()->name"
+                :initials="auth()->user()->initials()"
+            />
+            <div class="grid flex-1 text-start text-sm leading-tight">
+                <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
+                <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
+            </div>
+        </div>
+        <flux:menu.separator />
+        <flux:menu.radio.group>
+            <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
+                {{ __('Settings') }}
+            </flux:menu.item>
+            <form method="POST" action="{{ route('logout') }}" class="w-full">
+                @csrf
+                <flux:menu.item
+                    as="button"
+                    type="submit"
+                    icon="arrow-right-start-on-rectangle"
+                    class="w-full cursor-pointer"
+                    data-test="logout-button"
+                >
+                    {{ __('Log out') }}
+                </flux:menu.item>
+            </form>
+        </flux:menu.radio.group>
+    </flux:menu>
+</flux:dropdown>
+```
