@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin;
 
 use App\Application\Calculation\CalculationRunService;
+use App\Application\Calculation\OfficialRunEligibility;
+use App\Application\Calculation\RecordMinimumSampleDeviation;
 use App\Application\Quality\RecordExpertJudgment;
 use App\Models\CalculationRun;
 use App\Models\EvaluationPeriod;
@@ -23,6 +25,10 @@ class Calculations extends Component
     public int $operationalOrder = 1;
 
     public string $expertReason = '';
+
+    public string $minimumDeviationReason = '';
+
+    public string $minimumDeviationApprovalReference = '';
 
     public function mount(?int $periodId = null): void
     {
@@ -60,6 +66,25 @@ class Calculations extends Component
         }
     }
 
+    public function recordMinimumDeviation(RecordMinimumSampleDeviation $action): void
+    {
+        if (! $this->runId) {
+            return;
+        }
+
+        try {
+            $action->handle(
+                CalculationRun::query()->findOrFail($this->runId),
+                $this->minimumDeviationReason,
+                $this->minimumDeviationApprovalReference,
+                auth()->user(),
+            );
+            session()->flash('status', 'Keputusan penyimpangan minimum sampel berhasil dicatat.');
+        } catch (DomainException $e) {
+            session()->flash('error', $e->getMessage());
+        }
+    }
+
     public function saveExpertJudgment(RecordExpertJudgment $action): void
     {
         if (! $this->runId || ! $this->selectedUnitId) {
@@ -87,7 +112,7 @@ class Calculations extends Component
         }
     }
 
-    public function render(): View
+    public function render(OfficialRunEligibility $eligibility): View
     {
         $run = $this->runId === null
             ? null
@@ -119,6 +144,7 @@ class Calculations extends Component
         }
 
         $allUnits = EvaluationUnit::query()->orderBy('display_order')->get();
+        $eligibilityIssues = $run === null ? [] : $eligibility->issues($run);
 
         return view('livewire.admin.calculations', [
             'period' => $this->period(),
@@ -126,6 +152,11 @@ class Calculations extends Component
             'benchmarkByScale' => $benchmarkByScale,
             'sensitivityGrid' => $sensitivityGrid,
             'allUnits' => $allUnits,
+            'eligibilityIssues' => $eligibilityIssues,
+            'hasMinimumSampleIssue' => collect($eligibilityIssues)->contains(
+                fn (string $issue): bool => str_contains($issue, 'baru memiliki')
+                    && str_contains($issue, 'respons included.'),
+            ),
         ])->layout('layouts.app', ['title' => 'Kalkulasi UEQ dan SAW']);
     }
 

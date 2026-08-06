@@ -7,6 +7,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\EvaluationPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -50,5 +51,11 @@ class EvaluationPeriod extends Model
     public function readinessEvidence(): HasMany
     {
         return $this->hasMany(PeriodReadinessEvidence::class);
+    }
+
+    /** @return BelongsTo<CalculationRun, $this> */
+    public function officialRun(): BelongsTo
+    {
+        return $this->belongsTo(CalculationRun::class, 'official_calculation_run_id');
     }
 }

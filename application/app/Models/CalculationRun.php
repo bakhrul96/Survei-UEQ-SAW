@@ -11,6 +11,7 @@ use LogicException;
 /**
  * @property CarbonInterface|null $calculated_at
  * @property CarbonInterface|null $official_locked_at
+ * @property CarbonInterface|null $minimum_deviation_approved_at
  */
 class CalculationRun extends Model
 {
@@ -25,13 +26,24 @@ class CalculationRun extends Model
             'excluded_count' => 'integer',
             'calculated_at' => 'datetime',
             'official_locked_at' => 'datetime',
+            'minimum_deviation_approved_at' => 'datetime',
         ];
     }
 
     protected static function booted(): void
     {
         static::updating(function (self $run): void {
-            $immutableAttributes = array_diff(array_keys($run->getDirty()), ['status', 'locked_by', 'official_locked_at', 'updated_at']);
+            $mutableMetadata = [
+                'status',
+                'locked_by',
+                'official_locked_at',
+                'minimum_deviation_reason',
+                'minimum_deviation_approval_reference',
+                'minimum_deviation_approved_by',
+                'minimum_deviation_approved_at',
+                'updated_at',
+            ];
+            $immutableAttributes = array_diff(array_keys($run->getDirty()), $mutableMetadata);
 
             if ($immutableAttributes !== []) {
                 throw new LogicException('Calculation run inputs are immutable.');
@@ -59,6 +71,12 @@ class CalculationRun extends Model
     public function lockedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'locked_by');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function minimumDeviationApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'minimum_deviation_approved_by');
     }
 
     /** @return HasMany<UeqResult, $this> */

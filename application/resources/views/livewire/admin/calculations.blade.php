@@ -50,6 +50,39 @@
             @endforeach
         </flux:card>
 
+        <flux:card class="space-y-4">
+            <div>
+                <flux:heading size="lg">Kelayakan hasil resmi</flux:heading>
+                <flux:text class="text-xs text-zinc-500">Seluruh gate final harus terpenuhi sebelum run dapat dikunci.</flux:text>
+            </div>
+            @if($eligibilityIssues === [])
+                <flux:callout variant="success" icon="check-circle">Calculation run memenuhi seluruh gate hasil resmi.</flux:callout>
+            @else
+                <ul class="list-disc space-y-1 ps-5 text-sm text-red-700 dark:text-red-300">
+                    @foreach($eligibilityIssues as $issue)
+                        <li>{{ $issue }}</li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if($hasMinimumSampleIssue && $run->status === 'preview')
+                <form wire:submit="recordMinimumDeviation" class="space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-950/20">
+                    <div>
+                        <flux:heading size="md">Persetujuan penyimpangan minimum sampel</flux:heading>
+                        <flux:text>Catat alasan dan referensi persetujuan pembimbing sebelum finalisasi.</flux:text>
+                    </div>
+                    <flux:textarea wire:model="minimumDeviationReason" label="Alasan penyimpangan" rows="3" />
+                    <flux:input wire:model="minimumDeviationApprovalReference" label="Referensi persetujuan pembimbing" />
+                    <flux:button type="submit" variant="filled">Catat persetujuan</flux:button>
+                </form>
+            @elseif($run->minimum_deviation_approved_at)
+                <dl class="grid gap-2 text-sm md:grid-cols-2">
+                    <div><dt class="font-medium">Alasan penyimpangan</dt><dd>{{ $run->minimum_deviation_reason }}</dd></div>
+                    <div><dt class="font-medium">Referensi persetujuan</dt><dd>{{ $run->minimum_deviation_approval_reference }}</dd></div>
+                </dl>
+            @endif
+        </flux:card>
+
         <!-- Hasil UEQ -->
         <flux:card class="space-y-4">
             <flux:heading size="lg">Hasil UEQ per Modul &amp; Skala</flux:heading>

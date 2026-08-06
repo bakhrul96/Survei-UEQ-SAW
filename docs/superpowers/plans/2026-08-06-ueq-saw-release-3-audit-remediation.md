@@ -212,7 +212,7 @@ php artisan test \
 
 Expected: PASS, termasuk exact scenario keys S0/S1/S2 dan delta fixture.
 
-- [ ] **Step 8: Commit Task 1**
+- [x] **Step 8: Commit Task 1**
 
 ```bash
 git add application/database application/app application/resources application/tests docs/research/ueq-saw-golden-fixture.xlsx
@@ -239,7 +239,7 @@ git commit -m "fix: persist release three sensitivity scenarios"
 - Produces: `OfficialRunEligibility::assertEligible(CalculationRun $run): void`, melempar `DomainException` berisi seluruh issue yang digabung dengan newline.
 - Produces: `RecordMinimumSampleDeviation::handle(CalculationRun $run, string $reason, string $approvalReference, User $actor): CalculationRun`.
 
-- [ ] **Step 1: Write failing eligibility tests for every final gate**
+- [x] **Step 1: Write failing eligibility tests for every final gate**
 
 Gunakan test dataset terpisah untuk membuktikan setiap kondisi berikut menghasilkan pesan spesifik:
 
@@ -270,7 +270,7 @@ Tambahkan test untuk:
 - jumlah sensitivity result bukan `3 × jumlah saw result`;
 - happy path closed period lengkap menghasilkan `issues() === []`.
 
-- [ ] **Step 2: Run tests and verify the current lock path is unsafe**
+- [x] **Step 2: Run tests and verify the current lock path is unsafe**
 
 Run:
 
@@ -281,7 +281,7 @@ php artisan test tests/Feature/Calculation/OfficialRunEligibilityTest.php
 
 Expected: FAIL karena `OfficialRunEligibility` belum ada.
 
-- [ ] **Step 3: Add official pointer and deviation metadata schema**
+- [x] **Step 3: Add official pointer and deviation metadata schema**
 
 Migration menambahkan:
 
@@ -303,7 +303,7 @@ Schema::table('calculation_runs', function (Blueprint $table): void {
 
 Tambahkan relasi `EvaluationPeriod::officialRun()` dan `CalculationRun::minimumDeviationApprover()`, beserta datetime cast.
 
-- [ ] **Step 4: Implement eligibility as a read-only validator**
+- [x] **Step 4: Implement eligibility as a read-only validator**
 
 `issues()` harus memuat relasi period, SAW, sensitivity, dan membaca snapshot, tanpa mengubah database. Hitung minimum per unit dari `quality_decisions` yang bernilai `included`:
 
@@ -321,7 +321,7 @@ Jika `$belowMinimum` tidak kosong, validator hanya mengizinkan finalisasi ketika
 
 Validasi 26 jawaban menggunakan key integer/string `1..26`, bukan hanya `count() === 26`.
 
-- [ ] **Step 5: Implement deviation recording before official lock**
+- [x] **Step 5: Implement deviation recording before official lock**
 
 Action harus:
 
@@ -337,7 +337,7 @@ if (trim($reason) === '' || trim($approvalReference) === '') {
 
 Simpan actor/time dan buat `AuditEvent` action `calculation_run.minimum_deviation_recorded` dalam transaksi yang sama. UI hanya menampilkan form ketika validator menemukan unit di bawah minimum; form memuat reason dan approval reference.
 
-- [ ] **Step 6: Run Task 2 tests**
+- [x] **Step 6: Run Task 2 tests**
 
 Run:
 
