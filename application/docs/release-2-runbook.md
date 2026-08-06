@@ -1,7 +1,7 @@
 # Runbook Verifikasi Rilis 2
 
-Tanggal verifikasi: 2026-08-06 13:15 WIB
-Commit implementasi yang diverifikasi: `6256e3511d39aabd304a3222f72766d0a1e74dd0`
+Tanggal verifikasi: 2026-08-06 13:52:34 WIB
+Commit implementasi yang diverifikasi: `93ff5b8b40d48a11055a727eaf0c839614500a83`
 
 Ruang lingkup verifikasi meliputi quality flag/review, statistik dan reliabilitas UEQ, input serta konsensus informan teknis, calculation run, SAW, keterlacakan, immutability, UI admin, browser UAT, dan paritas schema MySQL.
 
@@ -17,14 +17,15 @@ Ruang lingkup verifikasi meliputi quality flag/review, statistik dan reliabilita
 | MySQL server | 8.4.10 |
 | Database penelitian | MySQL `ueq_saw` |
 | Browser viewport utama | 1280 × 800 |
-| Pemeriksaan responsif tambahan | 360 × 800, sidebar read-only |
+| Pemeriksaan responsif tambahan | 360 × 800, sidebar dan halaman Kalkulasi interaktif |
 
 ## Gate otomatis
 
 | Perintah | Hasil |
 |---|---|
-| `composer test` | PASS — Pint PASS, PHPStan 0 error, Pest 210 tes / 2.001 assertion |
-| `php artisan test tests/Browser/AdminAnalysisFlowTest.php tests/Browser/ReleaseThreeFlowTest.php tests/Browser/AdminSidebarTest.php` | PASS — 4 tes / 30 assertion |
+| `TMPDIR=/tmp/phpstan-release2-ui-browser composer test` | PASS — Pint PASS, PHPStan 0 error, Pest 210 tes / 2.001 assertion |
+| `php artisan test tests/Browser/ReleaseTwoUiAuditTest.php` | PASS — 3 tes / 20 assertion |
+| `php artisan test tests/Browser` | PASS — 9 tes / 75 assertion |
 | `npm run build` | PASS — 22 module ditransformasi; warning opsional `fontaine` tidak menggagalkan build |
 | `git diff --check` | PASS — tidak ada whitespace error |
 | Golden workbook/JSON/persistence tests | PASS — fixture `ueq-saw-v1`, toleransi `0.000001`, 0 mismatch |
@@ -72,7 +73,22 @@ Administrator fixture telah berstatus email-verified dan 2FA-confirmed. Alur 128
 3. halaman kalkulasi membuat preview baru;
 4. metadata input hash, pooled reliability, serta kontribusi C1–C3 terlihat;
 5. regresi Rilis 3 membuka laporan, membuat preview, dan mengunci run official;
-6. sidebar desktop dan drawer 360 × 800 tetap dapat digunakan.
+6. sidebar desktop dan drawer 360 × 800 tetap dapat digunakan;
+7. halaman Kalkulasi 360 × 800 membuat preview tanpa horizontal overflow pada dokumen;
+8. label Expert Judgment terbaca melalui asosiasi label-control eksplisit;
+9. setiap tabel horizontal yang dirender menjadi named region yang dapat difokuskan dengan keyboard.
+
+## Penutupan gap UI browser
+
+Audit Chromium/Playwright pada data fixture Rilis 2 menutup tiga temuan UI:
+
+| Temuan | Bukti penutupan |
+|---|---|
+| Kontrol Expert Judgment tanpa accessible name | `selectedUnitId`, `operationalOrder`, dan `expertReason` mempunyai pasangan `label[for]` dan `id` unik; browser membuktikan setiap `control.labels` berisi tepat satu label |
+| Tabel overflow tidak dapat difokuskan dengan keyboard | Empat result region yang dirender mempunyai `role="region"`, `tabindex="0"`, `aria-label` unik, dan focus ring; pola yang sama diterapkan pada tabel backlog conditional |
+| Horizontal overflow pada viewport 360 piksel | Setelah preview, assertion `document.documentElement.scrollWidth <= window.innerWidth` lulus dan bounding rectangle kedua action button tetap berada di dalam viewport |
+
+Pada preview terisi di 1280 × 800, Axe tidak menemukan issue serious/critical. Pemeriksaan yang sama juga membuktikan tidak ada JavaScript error atau broken image. Tidak ada screenshot keberhasilan, browser session, atau debug artifact yang disimpan sebagai evidence.
 
 ## Privasi evidence
 
