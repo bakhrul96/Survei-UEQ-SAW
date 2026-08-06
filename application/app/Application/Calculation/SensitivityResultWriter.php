@@ -5,6 +5,7 @@ namespace App\Application\Calculation;
 use App\Domain\Sensitivity\SensitivityResultData;
 use App\Models\CalculationRun;
 use App\Models\SensitivityResult;
+use LogicException;
 
 class SensitivityResultWriter
 {
@@ -13,7 +14,9 @@ class SensitivityResultWriter
      */
     public function write(CalculationRun $run, array $sensitivityScenarios): void
     {
-        $run->sensitivityResults()->delete();
+        if ($run->sensitivityResults()->exists()) {
+            throw new LogicException('Sensitivity results can only be written once.');
+        }
 
         foreach ($sensitivityScenarios as $scenarioResults) {
             foreach ($scenarioResults as $result) {

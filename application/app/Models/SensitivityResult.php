@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Domain\Sensitivity\SensitivityScenario;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LogicException;
 
 class SensitivityResult extends Model
 {
@@ -25,6 +26,17 @@ class SensitivityResult extends Model
         'delta_rank' => 'integer',
         'is_tied' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::updating(function (): void {
+            throw new LogicException('Sensitivity results are immutable.');
+        });
+
+        static::deleting(function (): void {
+            throw new LogicException('Sensitivity results are immutable.');
+        });
+    }
 
     /** @return BelongsTo<CalculationRun, $this> */
     public function calculationRun(): BelongsTo

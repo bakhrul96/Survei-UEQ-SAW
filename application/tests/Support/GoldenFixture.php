@@ -179,4 +179,12 @@ final class GoldenFixture
             ->preview($period->fresh(), $admin)
             ->load(['ueqResults.unit', 'ueqPooledResults', 'sawResults.unit', 'sensitivityResults.evaluationUnit']);
     }
+
+    public static function persistedClosedRun(): CalculationRun
+    {
+        $run = self::persistedRun();
+        $run->period->update(['status' => PeriodStatus::Closed]);
+
+        return $run->fresh(['period', 'creator', 'ueqResults.unit', 'ueqPooledResults', 'sawResults.unit', 'sensitivityResults.evaluationUnit']);
+    }
 }

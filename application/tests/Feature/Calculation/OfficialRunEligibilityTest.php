@@ -8,14 +8,6 @@ use App\Models\SensitivityResult;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\GoldenFixture;
 
-function closedGoldenRun(): CalculationRun
-{
-    $run = GoldenFixture::persistedRun();
-    $run->period->update(['status' => PeriodStatus::Closed]);
-
-    return $run->fresh(['period', 'sawResults', 'sensitivityResults']);
-}
-
 /** @param callable(array<string, mixed>): array<string, mixed> $mutate */
 function mutateRunSnapshot(CalculationRun $run, callable $mutate): CalculationRun
 {
@@ -35,7 +27,7 @@ it('rejects official lock eligibility for a draft period', function (): void {
 });
 
 it('rejects a run that is not preview', function (): void {
-    $run = closedGoldenRun();
+    $run = GoldenFixture::persistedClosedRun();
     $run->update(['status' => 'stale']);
 
     expect(app(OfficialRunEligibility::class)->issues($run->fresh()))
@@ -43,7 +35,7 @@ it('rejects a run that is not preview', function (): void {
 });
 
 it('rejects a snapshot from an obsolete input revision', function (): void {
-    $run = closedGoldenRun();
+    $run = GoldenFixture::persistedClosedRun();
     $run->period->increment('calculation_input_revision');
 
     expect(app(OfficialRunEligibility::class)->issues($run))
@@ -51,7 +43,7 @@ it('rejects a snapshot from an obsolete input revision', function (): void {
 });
 
 it('rejects included submissions without the exact item keys one through twenty six', function (): void {
-    $run = mutateRunSnapshot(closedGoldenRun(), function (array $snapshot): array {
+    $run = mutateRunSnapshot(GoldenFixture::persistedClosedRun(), function (array $snapshot): array {
         $submissionId = (string) $snapshot['included_submission_ids'][0];
         unset($snapshot['included_raw_answers'][$submissionId]['26']);
         $snapshot['included_raw_answers'][$submissionId]['27'] = 4;
@@ -64,7 +56,7 @@ it('rejects included submissions without the exact item keys one through twenty 
 });
 
 it('rejects unreviewed quality decisions', function (): void {
-    $run = mutateRunSnapshot(closedGoldenRun(), function (array $snapshot): array {
+    $run = mutateRunSnapshot(GoldenFixture::persistedClosedRun(), function (array $snapshot): array {
         $snapshot['quality_decisions'][0]['decision'] = 'unreviewed';
 
         return $snapshot;
@@ -75,7 +67,7 @@ it('rejects unreviewed quality decisions', function (): void {
 });
 
 it('requires an approved deviation for units below the minimum sample', function (): void {
-    $run = closedGoldenRun();
+    $run = GoldenFixture::persistedClosedRun();
 
     expect(app(OfficialRunEligibility::class)->issues($run))
         ->toContain('ibadah-yu baru memiliki 4 dari minimum 20 respons included.')
@@ -83,7 +75,7 @@ it('requires an approved deviation for units below the minimum sample', function
 });
 
 it('rejects incomplete or out of range technical consensus', function (array $replacement): void {
-    $run = mutateRunSnapshot(closedGoldenRun(), function (array $snapshot) use ($replacement): array {
+    $run = mutateRunSnapshot(GoldenFixture::persistedClosedRun(), function (array $snapshot) use ($replacement): array {
         $snapshot['technical_consensus'] = array_replace($snapshot['technical_consensus'], $replacement);
 
         return $snapshot;
@@ -98,7 +90,7 @@ it('rejects incomplete or out of range technical consensus', function (array $re
 ]);
 
 it('rejects missing algorithm and benchmark provenance', function (): void {
-    $run = mutateRunSnapshot(closedGoldenRun(), function (array $snapshot): array {
+    $run = mutateRunSnapshot(GoldenFixture::persistedClosedRun(), function (array $snapshot): array {
         $snapshot['benchmarks'][0]['source'] = '';
         $snapshot['benchmarks'][0]['version'] = '';
 
@@ -112,7 +104,7 @@ it('rejects missing algorithm and benchmark provenance', function (): void {
 });
 
 it('rejects empty or incomplete analytical results', function (): void {
-    $run = closedGoldenRun();
+    $run = GoldenFixture::persistedClosedRun();
     DB::table('saw_results')->where('calculation_run_id', $run->id)->limit(1)->delete();
     SensitivityResult::query()->where('calculation_run_id', $run->id)->limit(1)->delete();
 
@@ -122,7 +114,7 @@ it('rejects empty or incomplete analytical results', function (): void {
 });
 
 it('accepts a complete closed run with an approved minimum deviation', function (): void {
-    $run = closedGoldenRun();
+    $run = GoldenFixture::persistedClosedRun();
     $actor = $run->creator;
     app(RecordMinimumSampleDeviation::class)->handle(
         $run,

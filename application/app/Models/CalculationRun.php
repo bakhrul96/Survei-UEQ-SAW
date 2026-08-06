@@ -33,6 +33,10 @@ class CalculationRun extends Model
     protected static function booted(): void
     {
         static::updating(function (self $run): void {
+            if ($run->getRawOriginal('status') === 'official') {
+                throw new LogicException('Official calculation runs are immutable.');
+            }
+
             $mutableMetadata = [
                 'status',
                 'locked_by',

@@ -350,7 +350,7 @@ php artisan test \
 
 Expected: PASS dan setiap invalid fixture menghasilkan pesan pemulihan yang spesifik.
 
-- [ ] **Step 7: Commit Task 2**
+- [x] **Step 7: Commit Task 2**
 
 ```bash
 git add application/database application/app application/resources application/tests
@@ -379,7 +379,7 @@ git commit -m "fix: enforce final calculation eligibility"
 - Consumes: `OfficialRunEligibility::assertEligible(CalculationRun $run): void`.
 - Produces: `CalculationRunService::lockAsOfficial(CalculationRun $run, User $actor): CalculationRun` yang mengubah run `preview → official`, periode `closed → locked`, dan menetapkan `official_calculation_run_id` secara atomik.
 
-- [ ] **Step 1: Replace permissive lock tests with permanent-lock tests**
+- [x] **Step 1: Replace permissive lock tests with permanent-lock tests**
 
 Hapus expectation yang mengarsipkan official run lama. Tambahkan test berikut:
 
@@ -409,7 +409,7 @@ it('rejects a second official run for the same period', function (): void {
 
 Tambahkan test rollback dengan exception setelah run update untuk membuktikan run, period pointer, period status, dan audit event kembali ke state awal.
 
-- [ ] **Step 2: Run official-lock tests and observe failure**
+- [x] **Step 2: Run official-lock tests and observe failure**
 
 Run:
 
@@ -420,7 +420,7 @@ php artisan test tests/Feature/Calculation/OfficialRunLockTest.php
 
 Expected: FAIL karena implementasi lama mengarsipkan official run sebelumnya dan tidak mengubah periode/audit event.
 
-- [ ] **Step 3: Lock the period row before validating and updating**
+- [x] **Step 3: Lock the period row before validating and updating**
 
 Implementasi transaksi harus mengikuti urutan tetap berikut:
 
@@ -448,7 +448,7 @@ $lockedPeriod->update([
 
 Tambahkan `AuditEvent` dengan old/new values yang memuat run status, period status, input hash, algorithm version, dan `official_locked_at` dalam transaksi yang sama.
 
-- [ ] **Step 4: Harden all official result models**
+- [x] **Step 4: Harden all official result models**
 
 `SensitivityResult` harus memakai guard yang sama dengan `SawResult`:
 
@@ -464,11 +464,11 @@ Hapus `$run->sensitivityResults()->delete()` dari writer. Writer hanya boleh dip
 
 `CalculationRun` harus menolak semua update ketika original status `official`. Sebelum official, hanya transisi state yang eksplisit dan deviation metadata Task 2 yang boleh berubah. `ExpertJudgment` menolak update/delete jika relasi run berstatus official.
 
-- [ ] **Step 5: Ensure input changes never stale or mutate official runs**
+- [x] **Step 5: Ensure input changes never stale or mutate official runs**
 
 Pertahankan query stale hanya untuk `status = preview`. Tambahkan regression test yang membuat official run, menjalankan `CalculationInputChangeRecorder`, dan memastikan status, input hash, UEQ, SAW, sensitivity, serta backlog official tidak berubah.
 
-- [ ] **Step 6: Make the UI reopen official results read-only**
+- [x] **Step 6: Make the UI reopen official results read-only**
 
 Ketika run official:
 
@@ -478,7 +478,7 @@ Ketika run official:
 - reload halaman harus menampilkan input hash, Vi, dan seluruh rank yang sama;
 - tombol preview dinonaktifkan ketika periode `locked`.
 
-- [ ] **Step 7: Run Task 3 tests**
+- [x] **Step 7: Run Task 3 tests**
 
 Run:
 

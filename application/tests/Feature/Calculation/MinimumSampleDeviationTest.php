@@ -2,9 +2,10 @@
 
 use App\Application\Calculation\RecordMinimumSampleDeviation;
 use App\Models\AuditEvent;
+use Tests\Support\GoldenFixture;
 
 it('records an approved minimum sample deviation with an audit event', function (): void {
-    $run = closedGoldenRun();
+    $run = GoldenFixture::persistedClosedRun();
     $actor = $run->creator;
 
     $recorded = app(RecordMinimumSampleDeviation::class)->handle(
@@ -22,7 +23,7 @@ it('records an approved minimum sample deviation with an audit event', function 
 });
 
 it('rejects blank deviation evidence', function (string $reason, string $reference): void {
-    $run = closedGoldenRun();
+    $run = GoldenFixture::persistedClosedRun();
 
     expect(fn () => app(RecordMinimumSampleDeviation::class)->handle($run, $reason, $reference, $run->creator))
         ->toThrow(DomainException::class, 'Alasan dan referensi persetujuan pembimbing wajib diisi.');
@@ -32,7 +33,7 @@ it('rejects blank deviation evidence', function (string $reason, string $referen
 ]);
 
 it('only records minimum sample deviation on a preview run', function (): void {
-    $run = closedGoldenRun();
+    $run = GoldenFixture::persistedClosedRun();
     $run->update(['status' => 'stale']);
 
     expect(fn () => app(RecordMinimumSampleDeviation::class)->handle($run, 'Alasan', 'Referensi', $run->creator))

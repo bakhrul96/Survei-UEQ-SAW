@@ -5,7 +5,7 @@
             <flux:text>{{ $period->name }} · Analisis Sensitivitas &amp; Penguncian Hasil Resmi</flux:text>
         </div>
         <div data-release-two-actions class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-            <flux:button class="w-full sm:w-auto" wire:click="runPreview" variant="primary">Jalankan preview</flux:button>
+            <flux:button class="w-full sm:w-auto" wire:click="runPreview" variant="primary" :disabled="$period->status === \App\Domain\Study\PeriodStatus::Locked">Jalankan preview</flux:button>
             @if($run && $run->status !== 'official')
                 <flux:button class="w-full sm:w-auto" wire:click="lockOfficial" variant="filled" color="teal">Kunci Hasil Resmi (Official)</flux:button>
             @endif
@@ -286,6 +286,7 @@
             </div>
 
             <!-- Form Penambahan Expert Judgment -->
+            @if($run->status !== 'official')
             <form wire:submit.prevent="saveExpertJudgment" class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-zinc-50 p-3 rounded-lg border border-zinc-200">
                 <div>
                     <label for="expert-unit" class="block text-xs font-semibold text-zinc-700 mb-1">Pilih Modul</label>
@@ -308,6 +309,7 @@
                     </div>
                 </div>
             </form>
+            @endif
 
             <!-- Tabel Daftar Expert Judgment -->
             @if($run->expertJudgments->isNotEmpty())

@@ -3,6 +3,7 @@
 namespace App\Application\Calculation;
 
 use App\Domain\Sensitivity\SensitivityCalculator;
+use App\Domain\Study\PeriodStatus;
 use App\Models\AuditEvent;
 use App\Models\CalculationRun;
 use App\Models\EvaluationPeriod;
@@ -18,6 +19,7 @@ class CalculationRunService
         private readonly CalculationInputSnapshot $snapshots,
         private readonly UeqResultWriter $resultWriter,
         private readonly SawResultWriter $sawWriter,
+        private readonly OfficialRunEligibility $officialEligibility,
         private readonly SensitivityCalculator $sensitivityCalculator = new SensitivityCalculator,
         private readonly SensitivityResultWriter $sensitivityWriter = new SensitivityResultWriter,
     ) {}
@@ -94,16 +96,21 @@ class CalculationRunService
     {
         return DB::transaction(function () use ($run, $actor): CalculationRun {
             $lockedRun = CalculationRun::query()->lockForUpdate()->findOrFail($run->id);
+            $lockedPeriod = EvaluationPeriod::query()
+                ->lockForUpdate()
+                ->findOrFail($lockedRun->evaluation_period_id);
 
-            if ($lockedRun->status === 'stale') {
-                throw new DomainException('Kalkulasi berstatus stale tidak dapat dikunci sebagai hasil resmi.');
+            if ($lockedPeriod->official_calculation_run_id !== null) {
+                throw new DomainException('Periode ini sudah mempunyai hasil resmi dan tidak dapat dikunci ulang.');
             }
 
-            CalculationRun::query()
-                ->where('evaluation_period_id', $lockedRun->evaluation_period_id)
-                ->where('status', 'official')
-                ->where('id', '!=', $lockedRun->id)
-                ->update(['status' => 'archived']);
+            $this->officialEligibility->assertEligible($lockedRun);
+
+            $oldValues = [
+                'run_status' => $lockedRun->status,
+                'period_status' => $lockedPeriod->status->value,
+                'official_calculation_run_id' => $lockedPeriod->official_calculation_run_id,
+            ];
 
             $lockedRun->update([
                 'status' => 'official',
@@ -111,7 +118,28 @@ class CalculationRunService
                 'official_locked_at' => now(),
             ]);
 
-            return $lockedRun->fresh();
+            $lockedPeriod->update([
+                'status' => PeriodStatus::Locked,
+                'official_calculation_run_id' => $lockedRun->id,
+            ]);
+
+            AuditEvent::query()->create([
+                'action' => 'calculation_run.locked_official',
+                'auditable_type' => CalculationRun::class,
+                'auditable_id' => $lockedRun->id,
+                'actor_id' => $actor->id,
+                'old_values' => $oldValues,
+                'new_values' => [
+                    'run_status' => 'official',
+                    'period_status' => PeriodStatus::Locked->value,
+                    'official_calculation_run_id' => $lockedRun->id,
+                    'input_hash' => $lockedRun->input_hash,
+                    'algorithm_version' => $lockedRun->algorithm_version,
+                    'official_locked_at' => $lockedRun->official_locked_at?->toIso8601String(),
+                ],
+            ]);
+
+            return $lockedRun->fresh(['period']);
         });
     }
 }

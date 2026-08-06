@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LogicException;
 
 class ExpertJudgment extends Model
 {
@@ -19,6 +20,21 @@ class ExpertJudgment extends Model
     protected $casts = [
         'operational_order' => 'integer',
     ];
+
+    protected static function booted(): void
+    {
+        static::updating(function (self $judgment): void {
+            if ($judgment->calculationRun()->where('status', 'official')->exists()) {
+                throw new LogicException('Official expert judgments are immutable.');
+            }
+        });
+
+        static::deleting(function (self $judgment): void {
+            if ($judgment->calculationRun()->where('status', 'official')->exists()) {
+                throw new LogicException('Official expert judgments are immutable.');
+            }
+        });
+    }
 
     /** @return BelongsTo<CalculationRun, $this> */
     public function calculationRun(): BelongsTo
