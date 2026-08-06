@@ -18,6 +18,8 @@ periode jika panel **Kesiapan aktivasi** masih menampilkan masalah.
   recovery code, maupun kode autentikasi.
 - Jendela tanggal periode valid, sumber instrumen UEQ telah diverifikasi, dan
   seluruh 6 benchmark untuk versi instrumen aktif telah diverifikasi.
+- Kontak penelitian telah diganti dari nilai contoh dengan kontak yang
+  disediakan operator; nilai kontak tidak disalin ke dokumen verifikasi ini.
 
 ## Bukti otomatis
 
@@ -116,8 +118,8 @@ Operator harus mencatat hasil tanpa data pribadi responden:
 | Dashboard | Unique respondent, submission, dan progress per modul terpisah dengan benar. |
 | Export | CSV dan XLSX dapat dibuka, metadata periode cocok, identifier privat tidak ada. |
 
-Baseline ini belum memuat sign-off UAT manual produksi, karena domain HTTPS dan
-kontak penelitian masih harus disediakan atau disahkan oleh operator berwenang.
+Baseline ini belum memuat sign-off UAT manual produksi, karena domain HTTPS
+masih harus tersedia dan disahkan oleh operator berwenang.
 
 ## Aktivasi dan verifikasi lock
 
@@ -139,5 +141,5 @@ survei yang telah dikumpulkan.
 ## Keputusan readiness saat ini
 
 Implementasi, gate otomatis, dan dump sumber privat siap untuk UAT operator.
-Aktivasi produksi belum diotorisasi sampai kontak penelitian, HTTPS, tiga
-evidence record, dan UAT manual memperoleh sign-off nyata.
+Aktivasi produksi belum diotorisasi sampai HTTPS, tiga evidence record, dan UAT
+manual memperoleh sign-off nyata.
