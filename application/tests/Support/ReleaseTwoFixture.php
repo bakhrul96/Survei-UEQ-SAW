@@ -70,7 +70,7 @@ final class ReleaseTwoFixture
     {
         app(WongReangStudySeeder::class)->run();
         $period = EvaluationPeriod::query()->where('slug', 'wong-reang-2026')->firstOrFail();
-        $admin = User::factory()->create();
+        $admin = User::factory()->withTwoFactor()->create();
 
         UeqBenchmark::query()
             ->where('version', $period->instrument_version)

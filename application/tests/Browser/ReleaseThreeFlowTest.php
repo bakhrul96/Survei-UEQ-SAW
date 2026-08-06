@@ -20,14 +20,14 @@ it('exercises the complete release three admin analysis flow', function () {
     visit(route('admin.dashboard'))
         ->resize(1280, 800)
         ->assertSee('Dashboard progres')
-        ->click('a[href*="/admin/reports"]')
+        ->click('[data-flux-sidebar-item][href$="/admin/reports"]')
         ->waitForText('Laporan Agregat Penelitian (Bab IV)')
         ->assertSee('Ekspor XLSX Agregat')
-        ->click('a[href*="/admin/calculations"]')
+        ->click('[data-flux-sidebar-item][href$="/admin/calculations"]')
         ->waitForText('Kalkulasi UEQ dan SAW')
         ->press('Jalankan preview')
         ->waitForText('Hasil UEQ per Modul')
-        ->press('Kunci Hasil Resmi (Official)')
+        ->click('button[wire\\:click="lockOfficial"]')
         ->waitForText('OFFICIAL / LOCKED')
         ->assertSee('OFFICIAL / LOCKED');
 });
