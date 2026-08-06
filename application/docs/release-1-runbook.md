@@ -16,6 +16,8 @@ periode jika panel **Kesiapan aktivasi** masih menampilkan masalah.
 - Kondisi readiness lokal: tepat 1 admin email-verified dan 2FA-confirmed,
   serta 0 bukti readiness. Enrollment TOTP diverifikasi tanpa mencatat secret,
   recovery code, maupun kode autentikasi.
+- Jendela tanggal periode valid, sumber instrumen UEQ telah diverifikasi, dan
+  seluruh 6 benchmark untuk versi instrumen aktif telah diverifikasi.
 
 ## Bukti otomatis
 
@@ -75,16 +77,15 @@ ke database tersebut, lalu catat jumlah baris untuk:
 - `survey_submissions`;
 - `survey_answers`.
 
-Dump sumber lokal `ueq_saw_release_one_uat.sql` dibuat ulang pada 2026-08-06
-dengan `mysqldump` 8.4.10. Direktori memiliki mode `700`, file memiliki mode
-`600`, dan file berada di lokasi yang diabaikan Git. Jumlah baris sumber saat
-dump dibuat adalah 23 migrasi, 1 periode, 13 unit, 26 item, 6 benchmark,
-0 submission, dan 0 jawaban.
+Dump sumber lokal `ueq_saw_release_one_uat.sql` dibuat ulang setelah verifikasi
+konfigurasi pada 2026-08-06 dengan `mysqldump` 8.4.10. Direktori memiliki mode
+`700`, file memiliki mode `600`, dan file berada di lokasi yang diabaikan Git.
 
-Uji restore belum dijalankan: database khusus `ueq_saw_restore` belum tersedia
-dan akun aplikasi tidak mempunyai hak membuat database. Bukti backup/restore
-baru sah setelah restore operator yang disediakan secara out of band memulihkan
-file tersebut dan seluruh jumlah baris hasil restore cocok dengan sumber.
+Dump dipulihkan ke database khusus `ueq_saw_restore` menggunakan restore
+operator sementara yang disediakan secara out of band dan dihapus setelah uji.
+Jumlah hasil restore cocok dengan sumber: 23 migrasi, 1 periode, 13 unit,
+26 item, 6 benchmark, 0 submission, dan 0 jawaban. Database aplikasi dan
+database lain tidak dibuat ulang atau diubah oleh uji ini.
 
 ## Evidence readiness di Study Settings
 
@@ -115,9 +116,8 @@ Operator harus mencatat hasil tanpa data pribadi responden:
 | Dashboard | Unique respondent, submission, dan progress per modul terpisah dengan benar. |
 | Export | CSV dan XLSX dapat dibuka, metadata periode cocok, identifier privat tidak ada. |
 
-Baseline ini belum memuat sign-off UAT manual produksi, karena domain HTTPS,
-kontak penelitian, dan database restore masih harus disediakan atau disahkan
-oleh operator berwenang.
+Baseline ini belum memuat sign-off UAT manual produksi, karena domain HTTPS dan
+kontak penelitian masih harus disediakan atau disahkan oleh operator berwenang.
 
 ## Aktivasi dan verifikasi lock
 
@@ -139,5 +139,5 @@ survei yang telah dikumpulkan.
 ## Keputusan readiness saat ini
 
 Implementasi, gate otomatis, dan dump sumber privat siap untuk UAT operator.
-Aktivasi produksi belum diotorisasi sampai kontak penelitian, HTTPS, restore
-terverifikasi, tiga evidence record, dan UAT manual memperoleh sign-off nyata.
+Aktivasi produksi belum diotorisasi sampai kontak penelitian, HTTPS, tiga
+evidence record, dan UAT manual memperoleh sign-off nyata.
