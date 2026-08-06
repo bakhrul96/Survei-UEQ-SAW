@@ -90,29 +90,60 @@ it('stores an ineligible profile and redirects to the ineligible page', function
     expect(RespondentProfile::firstOrFail()->eligible)->toBeFalse();
 });
 
-it('updates the existing profile when the screener is submitted again', function () {
+it('stores eligibility only once when an ineligible respondent resubmits the screener', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
     $issued = app(SurveyTokenService::class)->issue();
-
-    $component = Livewire::withCookie('ueq_survey_token', $issued->plainToken)
-        ->test(ConsentScreener::class, ['period' => $period]);
-
-    $component->set('consent', true)
-        ->set('age', 20)
-        ->set('isIndramayuResident', true)
-        ->set('hasUsedWongReang', true)
-        ->call('submit')
-        ->assertRedirect();
 
     Livewire::withCookie('ueq_survey_token', $issued->plainToken)
         ->test(ConsentScreener::class, ['period' => $period])
         ->set('consent', true)
-        ->set('age', 21)
+        ->set('age', 20)
+        ->set('isIndramayuResident', false)
+        ->set('hasUsedWongReang', true)
+        ->call('submit')
+        ->assertRedirect(route('survey.ineligible', $period));
+
+    $original = RespondentProfile::firstOrFail()->getAttributes();
+
+    Livewire::withCookie('ueq_survey_token', $issued->plainToken)
+        ->test(ConsentScreener::class, ['period' => $period])
+        ->set('consent', true)
+        ->set('age', 30)
         ->set('isIndramayuResident', true)
         ->set('hasUsedWongReang', true)
         ->call('submit')
-        ->assertRedirect();
+        ->assertRedirect(route('survey.ineligible', $period));
 
     expect(RespondentProfile::count())->toBe(1)
-        ->and(RespondentProfile::firstOrFail()->age)->toBe(21);
+        ->and(RespondentProfile::firstOrFail()->getAttributes())->toBe($original)
+        ->and(RespondentProfile::firstOrFail()->eligible)->toBeFalse();
+});
+
+it('does not let an eligible respondent replace the original screener result', function () {
+    $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $issued = app(SurveyTokenService::class)->issue();
+
+    Livewire::withCookie('ueq_survey_token', $issued->plainToken)
+        ->test(ConsentScreener::class, ['period' => $period])
+        ->set('consent', true)
+        ->set('age', 20)
+        ->set('isIndramayuResident', true)
+        ->set('hasUsedWongReang', true)
+        ->call('submit')
+        ->assertRedirect(route('survey.units', $period));
+
+    Livewire::withCookie('ueq_survey_token', $issued->plainToken)
+        ->test(ConsentScreener::class, ['period' => $period])
+        ->set('consent', true)
+        ->set('age', 20)
+        ->set('isIndramayuResident', false)
+        ->set('hasUsedWongReang', false)
+        ->call('submit')
+        ->assertRedirect(route('survey.units', $period));
+
+    $profile = RespondentProfile::firstOrFail();
+
+    expect($profile->eligible)->toBeTrue()
+        ->and($profile->is_indramayu_resident)->toBeTrue()
+        ->and($profile->has_used_wong_reang)->toBeTrue();
 });

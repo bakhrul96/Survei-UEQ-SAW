@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Survey;
 
+use App\Application\Survey\RecordRespondentEligibility;
 use App\Domain\Survey\SurveyContext;
 use App\Models\EvaluationPeriod;
-use App\Models\RespondentProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -27,8 +27,10 @@ class ConsentScreener extends Component
         $this->period = $context->ensureAccepting($period);
     }
 
-    public function submit(SurveyContext $context): Redirector|RedirectResponse
-    {
+    public function submit(
+        SurveyContext $context,
+        RecordRespondentEligibility $recordEligibility,
+    ): Redirector|RedirectResponse {
         $period = EvaluationPeriod::query()->findOrFail($this->period->id);
         $this->period = $context->ensureAccepting($period);
 
@@ -39,27 +41,15 @@ class ConsentScreener extends Component
             'hasUsedWongReang' => ['required', 'boolean'],
         ]);
 
-        $respondent = $context->respondent();
-        $eligible = $validated['age'] >= $this->period->minimum_age
-            && $validated['isIndramayuResident']
-            && $validated['hasUsedWongReang'];
-
-        RespondentProfile::query()->updateOrCreate(
-            [
-                'evaluation_period_id' => $this->period->id,
-                'anonymous_respondent_id' => $respondent->id,
-            ],
-            [
-                'consented_at' => now(),
-                'age' => $validated['age'],
-                'is_indramayu_resident' => $validated['isIndramayuResident'],
-                'has_used_wong_reang' => $validated['hasUsedWongReang'],
-                'eligible' => $eligible,
-                'screened_at' => now(),
-            ],
+        $profile = $recordEligibility->handle(
+            period: $this->period,
+            respondent: $context->respondent(),
+            age: $validated['age'],
+            isIndramayuResident: $validated['isIndramayuResident'],
+            hasUsedWongReang: $validated['hasUsedWongReang'],
         );
 
-        return $eligible
+        return $profile->eligible
             ? redirect()->route('survey.units', $this->period)
             : redirect()->route('survey.ineligible', $this->period);
     }
