@@ -23,13 +23,21 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
         ->press('Lanjutkan')
         ->waitForText('Pilih Modul')
         ->press('Ibadah-Yu')
-        ->waitForText('Langkah 1 dari 4')
-        ->keys('body', 'Tab')
-        ->assertScript("document.activeElement.matches('[wire\\\\:model=\"confirmedExperience\"]') && document.activeElement.className.includes('focus:ring-2')")
-        ->keys('[wire\\:model="confirmedExperience"]', 'Tab')
-        ->assertScript("document.activeElement.id === 'ueq-item-1-value-1' && document.activeElement.parentElement.className.includes('focus-within:ring-2')")
-        ->keys('#ueq-item-7-value-7', 'Tab')
-        ->assertScript("document.activeElement.matches('button[wire\\\\:click=\"next\"]') && document.activeElement.className.includes('focus:ring-2')")
+        ->waitForText('Langkah 1 dari 4');
+
+    $page->page()->keyDown('Tab');
+    $page->page()->keyUp('Tab');
+    $page->assertScript("document.activeElement.matches('[wire\\\\:model=\"confirmedExperience\"]') && document.activeElement.className.includes('focus:ring-2')");
+
+    $page->page()->keyDown('Tab');
+    $page->page()->keyUp('Tab');
+    $page->assertScript("document.activeElement.id === 'ueq-item-1-value-1' && document.activeElement.parentElement.className.includes('focus-within:ring-2')");
+
+    foreach (range(1, 7) as $_) {
+        $page->page()->keyDown('Tab');
+        $page->page()->keyUp('Tab');
+    }
+    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"next\"]') && document.activeElement.className.includes('focus:ring-2')")
         ->check('[wire\\:model="confirmedExperience"]');
 
     foreach (range(1, 26) as $itemOrder) {
@@ -40,10 +48,12 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
         }
     }
 
-    $page->keys('#ueq-item-26-value-7', 'Tab')
-        ->assertScript("document.activeElement.matches('button[wire\\\\:click=\"previous\"]') && document.activeElement.className.includes('focus:ring-2')")
-        ->keys('button[wire\\:click="previous"]', 'Tab')
-        ->assertScript("document.activeElement.matches('button[wire\\\\:click=\"submit\"]') && document.activeElement.className.includes('focus:ring-2')");
+    $page->page()->keyDown('Tab');
+    $page->page()->keyUp('Tab');
+    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"previous\"]') && document.activeElement.className.includes('focus:ring-2')");
+    $page->page()->keyDown('Tab');
+    $page->page()->keyUp('Tab');
+    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"submit\"]') && document.activeElement.className.includes('focus:ring-2')");
 
     $page->press('Kirim Penilaian')
         ->waitForText('Penilaian berhasil disimpan')
