@@ -10,11 +10,17 @@
         </div>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <flux:card><flux:text>Responden unik</flux:text><flux:heading size="xl">{{ $data->uniqueRespondents }}</flux:heading></flux:card>
         <flux:card><flux:text>Responden memenuhi syarat</flux:text><flux:heading size="xl">{{ $data->eligibleRespondents }}</flux:heading></flux:card>
         <flux:card><flux:text>Evaluasi modul terkirim</flux:text><flux:heading size="xl">{{ $data->totalEvaluations }}</flux:heading></flux:card>
         <flux:card><flux:text>Target evaluasi modul</flux:text><flux:heading size="xl">{{ $data->units->count() * $period->target_per_unit }}</flux:heading></flux:card>
+        <flux:card><flux:text>Evaluasi ber-flag kualitas</flux:text><flux:heading size="xl">{{ $data->flaggedEvaluations }}</flux:heading></flux:card>
+        <flux:card><flux:text>Evaluasi excluded</flux:text><flux:heading size="xl">{{ $data->excludedEvaluations }}</flux:heading></flux:card>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <flux:card><flux:text>Menunggu review kualitas</flux:text><flux:heading size="xl">{{ $data->pendingReviewEvaluations }}</flux:heading></flux:card>
     </div>
 
     <flux:card class="space-y-4">

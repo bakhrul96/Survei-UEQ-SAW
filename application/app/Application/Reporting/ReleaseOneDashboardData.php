@@ -11,6 +11,9 @@ readonly class ReleaseOneDashboardData
         public int $uniqueRespondents,
         public int $totalEvaluations,
         public int $eligibleRespondents,
+        public int $flaggedEvaluations,
+        public int $excludedEvaluations,
+        public int $pendingReviewEvaluations,
         public Collection $units,
     ) {}
 }

@@ -93,3 +93,47 @@ it('correctly tracks eligible vs total unique respondents', function () {
     expect($data->uniqueRespondents)->toBe(3)
         ->and($data->eligibleRespondents)->toBe(2);
 });
+
+it('separates flagged, excluded, and pending review counts on the dashboard', function () {
+    $fixture = dashboardFixture(uniqueRespondents: 4, submissions: [
+        'ibadah-yu' => 4,
+    ]);
+
+    $admin = App\Models\User::factory()->create();
+    $submissions = App\Models\SurveySubmission::query()
+        ->where('evaluation_period_id', $fixture->period->id)
+        ->orderBy('id')
+        ->get();
+
+    // Satu flagged (identical answers), keputusan masih pending.
+    $submissions[0]->qualityReview()->create([
+        'flags' => ['fast_completion' => false, 'identical_answers' => true],
+        'decision' => null,
+        'reason' => null,
+        'reviewed_by' => null,
+        'reviewed_at' => null,
+    ]);
+    // Satu flagged dan sudah diputuskan excluded.
+    $submissions[1]->qualityReview()->create([
+        'flags' => ['fast_completion' => true, 'identical_answers' => false],
+        'decision' => App\Domain\Quality\QualityDecision::Excluded,
+        'reason' => 'Durasi di bawah ambang.',
+        'reviewed_by' => $admin->id,
+        'reviewed_at' => now(),
+    ]);
+    // Satu diputuskan included tanpa flag.
+    $submissions[2]->qualityReview()->create([
+        'flags' => ['fast_completion' => false, 'identical_answers' => false],
+        'decision' => App\Domain\Quality\QualityDecision::Included,
+        'reason' => null,
+        'reviewed_by' => $admin->id,
+        'reviewed_at' => now(),
+    ]);
+    // Submission keempat tanpa quality review sama sekali.
+
+    $data = app(ReleaseOneDashboardQuery::class)->for($fixture->period);
+
+    expect($data->flaggedEvaluations)->toBe(2)
+        ->and($data->excludedEvaluations)->toBe(1)
+        ->and($data->pendingReviewEvaluations)->toBe(1);
+});

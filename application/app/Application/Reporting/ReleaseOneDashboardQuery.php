@@ -43,10 +43,27 @@ class ReleaseOneDashboardQuery
                 );
             });
 
+        $qualityCounts = DB::table('quality_reviews')
+            ->join('survey_submissions', 'quality_reviews.survey_submission_id', '=', 'survey_submissions.id')
+            ->where('survey_submissions.evaluation_period_id', $period->id)
+            ->where('survey_submissions.status', 'submitted')
+            ->selectRaw(implode(', ', [
+                "SUM(CASE WHEN JSON_EXTRACT(quality_reviews.flags, '$.fast_completion') = true OR JSON_EXTRACT(quality_reviews.flags, '$.identical_answers') = true THEN 1 ELSE 0 END) as flagged",
+                "SUM(CASE WHEN quality_reviews.decision = 'excluded' THEN 1 ELSE 0 END) as excluded",
+                'COUNT(*) as reviewed',
+            ]))
+            ->first();
+
+        $totalSubmitted = (int) $units->sum('valid');
+        $reviewed = (int) ($qualityCounts->reviewed ?? 0);
+
         return new ReleaseOneDashboardData(
             uniqueRespondents: (int) $respondents->unique_respondents,
-            totalEvaluations: $units->sum('valid'),
+            totalEvaluations: $totalSubmitted,
             eligibleRespondents: (int) $respondents->eligible_respondents,
+            flaggedEvaluations: (int) ($qualityCounts->flagged ?? 0),
+            excludedEvaluations: (int) ($qualityCounts->excluded ?? 0),
+            pendingReviewEvaluations: $totalSubmitted - $reviewed,
             units: $units,
         );
     }
