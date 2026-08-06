@@ -4,8 +4,10 @@ namespace App\Domain\Study;
 
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
+use App\Models\PeriodReadinessEvidence;
 use App\Models\UeqBenchmark;
 use App\Models\UeqItem;
+use App\Models\User;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -61,6 +63,28 @@ class PeriodReadinessService
         }
         if (! $period->identical_answers_flag_enabled) {
             $issues[] = 'Aturan jawaban identik wajib diaktifkan.';
+        }
+        if (User::query()
+            ->whereNotNull('email_verified_at')
+            ->whereNotNull('two_factor_secret')
+            ->whereNotNull('two_factor_confirmed_at')
+            ->count() !== 1) {
+            $issues[] = 'Tepat satu admin terverifikasi dengan 2FA aktif wajib tersedia.';
+        }
+
+        $evidenceKinds = PeriodReadinessEvidence::query()
+            ->where('evaluation_period_id', $period->id)
+            ->toBase()
+            ->pluck('kind');
+
+        if (! $evidenceKinds->contains(ReadinessEvidenceKind::Https->value)) {
+            $issues[] = 'Bukti HTTPS belum diverifikasi.';
+        }
+        if (! $evidenceKinds->contains(ReadinessEvidenceKind::BackupRestore->value)) {
+            $issues[] = 'Bukti uji pemulihan backup belum diverifikasi.';
+        }
+        if (! $evidenceKinds->contains(ReadinessEvidenceKind::SubmitTest->value)) {
+            $issues[] = 'Bukti uji submit survei belum diverifikasi.';
         }
         if (! $period->instrument_verified_at || ! $period->instrument_source) {
             $issues[] = 'Instrumen UEQ belum diverifikasi.';

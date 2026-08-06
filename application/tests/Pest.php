@@ -3,13 +3,16 @@
 use App\Application\Survey\SubmitSurvey;
 use App\Application\Survey\SubmitSurveyData;
 use App\Domain\Study\PeriodStatus;
+use App\Domain\Study\ReadinessEvidenceKind;
 use App\Domain\Survey\SurveyTokenService;
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
+use App\Models\PeriodReadinessEvidence;
 use App\Models\RespondentProfile;
 use App\Models\SurveySession;
 use App\Models\SurveySubmission;
 use App\Models\UeqItem;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -102,6 +105,37 @@ function validSubmitSurveyData(object $fixture, ?string $idempotencyKey = null):
         startedAt: CarbonImmutable::now()->subMinutes(4),
         answers: array_fill_keys(range(1, 26), 4),
     );
+}
+
+function releaseOneReadyAdminAndEvidence(EvaluationPeriod $period): User
+{
+    $admin = User::factory()->withTwoFactor()->create();
+
+    collect([
+        ReadinessEvidenceKind::Https->value => [
+            'https://survei.wongreang.example',
+            'TLS dan pengalihan HTTPS berhasil diverifikasi.',
+        ],
+        ReadinessEvidenceKind::BackupRestore->value => [
+            'ueq_saw_20260806_1200.sql',
+            'Backup dipulihkan dan data hasil restore telah diperiksa.',
+        ],
+        ReadinessEvidenceKind::SubmitTest->value => [
+            'SurveyHappyPathTest 1 test / 8 assertions',
+            'Alur submit lengkap berhasil dijalankan tanpa kegagalan.',
+        ],
+    ])->each(function (array $details, string $kind) use ($period, $admin): void {
+        PeriodReadinessEvidence::query()->create([
+            'evaluation_period_id' => $period->id,
+            'kind' => $kind,
+            'reference' => $details[0],
+            'notes' => $details[1],
+            'verified_by' => $admin->id,
+            'verified_at' => now(),
+        ]);
+    });
+
+    return $admin;
 }
 
 function dashboardFixture(int $uniqueRespondents, array $submissions): object

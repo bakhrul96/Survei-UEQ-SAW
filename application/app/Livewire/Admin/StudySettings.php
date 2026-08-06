@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin;
 
+use App\Application\Study\RecordReadinessEvidence;
 use App\Domain\Study\PeriodReadinessService;
 use App\Domain\Study\PeriodStatus;
+use App\Domain\Study\ReadinessEvidenceKind;
 use App\Models\EvaluationPeriod;
 use App\Models\UeqBenchmark;
+use App\Models\User;
 use DomainException;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -45,6 +48,20 @@ class StudySettings extends Component
     public bool $identicalAnswersFlagEnabled = true;
 
     public string $instrumentSource = '';
+
+    /** @var array<string, string> */
+    public array $evidenceReferences = [
+        'https' => '',
+        'backup_restore' => '',
+        'submit_test' => '',
+    ];
+
+    /** @var array<string, string> */
+    public array $evidenceNotes = [
+        'https' => '',
+        'backup_restore' => '',
+        'submit_test' => '',
+    ];
 
     public function mount(): void
     {
@@ -146,6 +163,33 @@ class StudySettings extends Component
             ->update(['verified_at' => now()]);
     }
 
+    public function recordEvidence(string $kind, RecordReadinessEvidence $recorder): void
+    {
+        $evidenceKind = ReadinessEvidenceKind::tryFrom($kind);
+        abort_if($evidenceKind === null, 404);
+
+        $validated = $this->validate([
+            "evidenceReferences.{$kind}" => ['required', 'string'],
+            "evidenceNotes.{$kind}" => ['required', 'string'],
+        ]);
+
+        $actor = auth()->user();
+        abort_unless($actor instanceof User, 401);
+
+        try {
+            $recorder->handle(
+                $this->period(),
+                $actor,
+                $evidenceKind,
+                $validated['evidenceReferences'][$kind],
+                $validated['evidenceNotes'][$kind],
+            );
+            session()->flash('evidenceStatus', 'Bukti kesiapan berhasil disimpan.');
+        } catch (DomainException $exception) {
+            $this->addError("evidence.{$kind}", $exception->getMessage());
+        }
+    }
+
     public function close(): void
     {
         $period = $this->period();
@@ -158,13 +202,30 @@ class StudySettings extends Component
 
     public function render(PeriodReadinessService $readiness): View
     {
-        $period = $this->period();
+        $period = $this->period()->load('readinessEvidence.verifier');
 
         return view('livewire.admin.study-settings', [
             'period' => $period,
             'issues' => $readiness->issues($period),
             'isDraft' => $period->status === PeriodStatus::Draft,
             'benchmarks' => UeqBenchmark::query()->where('version', $period->instrument_version)->orderBy('scale')->get(),
+            'evidenceDefinitions' => [
+                ReadinessEvidenceKind::Https->value => [
+                    'label' => 'HTTPS production',
+                    'example' => 'https://survei.wongreang.example',
+                ],
+                ReadinessEvidenceKind::BackupRestore->value => [
+                    'label' => 'Uji pemulihan backup',
+                    'example' => 'ueq_saw_20260806_1200.sql',
+                ],
+                ReadinessEvidenceKind::SubmitTest->value => [
+                    'label' => 'Uji submit survei',
+                    'example' => 'SurveyHappyPathTest 1 test / 8 assertions',
+                ],
+            ],
+            'evidenceByKind' => $period->readinessEvidence->keyBy(
+                fn ($evidence): string => $evidence->kind->value,
+            ),
         ])->layout('layouts.app', ['title' => 'Pengaturan Studi']);
     }
 

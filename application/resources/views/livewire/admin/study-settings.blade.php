@@ -70,6 +70,56 @@
         </flux:card>
     </form>
 
+    <flux:card class="space-y-4">
+        <div>
+            <flux:heading size="lg">Bukti kesiapan operasional</flux:heading>
+            <flux:text>Setiap verifikasi mencatat admin, waktu, referensi, dan catatan pemeriksaan.</flux:text>
+        </div>
+
+        @if (session('evidenceStatus'))
+            <flux:callout variant="success" icon="check-circle">{{ session('evidenceStatus') }}</flux:callout>
+        @endif
+
+        <div class="space-y-5">
+            @foreach ($evidenceDefinitions as $kind => $definition)
+                @php($evidence = $evidenceByKind->get($kind))
+                <section class="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-700" wire:key="evidence-{{ $kind }}">
+                    <div>
+                        <flux:heading size="md">{{ $definition['label'] }}</flux:heading>
+                        @if ($evidence)
+                            <dl class="mt-2 grid gap-2 text-sm md:grid-cols-2">
+                                <div><dt class="font-medium">Referensi</dt><dd class="break-all">{{ $evidence->reference }}</dd></div>
+                                <div><dt class="font-medium">Diverifikasi</dt><dd>{{ $evidence->verifier->name }} · {{ $evidence->verified_at->format('d M Y H:i') }}</dd></div>
+                                <div class="md:col-span-2"><dt class="font-medium">Catatan</dt><dd class="whitespace-pre-line">{{ $evidence->notes }}</dd></div>
+                            </dl>
+                        @else
+                            <flux:text class="mt-1">Belum diverifikasi.</flux:text>
+                        @endif
+                    </div>
+
+                    @if ($isDraft)
+                        <flux:input
+                            wire:model="evidenceReferences.{{ $kind }}"
+                            label="Referensi"
+                            placeholder="{{ $definition['example'] }}"
+                        />
+                        <flux:textarea
+                            wire:model="evidenceNotes.{{ $kind }}"
+                            label="Catatan verifikasi"
+                            rows="3"
+                        />
+                        @error("evidence.{$kind}")
+                            <flux:callout variant="danger" icon="exclamation-triangle">{{ $message }}</flux:callout>
+                        @enderror
+                        <flux:button wire:click="recordEvidence('{{ $kind }}')" variant="filled">
+                            Simpan bukti
+                        </flux:button>
+                    @endif
+                </section>
+            @endforeach
+        </div>
+    </flux:card>
+
     <flux:card class="space-y-3">
         <flux:heading size="lg">Verifikasi</flux:heading>
         <dl class="grid gap-3 text-sm md:grid-cols-2">

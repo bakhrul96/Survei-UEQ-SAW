@@ -2,8 +2,10 @@
 
 use App\Domain\Study\PeriodReadinessService;
 use App\Domain\Study\PeriodStatus;
+use App\Domain\Study\ReadinessEvidenceKind;
 use App\Livewire\Admin\StudySettings;
 use App\Models\EvaluationPeriod;
+use App\Models\PeriodReadinessEvidence;
 use App\Models\UeqBenchmark;
 use App\Models\UeqItem;
 use App\Models\User;
@@ -23,6 +25,32 @@ it('rejects activation while instrument and benchmarks are unverified', function
         ->and($issues)->toContain('Enam benchmark belum diverifikasi.');
 });
 
+it('reports every missing operational readiness requirement', function () {
+    $period = EvaluationPeriod::firstOrFail();
+
+    expect(app(PeriodReadinessService::class)->issues($period))
+        ->toContain('Tepat satu admin terverifikasi dengan 2FA aktif wajib tersedia.')
+        ->toContain('Bukti HTTPS belum diverifikasi.')
+        ->toContain('Bukti uji pemulihan backup belum diverifikasi.')
+        ->toContain('Bukti uji submit survei belum diverifikasi.');
+});
+
+it('keeps activation blocked until all three operational evidence records exist', function () {
+    $period = EvaluationPeriod::firstOrFail();
+    $period->update([
+        'instrument_source' => 'UEQ Bahasa Indonesia terverifikasi',
+        'instrument_verified_at' => now(),
+        'opens_at' => now(),
+        'closes_at' => now()->addMonth(),
+    ]);
+    UeqBenchmark::query()->update(['verified_at' => now()]);
+    releaseOneReadyAdminAndEvidence($period);
+    PeriodReadinessEvidence::query()->where('kind', ReadinessEvidenceKind::SubmitTest)->delete();
+
+    expect(fn () => app(PeriodReadinessService::class)->activate($period->fresh()))
+        ->toThrow(DomainException::class, 'Bukti uji submit survei belum diverifikasi.');
+});
+
 it('locks configuration when every readiness rule passes', function () {
     $period = EvaluationPeriod::firstOrFail();
     $period->update([
@@ -32,6 +60,7 @@ it('locks configuration when every readiness rule passes', function () {
         'closes_at' => now()->addMonth(),
     ]);
     UeqBenchmark::query()->update(['verified_at' => now()]);
+    releaseOneReadyAdminAndEvidence($period);
 
     $activated = app(PeriodReadinessService::class)->activate($period->fresh());
 
@@ -67,8 +96,8 @@ it('does not let an active period change locked fields', function () {
 });
 
 it('lets an admin verify, activate, and close the seeded period', function () {
-    $admin = User::factory()->create();
     $period = EvaluationPeriod::firstOrFail();
+    $admin = releaseOneReadyAdminAndEvidence($period);
     $settings = Livewire::actingAs($admin)->test(StudySettings::class)
         ->set('opensAt', now()->format('Y-m-d\TH:i'))
         ->set('closesAt', now()->addMonth()->format('Y-m-d\TH:i'))

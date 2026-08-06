@@ -7,6 +7,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\EvaluationPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property PeriodStatus $status
@@ -36,5 +37,11 @@ class EvaluationPeriod extends Model
             'identical_answers_flag_enabled' => 'boolean',
             'calculation_input_revision' => 'integer',
         ];
+    }
+
+    /** @return HasMany<PeriodReadinessEvidence, $this> */
+    public function readinessEvidence(): HasMany
+    {
+        return $this->hasMany(PeriodReadinessEvidence::class);
     }
 }
