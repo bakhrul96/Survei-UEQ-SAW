@@ -13,8 +13,9 @@ periode jika panel **Kesiapan aktivasi** masih menampilkan masalah.
 - Seluruh 23 migrasi berstatus `Ran`.
 - Data studi lokal: 1 periode, 13 unit, 26 item UEQ, 6 benchmark,
   0 submission, dan 0 jawaban.
-- Kondisi readiness lokal: 0 admin yang sekaligus email-verified dan 2FA-confirmed,
-  serta 0 bukti readiness. Kondisi ini sengaja tidak dibypass.
+- Kondisi readiness lokal: tepat 1 admin email-verified dan 2FA-confirmed,
+  serta 0 bukti readiness. Enrollment TOTP diverifikasi tanpa mencatat secret,
+  recovery code, maupun kode autentikasi.
 
 ## Bukti otomatis
 
@@ -114,9 +115,9 @@ Operator harus mencatat hasil tanpa data pribadi responden:
 | Dashboard | Unique respondent, submission, dan progress per modul terpisah dengan benar. |
 | Export | CSV dan XLSX dapat dibuka, metadata periode cocok, identifier privat tidak ada. |
 
-Baseline ini belum memuat sign-off UAT manual produksi, karena admin TOTP,
-domain HTTPS, kontak penelitian, dan database restore harus disediakan oleh
-operator berwenang.
+Baseline ini belum memuat sign-off UAT manual produksi, karena domain HTTPS,
+kontak penelitian, dan database restore masih harus disediakan atau disahkan
+oleh operator berwenang.
 
 ## Aktivasi dan verifikasi lock
 
@@ -138,6 +139,5 @@ survei yang telah dikumpulkan.
 ## Keputusan readiness saat ini
 
 Implementasi, gate otomatis, dan dump sumber privat siap untuk UAT operator.
-Aktivasi produksi belum diotorisasi sampai admin TOTP, kontak penelitian,
-HTTPS, restore terverifikasi, tiga evidence record, dan UAT manual memperoleh
-sign-off nyata.
+Aktivasi produksi belum diotorisasi sampai kontak penelitian, HTTPS, restore
+terverifikasi, tiga evidence record, dan UAT manual memperoleh sign-off nyata.
