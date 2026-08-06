@@ -5,7 +5,11 @@ use App\Models\AnonymousRespondent;
 use App\Models\EvaluationPeriod;
 
 it('issues an encrypted cookie while storing only a keyed hash', function () {
-    EvaluationPeriod::factory()->create(['slug' => 'riset-2026', 'status' => PeriodStatus::Active]);
+    EvaluationPeriod::factory()->create([
+        'slug' => 'riset-2026',
+        'status' => PeriodStatus::Active,
+        'configuration_locked_at' => now(),
+    ]);
 
     $response = $this->get('/s/wong-reang/riset-2026');
 
@@ -18,7 +22,11 @@ it('issues an encrypted cookie while storing only a keyed hash', function () {
 });
 
 it('reuses a valid survey token instead of creating a second respondent', function () {
-    EvaluationPeriod::factory()->create(['slug' => 'riset-2026', 'status' => PeriodStatus::Active]);
+    EvaluationPeriod::factory()->create([
+        'slug' => 'riset-2026',
+        'status' => PeriodStatus::Active,
+        'configuration_locked_at' => now(),
+    ]);
     $first = $this->get('/s/wong-reang/riset-2026');
     $plainToken = $first->getCookie('ueq_survey_token')->getValue();
 
@@ -35,3 +43,20 @@ it('does not expose consent or ineligible pages for an inactive period', functio
     $this->get(route('survey.consent', $period))->assertNotFound();
     $this->get(route('survey.ineligible', $period))->assertNotFound();
 });
+
+it('does not issue a token outside the configured survey window', function (array $attributes) {
+    $period = EvaluationPeriod::factory()->create([
+        'slug' => 'window-closed-2026',
+        'status' => PeriodStatus::Active,
+        'configuration_locked_at' => now(),
+        ...$attributes,
+    ]);
+
+    $this->get(route('survey.entry', $period))->assertNotFound();
+    $this->get(route('survey.consent', $period))->assertNotFound();
+
+    expect(AnonymousRespondent::count())->toBe(0);
+})->with([
+    'before opening' => [['opens_at' => now()->addMinute(), 'closes_at' => now()->addHour()]],
+    'after closing' => [['opens_at' => now()->subHour(), 'closes_at' => now()->subMinute()]],
+]);

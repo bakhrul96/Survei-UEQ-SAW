@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Survey;
 
-use App\Domain\Study\PeriodStatus;
 use App\Domain\Survey\SurveyContext;
 use App\Models\EvaluationPeriod;
 use App\Models\RespondentProfile;
@@ -23,18 +22,15 @@ class ConsentScreener extends Component
 
     public bool $hasUsedWongReang = false;
 
-    public function mount(EvaluationPeriod $period): void
+    public function mount(EvaluationPeriod $period, SurveyContext $context): void
     {
-        abort_unless($period->status === PeriodStatus::Active, 404);
-
-        $this->period = $period;
+        $this->period = $context->ensureAccepting($period);
     }
 
     public function submit(SurveyContext $context): Redirector|RedirectResponse
     {
         $period = EvaluationPeriod::query()->findOrFail($this->period->id);
-        abort_unless($period->status === PeriodStatus::Active, 404);
-        $this->period = $period;
+        $this->period = $context->ensureAccepting($period);
 
         $validated = $this->validate([
             'consent' => ['accepted'],

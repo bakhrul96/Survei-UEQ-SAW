@@ -2,6 +2,10 @@
 
 namespace App\Application\Survey;
 
+use App\Domain\Study\SurveyPeriodGate;
+use App\Models\EvaluationPeriod;
+use App\Models\EvaluationUnit;
+use App\Models\RespondentProfile;
 use App\Models\SurveySession;
 use App\Models\SurveySubmission;
 use DomainException;
@@ -11,8 +15,33 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class SubmitSurvey
 {
+    public function __construct(
+        private readonly SurveyPeriodGate $periodGate,
+    ) {}
+
     public function handle(SubmitSurveyData $data): SurveySubmission
     {
+        $period = EvaluationPeriod::query()->findOrFail($data->periodId);
+        $this->periodGate->assertAccepting($period);
+
+        $profileExists = RespondentProfile::query()
+            ->where('evaluation_period_id', $data->periodId)
+            ->where('anonymous_respondent_id', $data->respondentId)
+            ->where('eligible', true)
+            ->exists();
+        throw_unless($profileExists, DomainException::class, 'Responden tidak memenuhi syarat.');
+
+        $unitExists = EvaluationUnit::query()
+            ->whereKey($data->unitId)
+            ->where('is_active', true)
+            ->exists();
+        throw_unless($unitExists, DomainException::class, 'Modul tidak tersedia.');
+        throw_unless(
+            $data->instrumentVersion === $period->instrument_version,
+            DomainException::class,
+            'Versi instrumen tidak sesuai.',
+        );
+
         $attempts = RateLimiter::increment(
             'survey-submit:'.$data->respondentId,
             60,

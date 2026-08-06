@@ -3,7 +3,6 @@
 namespace App\Livewire\Survey;
 
 use App\Application\Survey\StartSurveySession;
-use App\Domain\Study\PeriodStatus;
 use App\Domain\Survey\SurveyContext;
 use App\Models\AnonymousRespondent;
 use App\Models\EvaluationPeriod;
@@ -28,9 +27,7 @@ class UnitChooser extends Component
 
     public function mount(EvaluationPeriod $period, SurveyContext $context): void
     {
-        abort_unless($period->status === PeriodStatus::Active, 404);
-
-        $this->period = $period;
+        $this->period = $context->ensureAccepting($period);
         $respondent = $context->respondent();
         $this->ensureEligible($respondent);
         $this->loadUnits($respondent);
@@ -39,8 +36,7 @@ class UnitChooser extends Component
     public function choose(int $unitId, SurveyContext $context, StartSurveySession $startSession): Redirector|RedirectResponse
     {
         $period = EvaluationPeriod::query()->findOrFail($this->period->id);
-        abort_unless($period->status === PeriodStatus::Active, 404);
-        $this->period = $period;
+        $this->period = $context->ensureAccepting($period);
 
         $respondent = $context->respondent();
         $this->ensureEligible($respondent);

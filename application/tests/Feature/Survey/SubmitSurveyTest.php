@@ -68,3 +68,47 @@ it('stores duration in whole seconds', function () {
 
     expect($duration)->toBeInt();
 });
+
+it('rejects a direct submission after the survey window closes', function () {
+    $fixture = surveyFixture();
+    $fixture->period->update(['closes_at' => now()->subMinute()]);
+
+    expect(fn () => app(SubmitSurvey::class)->handle(validSubmitSurveyData($fixture)))
+        ->toThrow(DomainException::class, 'Periode penelitian sudah ditutup.');
+
+    expect(SurveySubmission::count())->toBe(0)
+        ->and(SurveyAnswer::count())->toBe(0)
+        ->and($fixture->session->fresh()->submitted_count)->toBe(0);
+});
+
+it('rejects a direct submission from an ineligible respondent', function () {
+    $fixture = surveyFixture();
+    $fixture->respondent->profiles()->update(['eligible' => false]);
+
+    expect(fn () => app(SubmitSurvey::class)->handle(validSubmitSurveyData($fixture)))
+        ->toThrow(DomainException::class, 'Responden tidak memenuhi syarat.');
+
+    expect(SurveySubmission::count())->toBe(0)
+        ->and(SurveyAnswer::count())->toBe(0);
+});
+
+it('rejects a direct submission with a mismatched instrument version', function () {
+    $fixture = surveyFixture();
+    $data = validSubmitSurveyData($fixture);
+    $data = new SubmitSurveyData(
+        periodId: $data->periodId,
+        respondentId: $data->respondentId,
+        sessionId: $data->sessionId,
+        unitId: $data->unitId,
+        idempotencyKey: $data->idempotencyKey,
+        instrumentVersion: 'UEQ-TAMPERED',
+        startedAt: $data->startedAt,
+        answers: $data->answers,
+    );
+
+    expect(fn () => app(SubmitSurvey::class)->handle($data))
+        ->toThrow(DomainException::class, 'Versi instrumen tidak sesuai.');
+
+    expect(SurveySubmission::count())->toBe(0)
+        ->and(SurveyAnswer::count())->toBe(0);
+});

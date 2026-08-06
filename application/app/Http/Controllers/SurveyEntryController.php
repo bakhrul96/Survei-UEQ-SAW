@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\Study\PeriodStatus;
+use App\Domain\Study\SurveyPeriodGate;
 use App\Domain\Survey\SurveyTokenService;
 use App\Models\EvaluationPeriod;
 use Carbon\CarbonInterface;
@@ -12,9 +12,13 @@ use LogicException;
 
 class SurveyEntryController
 {
-    public function __invoke(Request $request, EvaluationPeriod $period, SurveyTokenService $tokens): RedirectResponse
-    {
-        abort_unless($period->status === PeriodStatus::Active, 404);
+    public function __invoke(
+        Request $request,
+        EvaluationPeriod $period,
+        SurveyTokenService $tokens,
+        SurveyPeriodGate $gate,
+    ): RedirectResponse {
+        abort_if($gate->issues($period) !== [], 404);
 
         $cookieName = config()->string('survey.cookie_name');
         if ($cookieName === '') {

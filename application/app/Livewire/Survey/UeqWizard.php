@@ -5,7 +5,6 @@ namespace App\Livewire\Survey;
 use App\Application\Survey\StartSurveySession;
 use App\Application\Survey\SubmitSurvey;
 use App\Application\Survey\SubmitSurveyData;
-use App\Domain\Study\PeriodStatus;
 use App\Domain\Survey\SurveyContext;
 use App\Domain\Survey\SurveyDraftKey;
 use App\Models\AnonymousRespondent;
@@ -47,7 +46,8 @@ class UeqWizard extends Component
 
     public function mount(EvaluationPeriod $period, EvaluationUnit $unit, SurveyContext $context, StartSurveySession $startSession): void
     {
-        abort_unless($period->status === PeriodStatus::Active && $unit->is_active, 404);
+        $period = $context->ensureAccepting($period);
+        abort_unless($unit->is_active, 404);
 
         $respondent = $context->respondent();
         $this->ensureEligible($period, $respondent);
@@ -80,7 +80,7 @@ class UeqWizard extends Component
     public function submit(SubmitSurvey $submitSurvey, SurveyContext $context): Redirector|RedirectResponse
     {
         $period = EvaluationPeriod::query()->findOrFail($this->period->id);
-        abort_unless($period->status === PeriodStatus::Active, 404);
+        $period = $context->ensureAccepting($period);
         $respondent = $context->respondent();
         abort_unless($respondent->id === $this->respondentId, 403);
         $this->ensureEligible($period, $respondent);

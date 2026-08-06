@@ -16,6 +16,7 @@ class Complete extends Component
 
     public function mount(EvaluationPeriod $period, SurveyContext $context): void
     {
+        $period = $context->ensureAccepting($period);
         $respondent = $context->respondent();
         $this->period = $period;
         $this->submission = SurveySubmission::query()
