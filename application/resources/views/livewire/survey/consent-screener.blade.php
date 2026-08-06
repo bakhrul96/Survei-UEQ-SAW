@@ -5,7 +5,26 @@
     </div>
 
     <flux:card class="space-y-4">
-        <p class="whitespace-pre-line text-sm leading-6 text-zinc-700 dark:text-zinc-300">{{ $period->consent_text }}</p>
+        <div class="space-y-4 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
+            <section>
+                <h2 class="font-semibold text-zinc-900 dark:text-white">Tujuan penelitian</h2>
+                <p class="whitespace-pre-line">{{ $period->consent_text }}</p>
+            </section>
+            <section>
+                <h2 class="font-semibold text-zinc-900 dark:text-white">Data yang disimpan</h2>
+                <p class="whitespace-pre-line">{{ $period->consent_data_description }}</p>
+            </section>
+            <section>
+                <h2 class="font-semibold text-zinc-900 dark:text-white">Penggunaan cookie</h2>
+                <p class="whitespace-pre-line">{{ $period->consent_cookie_description }}</p>
+            </section>
+            <p><span class="font-semibold text-zinc-900 dark:text-white">Estimasi waktu:</span> {{ $period->consent_estimated_minutes }} menit.</p>
+            <section>
+                <h2 class="font-semibold text-zinc-900 dark:text-white">Hak berhenti</h2>
+                <p class="whitespace-pre-line">{{ $period->consent_withdrawal_description }}</p>
+            </section>
+            <p><span class="font-semibold text-zinc-900 dark:text-white">Kontak penelitian:</span> {{ $period->research_contact }}</p>
+        </div>
 
         <form wire:submit="submit" class="space-y-5">
             <flux:checkbox wire:model="consent" label="Saya telah membaca informasi penelitian dan bersedia berpartisipasi." />

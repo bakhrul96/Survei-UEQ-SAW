@@ -28,6 +28,22 @@ class StudySettings extends Component
 
     public string $consentText = '';
 
+    public string $consentDataDescription = '';
+
+    public string $consentCookieDescription = '';
+
+    public int $consentEstimatedMinutes = 10;
+
+    public string $consentWithdrawalDescription = '';
+
+    public string $researchContact = '';
+
+    public int $fastResponseSeconds = 120;
+
+    public string $qualityRulesVersion = '';
+
+    public bool $identicalAnswersFlagEnabled = true;
+
     public string $instrumentSource = '';
 
     public function mount(): void
@@ -51,6 +67,14 @@ class StudySettings extends Component
             'targetPerUnit' => ['required', 'integer', 'gte:minimumPerUnit'],
             'targetBasis' => ['required', 'string'],
             'consentText' => ['required', 'string'],
+            'consentDataDescription' => ['required', 'string'],
+            'consentCookieDescription' => ['required', 'string'],
+            'consentEstimatedMinutes' => ['required', 'integer', 'min:1'],
+            'consentWithdrawalDescription' => ['required', 'string'],
+            'researchContact' => ['required', 'string'],
+            'fastResponseSeconds' => ['required', 'integer', 'min:1'],
+            'qualityRulesVersion' => ['required', 'string'],
+            'identicalAnswersFlagEnabled' => ['accepted'],
             'instrumentSource' => ['nullable', 'string'],
         ]);
 
@@ -64,6 +88,14 @@ class StudySettings extends Component
             'target_per_unit' => $validated['targetPerUnit'],
             'target_basis' => trim($validated['targetBasis']),
             'consent_text' => trim($validated['consentText']),
+            'consent_data_description' => trim($validated['consentDataDescription']),
+            'consent_cookie_description' => trim($validated['consentCookieDescription']),
+            'consent_estimated_minutes' => $validated['consentEstimatedMinutes'],
+            'consent_withdrawal_description' => trim($validated['consentWithdrawalDescription']),
+            'research_contact' => trim($validated['researchContact']),
+            'fast_response_seconds' => $validated['fastResponseSeconds'],
+            'quality_rules_version' => trim($validated['qualityRulesVersion']),
+            'identical_answers_flag_enabled' => true,
             'instrument_source' => $instrumentSource,
             'instrument_verified_at' => $instrumentSource === $period->instrument_source
                 ? $period->instrument_verified_at
@@ -150,6 +182,14 @@ class StudySettings extends Component
         $this->targetPerUnit = $period->target_per_unit;
         $this->targetBasis = $period->target_basis;
         $this->consentText = $period->consent_text;
+        $this->consentDataDescription = $period->consent_data_description;
+        $this->consentCookieDescription = $period->consent_cookie_description;
+        $this->consentEstimatedMinutes = $period->consent_estimated_minutes;
+        $this->consentWithdrawalDescription = $period->consent_withdrawal_description;
+        $this->researchContact = $period->research_contact;
+        $this->fastResponseSeconds = $period->fast_response_seconds;
+        $this->qualityRulesVersion = $period->quality_rules_version;
+        $this->identicalAnswersFlagEnabled = $period->identical_answers_flag_enabled;
         $this->instrumentSource = $period->instrument_source ?? '';
     }
 }

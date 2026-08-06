@@ -38,6 +38,30 @@ class PeriodReadinessService
         if (trim($period->consent_text) === '') {
             $issues[] = 'Teks consent wajib diisi.';
         }
+        if (trim((string) $period->consent_data_description) === '') {
+            $issues[] = 'Deskripsi data consent wajib diisi.';
+        }
+        if (trim((string) $period->consent_cookie_description) === '') {
+            $issues[] = 'Penjelasan cookie consent wajib diisi.';
+        }
+        if ((int) $period->consent_estimated_minutes < 1) {
+            $issues[] = 'Estimasi waktu consent harus minimal satu menit.';
+        }
+        if (trim((string) $period->consent_withdrawal_description) === '') {
+            $issues[] = 'Hak berhenti consent wajib dijelaskan.';
+        }
+        if (trim((string) $period->research_contact) === '') {
+            $issues[] = 'Kontak penelitian wajib diisi.';
+        }
+        if ((int) $period->fast_response_seconds < 1) {
+            $issues[] = 'Ambang respons cepat harus lebih besar dari nol.';
+        }
+        if (trim((string) $period->quality_rules_version) === '') {
+            $issues[] = 'Versi aturan kualitas wajib diisi.';
+        }
+        if (! $period->identical_answers_flag_enabled) {
+            $issues[] = 'Aturan jawaban identik wajib diaktifkan.';
+        }
         if (! $period->instrument_verified_at || ! $period->instrument_source) {
             $issues[] = 'Instrumen UEQ belum diverifikasi.';
         }

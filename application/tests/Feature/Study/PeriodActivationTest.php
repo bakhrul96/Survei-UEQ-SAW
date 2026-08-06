@@ -133,3 +133,28 @@ it('rejects malformed current-version item and wrong-version benchmark readiness
         ->toContain('Kutub positif item instrumen tidak valid.')
         ->toContain('Enam benchmark belum diverifikasi.');
 });
+
+it('rejects incomplete consent and quality configuration before activation', function (string $attribute, mixed $value, string $message) {
+    $period = EvaluationPeriod::firstOrFail();
+    $period->forceFill([
+        'consent_data_description' => 'Jawaban UEQ mentah dan metadata pengisian.',
+        'consent_cookie_description' => 'Cookie anonim mencegah penilaian modul yang sama.',
+        'consent_estimated_minutes' => 10,
+        'consent_withdrawal_description' => 'Partisipasi dapat dihentikan sebelum submit.',
+        'research_contact' => 'peneliti@example.test',
+        'quality_rules_version' => 'quality-rules-v1',
+        'identical_answers_flag_enabled' => true,
+        $attribute => $value,
+    ]);
+
+    expect(app(PeriodReadinessService::class)->issues($period))->toContain($message);
+})->with([
+    'stored data' => ['consent_data_description', '', 'Deskripsi data consent wajib diisi.'],
+    'cookie use' => ['consent_cookie_description', '', 'Penjelasan cookie consent wajib diisi.'],
+    'estimated time' => ['consent_estimated_minutes', 0, 'Estimasi waktu consent harus minimal satu menit.'],
+    'withdrawal right' => ['consent_withdrawal_description', '', 'Hak berhenti consent wajib dijelaskan.'],
+    'research contact' => ['research_contact', '', 'Kontak penelitian wajib diisi.'],
+    'quality rules version' => ['quality_rules_version', '', 'Versi aturan kualitas wajib diisi.'],
+    'identical-answer rule' => ['identical_answers_flag_enabled', false, 'Aturan jawaban identik wajib diaktifkan.'],
+    'fast-response threshold' => ['fast_response_seconds', 0, 'Ambang respons cepat harus lebih besar dari nol.'],
+]);

@@ -23,6 +23,26 @@ it('renders survey entry and consent for an unauthenticated respondent', functio
         ->assertSee('Anda belum memenuhi kriteria');
 });
 
+it('renders every required research consent element', function () {
+    $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period->forceFill([
+        'consent_text' => 'Tujuan penelitian adalah mengevaluasi pengalaman pengguna Wong Reang.',
+        'consent_data_description' => 'Data yang disimpan adalah jawaban UEQ dan metadata pengisian.',
+        'consent_cookie_description' => 'Cookie anonim digunakan untuk mencegah duplikasi.',
+        'consent_estimated_minutes' => 10,
+        'consent_withdrawal_description' => 'Anda dapat berhenti sebelum mengirim jawaban.',
+        'research_contact' => 'peneliti@example.test',
+    ]);
+
+    Livewire::test(ConsentScreener::class, ['period' => $period])
+        ->assertSee('Tujuan penelitian adalah mengevaluasi pengalaman pengguna Wong Reang.')
+        ->assertSee('Data yang disimpan adalah jawaban UEQ dan metadata pengisian.')
+        ->assertSee('Cookie anonim digunakan untuk mencegah duplikasi.')
+        ->assertSee('10 menit')
+        ->assertSee('Anda dapat berhenti sebelum mengirim jawaban.')
+        ->assertSee('peneliti@example.test');
+});
+
 it('stores consent and allows only eligible respondents', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'minimum_age' => 17, 'configuration_locked_at' => now()]);
     $issued = app(SurveyTokenService::class)->issue();

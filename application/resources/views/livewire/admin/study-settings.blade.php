@@ -40,7 +40,27 @@
                 <flux:input wire:model="instrumentSource" label="Sumber instrumen UEQ" :disabled="! $isDraft" />
             </div>
             <flux:textarea wire:model="targetBasis" label="Dasar target sampel" rows="3" :disabled="! $isDraft" />
-            <flux:textarea wire:model="consentText" label="Teks consent" rows="5" :disabled="! $isDraft" />
+
+            <div class="space-y-4 border-t border-zinc-200 pt-4 dark:border-zinc-700">
+                <flux:heading size="md">Informasi consent</flux:heading>
+                <flux:textarea wire:model="consentText" label="Tujuan penelitian" rows="4" :disabled="! $isDraft" />
+                <flux:textarea wire:model="consentDataDescription" label="Data yang disimpan" rows="3" :disabled="! $isDraft" />
+                <flux:textarea wire:model="consentCookieDescription" label="Penggunaan cookie" rows="3" :disabled="! $isDraft" />
+                <div class="grid gap-4 md:grid-cols-2">
+                    <flux:input wire:model="consentEstimatedMinutes" type="number" min="1" label="Estimasi waktu (menit)" :disabled="! $isDraft" />
+                    <flux:input wire:model="researchContact" label="Kontak penelitian" :disabled="! $isDraft" />
+                </div>
+                <flux:textarea wire:model="consentWithdrawalDescription" label="Hak berhenti" rows="3" :disabled="! $isDraft" />
+            </div>
+
+            <div class="space-y-4 border-t border-zinc-200 pt-4 dark:border-zinc-700">
+                <flux:heading size="md">Aturan kualitas data</flux:heading>
+                <div class="grid gap-4 md:grid-cols-2">
+                    <flux:input wire:model="fastResponseSeconds" type="number" min="1" label="Ambang respons cepat (detik)" :disabled="! $isDraft" />
+                    <flux:input wire:model="qualityRulesVersion" label="Versi aturan kualitas" :disabled="! $isDraft" />
+                </div>
+                <flux:checkbox wire:model="identicalAnswersFlagEnabled" label="Aktifkan penanda jawaban identik" :disabled="! $isDraft" />
+            </div>
 
             @if ($isDraft)
                 <flux:button type="submit" variant="primary">Simpan konfigurasi</flux:button>

@@ -15,7 +15,9 @@ class QualityFlagger
 
         return [
             'fast_completion' => $submission->duration_seconds < $submission->period->fast_response_seconds,
-            'identical_answers' => $answers->count() === 26 && $answers->pluck('raw_score')->unique()->count() === 1,
+            'identical_answers' => $submission->period->identical_answers_flag_enabled
+                && $answers->count() === 26
+                && $answers->pluck('raw_score')->unique()->count() === 1,
         ];
     }
 }
