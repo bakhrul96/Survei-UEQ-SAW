@@ -53,7 +53,13 @@
         <!-- Hasil UEQ -->
         <flux:card class="space-y-4">
             <flux:heading size="lg">Hasil UEQ per Modul &amp; Skala</flux:heading>
-            <div class="overflow-x-auto">
+            <div
+                data-release-two-scroll-region
+                role="region"
+                tabindex="0"
+                aria-label="Hasil UEQ per modul dan skala"
+                class="overflow-x-auto rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+            >
                 <table class="w-full text-left text-sm border-collapse">
                     <thead>
                         <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700">
@@ -102,7 +108,13 @@
                 <flux:heading size="lg">Pooled reliability</flux:heading>
                 <flux:text class="text-xs text-zinc-500">Diagnostik pooled lintas modul; bukan pengganti reliabilitas per modul.</flux:text>
             </div>
-            <div class="overflow-x-auto">
+            <div
+                data-release-two-scroll-region
+                role="region"
+                tabindex="0"
+                aria-label="Reliabilitas pooled lintas modul"
+                class="overflow-x-auto rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+            >
                 <table class="w-full text-left text-sm border-collapse">
                     <thead><tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700"><th class="py-2 px-3">Skala</th><th class="py-2 px-3">Scope</th><th class="py-2 px-3 text-center">Pooled n</th><th class="py-2 px-3 text-right">Alpha</th><th class="py-2 px-3">Warning</th><th class="py-2 px-3">Ketidaktersediaan</th></tr></thead>
                     <tbody class="divide-y divide-zinc-200">
@@ -117,7 +129,13 @@
         <!-- Peringkat SAW -->
         <flux:card class="space-y-4">
             <flux:heading size="lg">Peringkat SAW (S0 Baseline Informan)</flux:heading>
-            <div class="overflow-x-auto">
+            <div
+                data-release-two-scroll-region
+                role="region"
+                tabindex="0"
+                aria-label="Peringkat SAW baseline informan"
+                class="overflow-x-auto rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+            >
                 <table class="w-full text-left text-sm border-collapse">
                     <thead>
                         <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700">
@@ -172,7 +190,13 @@
                         S0 = Baseline Informan · S1 = Dominasi UX (0.6 C1, 0.2 C2, 0.2 C3) · S2 = Dominasi Pertimbangan Teknis (0.2 C1, 0.4 C2, 0.4 C3)
                     </flux:text>
                 </div>
-                <div class="overflow-x-auto">
+                <div
+                    data-release-two-scroll-region
+                    role="region"
+                    tabindex="0"
+                    aria-label="Analisis sensitivitas peringkat"
+                    class="overflow-x-auto rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+                >
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700">
@@ -254,7 +278,13 @@
 
             <!-- Tabel Daftar Expert Judgment -->
             @if($run->expertJudgments->isNotEmpty())
-                <div class="overflow-x-auto">
+                <div
+                    data-release-two-scroll-region
+                    role="region"
+                    tabindex="0"
+                    aria-label="Backlog operasional Expert Judgment"
+                    class="overflow-x-auto rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+                >
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700">

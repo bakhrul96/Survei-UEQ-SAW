@@ -39,3 +39,42 @@ it('associates every expert judgment label with its control', function (): void 
             })()
         JS);
 });
+
+it('makes every calculation table a named keyboard region', function (): void {
+    $scenario = ReleaseTwoFixture::scenario();
+    $this->actingAs($scenario->admin);
+
+    $page = visit(route('admin.calculations'))
+        ->resize(1280, 800)
+        ->waitForText('Kalkulasi UEQ dan SAW')
+        ->press('Jalankan preview')
+        ->waitForText('Pooled reliability');
+
+    $page->assertScript(<<<'JS'
+        (() => {
+            const regions = Array.from(document.querySelectorAll('[data-release-two-scroll-region]'))
+                .filter((region) => region.offsetParent !== null);
+
+            return regions.length === 4
+                && regions.every((region) =>
+                    region.getAttribute('role') === 'region'
+                    && region.tabIndex === 0
+                    && (region.getAttribute('aria-label')?.trim().length ?? 0) > 0
+                    && region.classList.contains('focus-visible:ring-2')
+                );
+        })()
+    JS);
+
+    $page->script("() => document.querySelector('[data-release-two-scroll-region]').focus()");
+
+    $page->assertScript(<<<'JS'
+        (() => {
+            const region = document.querySelector('[data-release-two-scroll-region]');
+
+            return region === document.activeElement && region.matches(':focus');
+        })()
+    JS)
+        ->assertNoAccessibilityIssues(1)
+        ->assertNoJavaScriptErrors()
+        ->assertNoBrokenImages();
+});
