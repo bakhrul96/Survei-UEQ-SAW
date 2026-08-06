@@ -971,7 +971,7 @@ Update `application/docs/release-2-runbook.md` with:
 
 Mark checkboxes in this plan only for commands that were actually run and whose output was read.
 
-- [ ] **Step 6: Commit final evidence**
+- [x] **Step 6: Commit final evidence**
 
 ```bash
 git add application/tests/Browser/AdminAnalysisFlowTest.php application/tests/Browser/ReleaseThreeFlowTest.php application/docs/release-2-runbook.md docs/superpowers/plans/2026-08-06-ueq-saw-release-2-gap-remediation.md
