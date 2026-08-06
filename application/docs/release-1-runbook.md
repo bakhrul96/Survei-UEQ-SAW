@@ -7,6 +7,8 @@ periode jika panel **Kesiapan aktivasi** masih menampilkan masalah.
 ## Baseline terverifikasi 2026-08-06
 
 - Commit implementasi yang diverifikasi: `eaf9c263ea216fbc727e8d8eb5561223cb9c5b92`.
+- Gate operasional terakhir dijalankan pada HEAD `7f3c586` di worktree
+  `codex/release-one-remediation`.
 - Lingkungan lokal: MySQL 8.4.10, PHP 8.5.4, Node 22.23.2, npm 10.9.8.
 - Seluruh 23 migrasi berstatus `Ran`.
 - Data studi lokal: 1 periode, 13 unit, 26 item UEQ, 6 benchmark,
@@ -72,9 +74,16 @@ ke database tersebut, lalu catat jumlah baris untuk:
 - `survey_submissions`;
 - `survey_answers`.
 
-Referensi backup/restore baru belum diterbitkan pada baseline lokal ini. Bukti
-baru sah setelah file privat benar-benar dipulihkan dan jumlah baris hasil
-restore cocok dengan sumber.
+Dump sumber lokal `ueq_saw_release_one_uat.sql` dibuat ulang pada 2026-08-06
+dengan `mysqldump` 8.4.10. Direktori memiliki mode `700`, file memiliki mode
+`600`, dan file berada di lokasi yang diabaikan Git. Jumlah baris sumber saat
+dump dibuat adalah 23 migrasi, 1 periode, 13 unit, 26 item, 6 benchmark,
+0 submission, dan 0 jawaban.
+
+Uji restore belum dijalankan: database khusus `ueq_saw_restore` belum tersedia
+dan akun aplikasi tidak mempunyai hak membuat database. Bukti backup/restore
+baru sah setelah restore operator yang disediakan secara out of band memulihkan
+file tersebut dan seluruh jumlah baris hasil restore cocok dengan sumber.
 
 ## Evidence readiness di Study Settings
 
@@ -128,6 +137,7 @@ survei yang telah dikumpulkan.
 
 ## Keputusan readiness saat ini
 
-Implementasi dan gate otomatis siap untuk UAT operator. Aktivasi produksi
-belum diotorisasi sampai admin TOTP, kontak penelitian, HTTPS, backup/restore,
-tiga evidence record, dan UAT manual memperoleh sign-off nyata.
+Implementasi, gate otomatis, dan dump sumber privat siap untuk UAT operator.
+Aktivasi produksi belum diotorisasi sampai admin TOTP, kontak penelitian,
+HTTPS, restore terverifikasi, tiga evidence record, dan UAT manual memperoleh
+sign-off nyata.
