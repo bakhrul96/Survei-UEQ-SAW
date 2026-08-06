@@ -36,7 +36,15 @@
                     <flux:text class="text-xs text-zinc-500">Dikunci oleh {{ $run->lockedBy->name }} pada {{ $run->official_locked_at?->format('d M Y H:i') }}</flux:text>
                 @endif
             </div>
-            <flux:text class="text-xs">Versi: {{ $run->algorithm_version }} · Input hash: <code class="rounded bg-zinc-100 px-1 py-0.5 font-mono text-zinc-800">{{ $run->input_hash }}</code> · Included: {{ $run->included_count }} · Excluded: {{ $run->excluded_count }}</flux:text>
+            <dl class="grid gap-3 text-xs md:grid-cols-2 lg:grid-cols-4">
+                <div><dt class="font-medium text-zinc-500">ID run</dt><dd>#{{ $run->id }}</dd></div>
+                <div><dt class="font-medium text-zinc-500">Versi algoritma</dt><dd>{{ $run->algorithm_version }}</dd></div>
+                <div><dt class="font-medium text-zinc-500">Status</dt><dd>{{ strtoupper($run->status) }}</dd></div>
+                <div><dt class="font-medium text-zinc-500">Dibuat oleh</dt><dd>{{ $run->creator->name }}</dd></div>
+                <div><dt class="font-medium text-zinc-500">Waktu kalkulasi</dt><dd>{{ $run->calculated_at?->format('d M Y H:i:s') }}</dd></div>
+                <div><dt class="font-medium text-zinc-500">Included / Excluded</dt><dd>{{ $run->included_count }} / {{ $run->excluded_count }}</dd></div>
+                <div class="md:col-span-2"><dt class="font-medium text-zinc-500">Input hash</dt><dd><code class="break-all rounded bg-zinc-100 px-1 py-0.5 font-mono text-zinc-800">{{ $run->input_hash }}</code></dd></div>
+            </dl>
             @foreach($run->warnings as $warning)
                 <flux:text class="text-amber-700 text-xs font-medium">⚠️ {{ $warning }}</flux:text>
             @endforeach
@@ -55,9 +63,13 @@
                             <th class="py-2 px-3 text-right">Mean</th>
                             <th class="py-2 px-3 text-right">SD</th>
                             <th class="py-2 px-3 text-right">SE</th>
+                            <th class="py-2 px-3 text-right">CI 95% bawah</th>
+                            <th class="py-2 px-3 text-right">CI 95% atas</th>
                             <th class="py-2 px-3 text-right">Alpha</th>
+                            <th class="py-2 px-3">Warning reliabilitas</th>
+                            <th class="py-2 px-3 text-right">Batas Good</th>
                             <th class="py-2 px-3 text-right">Gap</th>
-                            <th class="py-2 px-3">Status/Catatan</th>
+                            <th class="py-2 px-3">Ketidaktersediaan</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-200">
@@ -69,10 +81,33 @@
                                 <td class="py-2 px-3 text-right font-mono">{{ $row->mean !== null ? number_format($row->mean, 4) : '-' }}</td>
                                 <td class="py-2 px-3 text-right font-mono">{{ $row->standard_deviation !== null ? number_format($row->standard_deviation, 4) : '-' }}</td>
                                 <td class="py-2 px-3 text-right font-mono">{{ $row->standard_error !== null ? number_format($row->standard_error, 4) : '-' }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ $row->ci95_lower !== null ? number_format($row->ci95_lower, 4) : '-' }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ $row->ci95_upper !== null ? number_format($row->ci95_upper, 4) : '-' }}</td>
                                 <td class="py-2 px-3 text-right font-mono">{{ $row->cronbach_alpha !== null ? number_format($row->cronbach_alpha, 4) : '-' }}</td>
+                                <td class="py-2 px-3 text-xs">
+                                    {{ collect($row->reliability_warnings)->join(', ') ?: ($row->reliability_unavailable_reason ?? 'Tidak ada') }}
+                                </td>
+                                <td class="py-2 px-3 text-right font-mono">{{ isset($benchmarkByScale[$row->scale]) ? number_format((float) $benchmarkByScale[$row->scale], 4) : '-' }}</td>
                                 <td class="py-2 px-3 text-right font-mono text-emerald-700 font-semibold">{{ $row->gap !== null ? number_format($row->gap, 4) : '-' }}</td>
-                                <td class="py-2 px-3 text-xs text-zinc-500">{{ $row->unavailable_reason ?? 'Normal' }}</td>
+                                <td class="py-2 px-3 text-xs text-zinc-500">{{ $row->unavailable_reason ?? 'Deskriptif tersedia' }}</td>
                             </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </flux:card>
+
+        <flux:card class="space-y-4">
+            <div>
+                <flux:heading size="lg">Pooled reliability</flux:heading>
+                <flux:text class="text-xs text-zinc-500">Diagnostik pooled lintas modul; bukan pengganti reliabilitas per modul.</flux:text>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead><tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700"><th class="py-2 px-3">Skala</th><th class="py-2 px-3">Scope</th><th class="py-2 px-3 text-center">Pooled n</th><th class="py-2 px-3 text-right">Alpha</th><th class="py-2 px-3">Warning</th><th class="py-2 px-3">Ketidaktersediaan</th></tr></thead>
+                    <tbody class="divide-y divide-zinc-200">
+                        @foreach($run->ueqPooledResults as $row)
+                            <tr><td class="py-2 px-3">{{ $row->scale }}</td><td class="py-2 px-3">{{ $row->scope }}</td><td class="py-2 px-3 text-center">{{ $row->n }}</td><td class="py-2 px-3 text-right font-mono">{{ $row->cronbach_alpha !== null ? number_format($row->cronbach_alpha, 4) : '-' }}</td><td class="py-2 px-3 text-xs">{{ collect($row->warnings)->join(', ') ?: 'Tidak ada' }}</td><td class="py-2 px-3 text-xs">{{ $row->unavailable_reason ?? 'Tersedia' }}</td></tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -88,10 +123,16 @@
                         <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700">
                             <th class="py-2 px-3">Rank</th>
                             <th class="py-2 px-3">Modul</th>
-                            <th class="py-2 px-3 text-right">C1 (Gap UEQ)</th>
-                            <th class="py-2 px-3 text-right">C2 (Estimasi Hari)</th>
-                            <th class="py-2 px-3 text-right">C3 (Urgensi Arsitektur)</th>
-                            <th class="py-2 px-3 text-right">Nilai Preferensi (Vi)</th>
+                            <th class="py-2 px-3 text-right">X1 gap</th>
+                            <th class="py-2 px-3 text-right">X2 hari</th>
+                            <th class="py-2 px-3 text-right">X3 urgensi</th>
+                            <th class="py-2 px-3 text-right">R1</th>
+                            <th class="py-2 px-3 text-right">R2</th>
+                            <th class="py-2 px-3 text-right">R3</th>
+                            <th class="py-2 px-3 text-right">Kontribusi C1</th>
+                            <th class="py-2 px-3 text-right">Kontribusi C2</th>
+                            <th class="py-2 px-3 text-right">Kontribusi C3</th>
+                            <th class="py-2 px-3 text-right">Vi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-200">
@@ -101,14 +142,20 @@
                                     #{{ $row->rank }}{{ $row->is_tied ? ' (Seri)' : '' }}
                                 </td>
                                 <td class="py-2 px-3 font-semibold">{{ $row->unit->name }}</td>
-                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->x1_gap, 4) }} (R1: {{ number_format($row->r1, 3) }})</td>
-                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->x2_days, 1) }} hr (R2: {{ number_format($row->r2, 3) }})</td>
-                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->x3_urgency, 1) }} / 5 (R3: {{ number_format($row->r3, 3) }})</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->x1_gap, 4) }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->x2_days, 2) }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->x3_urgency, 2) }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->r1, 4) }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->r2, 4) }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->r3, 4) }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->contribution_c1, 6) }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->contribution_c2, 6) }}</td>
+                                <td class="py-2 px-3 text-right font-mono">{{ number_format($row->contribution_c3, 6) }}</td>
                                 <td class="py-2 px-3 text-right font-mono font-bold text-indigo-600">{{ number_format($row->preference_value, 6) }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-3 px-3 text-center text-zinc-500">Belum ada peringkat SAW. Penuhi data informan teknis terlebih dahulu.</td>
+                                <td colspan="12" class="py-3 px-3 text-center text-zinc-500">Belum ada peringkat SAW. Penuhi data informan teknis terlebih dahulu.</td>
                             </tr>
                         @endforelse
                     </tbody>

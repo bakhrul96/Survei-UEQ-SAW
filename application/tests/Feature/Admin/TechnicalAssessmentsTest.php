@@ -124,7 +124,11 @@ it('renders informant completeness and per-unit consensus evidence', function ()
         ->assertSee('3 informan')
         ->assertSee('Lengkap')
         ->assertSee('SD hari')
-        ->assertSee('SD urgensi');
+        ->assertSee('SD urgensi')
+        ->assertDontSee('anonymous_respondent_id')
+        ->assertDontSee('token_hash')
+        ->assertDontSee('raw_score')
+        ->assertDontSee('user_agent');
 });
 
 function technicalUnits()

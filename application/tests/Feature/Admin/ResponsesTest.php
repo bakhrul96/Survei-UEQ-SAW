@@ -15,7 +15,11 @@ it('shows prospective flags without treating the response as reviewed', function
     Livewire::actingAs($admin)
         ->test(Responses::class)
         ->assertSee('Jawaban identik')
-        ->assertSee('Belum direview');
+        ->assertSee('Belum direview')
+        ->assertDontSee('anonymous_respondent_id')
+        ->assertDontSee('token_hash')
+        ->assertDontSee('raw_score')
+        ->assertDontSee('user_agent');
 });
 
 it('lets an administrator exclude a submitted response with a reason', function () {

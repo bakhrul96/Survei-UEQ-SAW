@@ -92,8 +92,16 @@ class Calculations extends Component
         $run = $this->runId === null
             ? null
             : CalculationRun::query()
-                ->with(['ueqResults.unit', 'sawResults.unit', 'sensitivityResults.evaluationUnit', 'expertJudgments.evaluationUnit', 'lockedBy'])
+                ->with(['creator', 'ueqResults.unit', 'ueqPooledResults', 'sawResults.unit', 'sensitivityResults.evaluationUnit', 'expertJudgments.evaluationUnit', 'lockedBy'])
                 ->findOrFail($this->runId);
+
+        $snapshot = $run?->getAttribute('input_snapshot');
+        $benchmarkRows = is_array($snapshot) && is_array($snapshot['benchmarks'] ?? null)
+            ? $snapshot['benchmarks']
+            : [];
+        $benchmarkByScale = collect($benchmarkRows)
+            ->keyBy('scale')
+            ->map(fn (array $row): string => $row['good_threshold']);
 
         $sensitivityGrid = [];
         if ($run && $run->sensitivityResults->isNotEmpty()) {
@@ -115,6 +123,7 @@ class Calculations extends Component
         return view('livewire.admin.calculations', [
             'period' => $this->period(),
             'run' => $run,
+            'benchmarkByScale' => $benchmarkByScale,
             'sensitivityGrid' => $sensitivityGrid,
             'allUnits' => $allUnits,
         ])->layout('layouts.app', ['title' => 'Kalkulasi UEQ dan SAW']);
