@@ -6,8 +6,8 @@ periode jika panel **Kesiapan aktivasi** masih menampilkan masalah.
 
 ## Baseline terverifikasi 2026-08-06
 
-- Commit implementasi yang diverifikasi: `eaf9c263ea216fbc727e8d8eb5561223cb9c5b92`.
-- Gate operasional terakhir dijalankan pada HEAD `7f3c586` di worktree
+- Commit implementasi yang diverifikasi: `86fe763a3b527d3588a12ba035bb2f8823ef5adf`.
+- Gate operasional terakhir dijalankan pada HEAD `d767cb0` di worktree
   `codex/release-one-remediation`.
 - Lingkungan lokal: MySQL 8.4.10, PHP 8.5.4, Node 22.23.2, npm 10.9.8.
 - Seluruh 23 migrasi berstatus `Ran`.
@@ -25,8 +25,9 @@ periode jika panel **Kesiapan aktivasi** masih menampilkan masalah.
 
 | Pemeriksaan | Hasil | Bukti |
 | --- | --- | --- |
-| Repository gate | Lulus | `composer test`: Pint lulus, PHPStan 0 temuan, Pest 183 test / 682 assertion. |
-| Focused Rilis 1 | Lulus | 98 test / 282 assertion untuk auth, admin singleton, readiness, periode, survei, dashboard, serta CSV/XLSX. |
+| Repository gate | Lulus | `composer test`: Pint lulus, PHPStan 0 temuan, Pest 188 test / 705 assertion. |
+| Focused Rilis 1 | Lulus | 127 test / 367 assertion untuk auth, admin singleton, security, readiness, periode, survei, dashboard, raw CSV/XLSX, dan navigasi sidebar. |
+| Sidebar admin | Lulus | `AdminSidebarTest`: 2 test / 13 assertion pada desktop 1280 × 800 dan drawer mobile 360 × 800. Seluruh area admin aktif tersedia dalam kelompok Ikhtisar, Pengumpulan Data, Analisis, dan Akun; tidak ada tautan Repository atau Documentation. |
 | Happy path mobile | Lulus | `SurveyHappyPathTest`: 1 test / 14 assertion pada viewport 360 × 800; mencakup 26 jawaban, fokus keyboard, submit, dan pembersihan draft lokal. |
 | Offline recovery | Lulus | `OfflineDraftTest`: 1 test / 11 assertion; draft pulih setelah reload, submit disabled saat offline, lalu aktif kembali saat online. |
 | Production build | Lulus | Vite 8.2.0 membangun manifest dan aset produksi. Peringatan `fontaine` hanya terkait fallback font opsional. |
