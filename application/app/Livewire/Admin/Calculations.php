@@ -8,7 +8,6 @@ use App\Application\Calculation\RecordMinimumSampleDeviation;
 use App\Application\Quality\RecordExpertJudgment;
 use App\Models\CalculationRun;
 use App\Models\EvaluationPeriod;
-use App\Models\EvaluationUnit;
 use DomainException;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -95,11 +94,14 @@ class Calculations extends Component
 
         try {
             $run = CalculationRun::query()->findOrFail($this->runId);
-            $unit = EvaluationUnit::query()->findOrFail($this->selectedUnitId);
+            $judgment = $run->expertJudgments()
+                ->with('evaluationUnit')
+                ->where('evaluation_unit_id', $this->selectedUnitId)
+                ->firstOrFail();
 
             $action->handle(
                 run: $run,
-                unit: $unit,
+                unit: $judgment->evaluationUnit,
                 operationalOrder: $this->operationalOrder,
                 reason: $this->expertReason,
                 reviewer: auth()->user(),
@@ -143,7 +145,6 @@ class Calculations extends Component
             }
         }
 
-        $allUnits = EvaluationUnit::query()->orderBy('display_order')->get();
         $eligibilityIssues = $run === null ? [] : $eligibility->issues($run);
 
         return view('livewire.admin.calculations', [
@@ -151,7 +152,10 @@ class Calculations extends Component
             'run' => $run,
             'benchmarkByScale' => $benchmarkByScale,
             'sensitivityGrid' => $sensitivityGrid,
-            'allUnits' => $allUnits,
+            'backlogUnits' => $run?->expertJudgments
+                ->sortBy('operational_order')
+                ->map(fn ($judgment) => $judgment->evaluationUnit)
+                ->values() ?? collect(),
             'eligibilityIssues' => $eligibilityIssues,
             'hasMinimumSampleIssue' => collect($eligibilityIssues)->contains(
                 fn (string $issue): bool => str_contains($issue, 'baru memiliki')

@@ -2,6 +2,7 @@
 
 namespace App\Application\Calculation;
 
+use App\Application\Quality\InitializeOperationalBacklog;
 use App\Domain\Sensitivity\SensitivityCalculator;
 use App\Domain\Study\PeriodStatus;
 use App\Models\AuditEvent;
@@ -20,9 +21,12 @@ class CalculationRunService
         private readonly UeqResultWriter $resultWriter,
         private readonly SawResultWriter $sawWriter,
         private readonly OfficialRunEligibility $officialEligibility,
+        private readonly InitializeOperationalBacklog $backlogInitializer,
         private readonly SensitivityCalculator $sensitivityCalculator = new SensitivityCalculator,
         private readonly SensitivityResultWriter $sensitivityWriter = new SensitivityResultWriter,
-    ) {}
+    ) {
+        // Dependencies are injected by the application container.
+    }
 
     public function preview(EvaluationPeriod $period, User $actor): CalculationRun
     {
@@ -60,6 +64,7 @@ class CalculationRunService
 
             $this->resultWriter->write($run, $calculation['rows'], $calculation['pooledRows']);
             $this->sawWriter->write($run, $sawCalculation['rows']);
+            $this->backlogInitializer->handle($run);
 
             if ($sawCalculation['alternatives'] !== []) {
                 /** @var array{S1: array{c1: string, c2: string, c3: string}, S2: array{c1: string, c2: string, c3: string}} $configuredScenarios */
@@ -88,7 +93,7 @@ class CalculationRunService
                 ],
             ]);
 
-            return $run->load(['ueqResults', 'ueqPooledResults', 'sawResults', 'sensitivityResults']);
+            return $run->load(['ueqResults', 'ueqPooledResults', 'sawResults', 'sensitivityResults', 'expertJudgments.evaluationUnit']);
         });
     }
 

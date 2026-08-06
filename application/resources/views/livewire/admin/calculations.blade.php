@@ -292,7 +292,7 @@
                     <label for="expert-unit" class="block text-xs font-semibold text-zinc-700 mb-1">Pilih Modul</label>
                     <select id="expert-unit" wire:model="selectedUnitId" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">-- Pilih Modul --</option>
-                        @foreach($allUnits as $unit)
+                        @foreach($backlogUnits as $unit)
                             <option value="{{ $unit->id }}">{{ $unit->name }}</option>
                         @endforeach
                     </select>
@@ -337,8 +337,12 @@
                                     <td class="py-2 px-3 text-center font-bold">#{{ $ej->operational_order }}</td>
                                     <td class="py-2 px-3 font-semibold">{{ $ej->evaluationUnit->name }}</td>
                                     <td class="py-2 px-3 text-xs">
-                                        <span class="inline-flex items-center rounded px-2 py-0.5 font-medium bg-amber-100 text-amber-800">
-                                            {{ $ej->decision }}
+                                        <span @class([
+                                            'inline-flex items-center rounded px-2 py-0.5 font-medium',
+                                            'bg-amber-100 text-amber-800' => $ej->decision === 'adjusted',
+                                            'bg-zinc-100 text-zinc-700' => $ej->decision === 'unchanged',
+                                        ])>
+                                            {{ strtoupper($ej->decision) }}
                                         </span>
                                     </td>
                                     <td class="py-2 px-3 text-xs text-zinc-700">{{ $ej->reason }}</td>

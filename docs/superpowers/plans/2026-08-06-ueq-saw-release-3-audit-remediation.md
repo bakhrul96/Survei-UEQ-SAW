@@ -493,7 +493,7 @@ php artisan test \
 
 Expected: PASS; tidak ada test yang mengharapkan status `archived`.
 
-- [ ] **Step 8: Commit Task 3**
+- [x] **Step 8: Commit Task 3**
 
 ```bash
 git add application/app application/resources application/tests
@@ -521,7 +521,7 @@ git commit -m "fix: make official calculation runs permanent"
 - Produces: `RecordExpertJudgment::handle(CalculationRun $run, EvaluationUnit $unit, int $operationalOrder, string $reason, User $reviewer): ExpertJudgment`.
 - Invariant: untuk run dengan `N` SAW rows terdapat tepat `N` expert judgment rows dan urutannya tepat `1..N` tanpa duplikasi.
 
-- [ ] **Step 1: Write failing backlog invariant and reorder tests**
+- [x] **Step 1: Write failing backlog invariant and reorder tests**
 
 ```php
 it('initializes a complete operational backlog without changing saw ranking', function (): void {
@@ -553,7 +553,7 @@ it('moves one unit and shifts the affected backlog atomically', function (): voi
 
 Tambahkan test penolakan untuk unit yang tidak ada pada `saw_results`, order di luar `1..N`, reason kosong ketika order berubah, dan perubahan setelah official lock.
 
-- [ ] **Step 2: Run tests and verify partial-row behavior fails**
+- [x] **Step 2: Run tests and verify partial-row behavior fails**
 
 Run:
 
@@ -564,7 +564,7 @@ php artisan test tests/Feature/Admin/ExpertJudgmentTest.php
 
 Expected: FAIL karena implementasi lama hanya menyimpan baris yang disesuaikan dan mengizinkan duplicate operational order.
 
-- [ ] **Step 3: Normalize existing rows and add the unique order constraint**
+- [x] **Step 3: Normalize existing rows and add the unique order constraint**
 
 Migration harus, per calculation run:
 
@@ -576,7 +576,7 @@ Migration harus, per calculation run:
 
 Rollback menghapus unique index tanpa menghapus data backlog.
 
-- [ ] **Step 4: Initialize the complete backlog when a preview is created**
+- [x] **Step 4: Initialize the complete backlog when a preview is created**
 
 Panggil initializer setelah `SawResultWriter::write()`. Ordering baseline harus stabil:
 
@@ -595,19 +595,19 @@ $run->sawResults()
     ]));
 ```
 
-- [ ] **Step 5: Implement an atomic reorder action with audit history**
+- [x] **Step 5: Implement an atomic reorder action with audit history**
 
 Lock all backlog rows for the run. Jika item berpindah dari `$oldOrder` ke `$newOrder`, geser row lain satu posisi dalam memory, lalu tulis order sementara `N + 1000 + index` agar compatible dengan kolom unsigned dan unique constraint tidak berbenturan, kemudian tulis `1..N` final. Set item yang dipindahkan menjadi `decision = adjusted`, trim reason, reviewer, timestamp. Buat `AuditEvent` action `expert_judgment.backlog_reordered` dengan old/new order map.
 
-- [ ] **Step 6: Require a complete backlog in the official eligibility gate**
+- [x] **Step 6: Require a complete backlog in the official eligibility gate**
 
 `OfficialRunEligibility` harus menolak official lock jika jumlah backlog berbeda dari jumlah SAW rows, terdapat unit SAW tanpa backlog, terdapat unit backlog tanpa SAW row, atau urutannya bukan tepat `1..N`. Pesan tunggal yang digunakan: `Backlog operasional harus lengkap dan berurutan sebelum hasil resmi dikunci.` Tambahkan assertion ini ke `OfficialRunEligibilityTest` dan `ExpertJudgmentTest`.
 
-- [ ] **Step 7: Restrict UI choices to the selected run backlog**
+- [x] **Step 7: Restrict UI choices to the selected run backlog**
 
 Hapus query `EvaluationUnit::all()` dari component. Dropdown hanya memakai `$run->expertJudgments`/`$run->sawResults`. Tabel selalu menampilkan seluruh backlog, bukan hanya adjusted rows. Bedakan badge `UNCHANGED` dan `ADJUSTED`.
 
-- [ ] **Step 8: Run Task 4 tests**
+- [x] **Step 8: Run Task 4 tests**
 
 Run:
 

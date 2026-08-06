@@ -12,7 +12,7 @@ final class OfficialRunEligibility
     /** @return list<string> */
     public function issues(CalculationRun $run): array
     {
-        $run->loadMissing(['period', 'sawResults', 'sensitivityResults']);
+        $run->loadMissing(['period', 'sawResults', 'sensitivityResults', 'expertJudgments']);
         $issues = [];
         $snapshot = $run->getAttribute('input_snapshot');
 
@@ -79,6 +79,9 @@ final class OfficialRunEligibility
         }
         if (! $this->hasCompleteSensitivityResults($run)) {
             $issues[] = 'Hasil sensitivitas S0, S1, dan S2 harus lengkap untuk setiap alternatif.';
+        }
+        if (! $this->hasCompleteOperationalBacklog($run)) {
+            $issues[] = 'Backlog operasional harus lengkap dan berurutan sebelum hasil resmi dikunci.';
         }
 
         return array_values(array_unique($issues));
@@ -194,6 +197,17 @@ final class OfficialRunEligibility
         }
 
         return true;
+    }
+
+    private function hasCompleteOperationalBacklog(CalculationRun $run): bool
+    {
+        $sawUnitIds = $run->sawResults->pluck('evaluation_unit_id')->sort()->values()->all();
+        $backlogUnitIds = $run->expertJudgments->pluck('evaluation_unit_id')->sort()->values()->all();
+        $orders = $run->expertJudgments->pluck('operational_order')->sort()->values()->all();
+
+        return $sawUnitIds !== []
+            && $sawUnitIds === $backlogUnitIds
+            && $orders === range(1, count($sawUnitIds));
     }
 
     /** @return list<array<string, mixed>> */
