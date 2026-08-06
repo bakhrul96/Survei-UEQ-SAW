@@ -17,7 +17,16 @@ use App\Livewire\Survey\UnitChooser;
 use App\Models\EvaluationPeriod;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', function () {
+    $period = EvaluationPeriod::query()
+        ->where('status', PeriodStatus::Active)
+        ->orderBy('id')
+        ->first();
+
+    return $period instanceof EvaluationPeriod
+        ? redirect()->route('survey.entry', $period)
+        : view('survey.landing');
+})->name('home');
 
 Route::get('/s/wong-reang/{period:slug}', SurveyEntryController::class)->name('survey.entry');
 Route::get('/s/wong-reang/{period:slug}/consent', ConsentScreener::class)->name('survey.consent');

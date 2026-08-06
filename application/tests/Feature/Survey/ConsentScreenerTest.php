@@ -187,3 +187,14 @@ it('renders large easy-to-tap consent checkboxes bound to their models', functio
         ->assertSee('wire:model.live="isIndramayuResident"', escape: false)
         ->assertSee('wire:model.live="hasUsedWongReang"', escape: false);
 });
+
+it('presents the consent page as a reassuring landing with trust badges', function () {
+    $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
+
+    Livewire::test(ConsentScreener::class, ['period' => $period])
+        ->assertSee('Anonim')
+        ->assertSee('26 pertanyaan')
+        ->assertSee('Tanpa nama')
+        ->assertSee('Hanya modul yang pernah Anda gunakan');
+});

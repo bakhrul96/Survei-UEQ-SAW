@@ -1,8 +1,27 @@
 <div class="mx-auto w-full max-w-2xl space-y-6">
-    <div>
-        <flux:heading size="xl">Informasi Penelitian</flux:heading>
-        <flux:text>{{ $period->name }}</flux:text>
-    </div>
+    <header class="space-y-4">
+        <div class="space-y-2">
+            <flux:heading size="xl">Informasi Penelitian</flux:heading>
+            <flux:text>{{ $period->name }} — bantu tentukan prioritas perbaikan layanan dengan menilai modul yang pernah Anda gunakan.</flux:text>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+            <div class="rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-center shadow-sm">
+                <p class="text-lg font-bold text-indigo-700">Anonim</p>
+                <p class="text-xs text-zinc-600">Tanpa nama &amp; NIK</p>
+            </div>
+            <div class="rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-center shadow-sm">
+                <p class="text-lg font-bold text-indigo-700">±{{ $period->consent_estimated_minutes }} mnt</p>
+                <p class="text-xs text-zinc-600">estimasi pengisian</p>
+            </div>
+            <div class="rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-center shadow-sm">
+                <p class="text-lg font-bold text-indigo-700">26 pertanyaan</p>
+                <p class="text-xs text-zinc-600">per modul</p>
+            </div>
+        </div>
+
+        <p class="rounded-lg bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-900">Hanya modul yang pernah Anda gunakan yang dinilai — jawaban tersimpan sementara di perangkat bila koneksi terputus.</p>
+    </header>
 
     <flux:card class="space-y-4">
         <div class="space-y-4 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
