@@ -76,7 +76,7 @@
 - Produces: `InitializeQualityReview::handle(SurveySubmission): QualityReview` dengan `flags` terisi dan keputusan/reviewer/waktu masih null.
 - Preserves: `ReviewSubmission::handle(...)` tetap menjadi satu-satunya jalan menetapkan `included` atau `excluded`.
 
-- [ ] **Step 1: Write failing schema and submission tests**
+- [x] **Step 1: Write failing schema and submission tests**
 
 ```php
 it('persists prospective flags in the survey transaction before review', function () {
@@ -106,7 +106,7 @@ it('shows automatic flags without pretending the response was reviewed', functio
 });
 ```
 
-- [ ] **Step 2: Run the tests and verify the intended failure**
+- [x] **Step 2: Run the tests and verify the intended failure**
 
 Run:
 
@@ -117,7 +117,7 @@ php artisan test tests/Feature/Survey/SubmitSurveyTest.php tests/Feature/Quality
 
 Expected: FAIL because `quality_reviews.decision`, `reviewed_by`, and `reviewed_at` reject null and submit does not initialize flags.
 
-- [ ] **Step 3: Make pending reviews represent automatic flags explicitly**
+- [x] **Step 3: Make pending reviews represent automatic flags explicitly**
 
 Migration shape:
 
@@ -151,7 +151,7 @@ final class InitializeQualityReview
 
 Inject `InitializeQualityReview` into `SubmitSurvey`. Call it after `answers()->createMany(...)` and before updating the session so submission, answers, and flags commit or roll back together. Make `QualityReview::$decision` nullable in PHPDoc and use `$review?->decision?->value` in `ResponseReviewQuery`, `Responses::openReview`, and `CalculationInputSnapshot`. A pending row maps to the snapshot decision string `unreviewed`. `ReviewSubmission` must retain the existing flags instead of silently changing prospective rules during manual review.
 
-- [ ] **Step 4: Render stable Indonesian labels and verify no sensitive data is exposed**
+- [x] **Step 4: Render stable Indonesian labels and verify no sensitive data is exposed**
 
 Use an explicit map in the Blade view:
 
@@ -164,7 +164,7 @@ Use an explicit map in the Blade view:
 
 Assert the page does not render `token_hash`, anonymous respondent ID, cookie, IP address, or user agent.
 
-- [ ] **Step 5: Run focused regression and commit**
+- [x] **Step 5: Run focused regression and commit**
 
 ```bash
 cd application
@@ -190,7 +190,7 @@ Expected: focused tests pass and PHPStan reports zero errors.
 - Produces: one incremented `calculation_input_revision`, all current preview runs marked `stale`, and one append-only `audit_events` row.
 - Produces method: `CalculationInputChangeRecorder::record(EvaluationPeriod, User, string, string, int, ?array, array): void`.
 
-- [ ] **Step 1: Write a failing atomic lifecycle test**
+- [x] **Step 1: Write a failing atomic lifecycle test**
 
 ```php
 it('increments revision, stales previews, and appends an audit event', function () {
@@ -228,7 +228,7 @@ it('increments revision, stales previews, and appends an audit event', function 
 });
 ```
 
-- [ ] **Step 2: Run the test and verify failure**
+- [x] **Step 2: Run the test and verify failure**
 
 ```bash
 cd application
@@ -237,7 +237,7 @@ php artisan test tests/Feature/Calculation/CalculationInputChangeRecorderTest.ph
 
 Expected: FAIL because the recorder does not exist.
 
-- [ ] **Step 3: Implement one mutation recorder**
+- [x] **Step 3: Implement one mutation recorder**
 
 ```php
 final class CalculationInputChangeRecorder
@@ -273,11 +273,11 @@ final class CalculationInputChangeRecorder
 
 The recorder must be called inside the same `DB::transaction` that changes the input. Refactor `ReviewSubmission` to call it after its review row is created/updated and remove its duplicated period/run/audit statements. Official and archived runs are historical records and must not be rewritten by this Rilis 2 mutation service.
 
-- [ ] **Step 4: Prove rollback is atomic**
+- [x] **Step 4: Prove rollback is atomic**
 
 Add a test that throws after `record(...)` inside `DB::transaction`; assert revision, run status, and audit count remain unchanged after rollback.
 
-- [ ] **Step 5: Run focused verification and commit**
+- [x] **Step 5: Run focused verification and commit**
 
 ```bash
 cd application
@@ -313,7 +313,7 @@ Expected: revision, stale, audit, and rollback assertions pass.
 - Test support: `ReleaseTwoFixture::completeAssessments(float $days = 1.0, int $urgency = 3): array`, `ReleaseTwoFixture::saveInformant(EvaluationPeriod, User, string, float, int, array): TechnicalInformant`, `ReleaseTwoFixture::seedInformants(EvaluationPeriod, User, int): Collection`, dan `ReleaseTwoFixture::scenario(): object`.
 - `ReleaseTwoFixture::scenario()` seeds `WongReangStudySeeder`, verifies all six benchmarks, creates two varied included submissions for each of the first two units, creates three complete informants over all 13 units, and returns an object with `period` plus `admin`. Use the two answer vectors already proven in `tests/Feature/Admin/CalculationsTest.php:54-63`; do not invent a third numeric oracle.
 
-- [ ] **Step 1: Write failing domain-boundary tests**
+- [x] **Step 1: Write failing domain-boundary tests**
 
 ```php
 it('rejects a partial informant before any row is written', function () {
@@ -360,7 +360,7 @@ it('rejects invalid values through the domain service', function (float $days, i
 ]);
 ```
 
-- [ ] **Step 2: Run focused tests and verify failure**
+- [x] **Step 2: Run focused tests and verify failure**
 
 ```bash
 cd application
@@ -369,7 +369,7 @@ php artisan test tests/Unit/Technical/TechnicalConsensusTest.php tests/Feature/A
 
 Expected: FAIL because the domain accepts partial/invalid input, has no five-informant cap, and returns an untyped object without SD/completeness.
 
-- [ ] **Step 3: Implement domain validation before opening the transaction**
+- [x] **Step 3: Implement domain validation before opening the transaction**
 
 Validation rules in `SaveTechnicalAssessment`:
 
@@ -431,7 +431,7 @@ final class ReleaseTwoFixture
 
 Before creating a new code, lock the period and count its informants; reject count `>= 5`. After persistence, call `CalculationInputChangeRecorder` with individual old/new assessments and weights. Update the Livewire call to pass `auth()->user()` and make every unit required rather than nullable.
 
-- [ ] **Step 4: Return deterministic mean, sample SD, completeness, and normalized weights**
+- [x] **Step 4: Return deterministic mean, sample SD, completeness, and normalized weights**
 
 `TechnicalUnitConsensus` must use sample SD:
 
@@ -458,11 +458,11 @@ private function sampleStandardDeviation(array $values): ?float
 
 Make `SawResultWriter` return no rows plus one explicit warning when `technical_consensus.is_complete` is false. It must consume the snapshot means, not re-average arbitrary available rows.
 
-- [ ] **Step 5: Render evidence and verify stale lifecycle**
+- [x] **Step 5: Render evidence and verify stale lifecycle**
 
 The technical page must display informant count, complete/incomplete status, per-unit `n`, mean days, SD days, mean urgency, and SD urgency. Add a feature test that creates a preview, updates one existing informant, and asserts the old preview becomes stale and one `technical_assessment.updated` audit event exists.
 
-- [ ] **Step 6: Run focused regression and commit**
+- [x] **Step 6: Run focused regression and commit**
 
 ```bash
 cd application
@@ -495,7 +495,7 @@ Expected: partial/invalid/sixth informant tests fail safely; 3-5 complete inform
 - Produces relation: `CalculationRun::ueqPooledResults(): HasMany`.
 - Produces writer result: `array{rows: list<array<string,mixed>>, pooledRows: list<array<string,mixed>>, warnings: list<string>}`; `CalculationRunService` passes both collections to persistence in the same transaction.
 
-- [ ] **Step 1: Write failing statistic-specific availability tests**
+- [x] **Step 1: Write failing statistic-specific availability tests**
 
 ```php
 it('keeps a one-response mean while marking inferential statistics unavailable', function () {
@@ -527,7 +527,7 @@ it('keeps zero descriptive variance as zero but leaves alpha unavailable', funct
 });
 ```
 
-- [ ] **Step 2: Write failing pooled and warning persistence tests**
+- [x] **Step 2: Write failing pooled and warning persistence tests**
 
 ```php
 it('stores six pooled diagnostics and unit reliability warnings', function () {
@@ -543,7 +543,7 @@ it('stores six pooled diagnostics and unit reliability warnings', function () {
 });
 ```
 
-- [ ] **Step 3: Run tests and verify failure**
+- [x] **Step 3: Run tests and verify failure**
 
 ```bash
 cd application
@@ -552,7 +552,7 @@ php artisan test tests/Unit/Ueq/UeqStatisticsCalculatorTest.php tests/Feature/Ca
 
 Expected: FAIL because current statistics collapse zero variance to a fully unavailable row and pooled storage does not exist.
 
-- [ ] **Step 4: Add reliability persistence**
+- [x] **Step 4: Add reliability persistence**
 
 Migration fields:
 
@@ -590,7 +590,7 @@ if ($cronbachAlpha !== null && $cronbachAlpha < 0.70) {
 
 For pooled rows, do not add `n_below_20` based on a unit threshold; label scope `pooled`, keep `alpha_below_0_70` when applicable, and show that it is diagnostic. Compute pooled results from all included module evaluations in the snapshot, not by averaging unit alpha values.
 
-- [ ] **Step 5: Preserve golden mathematics and commit**
+- [x] **Step 5: Preserve golden mathematics and commit**
 
 ```bash
 cd application
@@ -617,7 +617,7 @@ Expected: all existing golden values remain within `0.000001`, descriptive value
 - Produces: immutable UEQ, pooled, and SAW rows plus `calculation_run.created` audit event.
 - Preserves: status-only transitions allowed by `CalculationRun`; numeric result fields never update in place.
 
-- [ ] **Step 1: Write failing immutability and audit tests**
+- [x] **Step 1: Write failing immutability and audit tests**
 
 ```php
 it('prevents SAW and pooled result mutation or deletion', function () {
@@ -645,7 +645,7 @@ it('audits calculation creation without copying raw answers into the audit event
 });
 ```
 
-- [ ] **Step 2: Run tests and verify failure**
+- [x] **Step 2: Run tests and verify failure**
 
 ```bash
 cd application
@@ -654,7 +654,7 @@ php artisan test tests/Feature/Calculation/CalculationResultImmutabilityTest.php
 
 Expected: FAIL because `SawResult` is mutable and calculation creation has no audit event.
 
-- [ ] **Step 3: Mirror the existing UEQ immutability guard**
+- [x] **Step 3: Mirror the existing UEQ immutability guard**
 
 In both result models:
 
@@ -668,7 +668,7 @@ protected static function booted(): void
 
 Use the model-specific message for pooled rows. Cast every SAW decimal to `decimal:10`, `rank` to integer, and `is_tied` to boolean so UI/export and snapshot comparisons do not depend on driver-specific strings.
 
-- [ ] **Step 4: Append a calculation audit event in the calculation transaction**
+- [x] **Step 4: Append a calculation audit event in the calculation transaction**
 
 After all result writers finish, create:
 
@@ -692,7 +692,7 @@ AuditEvent::query()->create([
 
 Do not duplicate the input snapshot in `audit_events`; the run already owns it.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 ```bash
 cd application
@@ -717,7 +717,7 @@ Expected: direct model updates/deletes fail, creation is audited, and official-l
 - Produces: automated evidence for all six Rilis 2 acceptance criteria, including gap, X, R, contributions, Vi, rank, and tie.
 - Test support: `GoldenFixture::data(): array`, `GoldenFixture::sawRows(): array`, dan `GoldenFixture::persistedRun(): CalculationRun`. `data()` reads `tests/Fixtures/ueq-saw-golden.json`; `sawRows()` calls `UeqStatisticsCalculator` and `SawCalculator`; `persistedRun()` creates database rows through survey/review/technical services and calls `CalculationRunService::preview`.
 
-- [ ] **Step 1: Write a failing workbook-to-JSON consistency test**
+- [x] **Step 1: Write a failing workbook-to-JSON consistency test**
 
 ```php
 it('keeps the machine-readable fixture equal to the independent workbook', function () {
@@ -737,7 +737,7 @@ it('keeps the machine-readable fixture equal to the independent workbook', funct
 
 Extend the test with table-driven cell maps for all 12 unit-scale rows, six gap values per unit, three weights, two X/R/contribution/Vi rows, and both tie/rank outcomes. Assert the workbook contains formulas in transformed scores, respondent scale means, overview statistics, and technical/SAW sheets.
 
-- [ ] **Step 2: Write the full SAW golden test**
+- [x] **Step 2: Write the full SAW golden test**
 
 ```php
 it('matches every golden SAW intermediate and final value', function () {
@@ -760,7 +760,7 @@ it('matches every golden SAW intermediate and final value', function () {
 });
 ```
 
-- [ ] **Step 3: Write the end-to-end calculation persistence test**
+- [x] **Step 3: Write the end-to-end calculation persistence test**
 
 Implement `GoldenFixture::persistedRun()` by seeding fixture submissions and decisions, three complete informants, verified benchmarks, and 13 fixed units. Untuk sebelas unit non-oracle, isi setiap informan dengan `days = 1.0` dan `urgency = 1`; nilai tersebut hanya memenuhi kontrak kelengkapan dan tidak menghasilkan SAW row karena tidak ada included UEQ submission pada unit itu. Then assert the returned run:
 
@@ -784,7 +784,7 @@ foreach ($fixture['expected']['gaps'] as $unitCode => $expectedScales) {
 
 Also assert snapshot contains item polarity, benchmark source/version/threshold, individual technical values, technical consensus with SD, quality decisions, included raw answers, and final weights.
 
-- [ ] **Step 4: Run oracle verification and commit**
+- [x] **Step 4: Run oracle verification and commit**
 
 ```bash
 cd application
@@ -813,7 +813,7 @@ Expected: workbook and JSON agree within `0.000001`; persisted calculation resul
 - Produces: tables that expose every Rilis 2 intermediate without exposing raw answers or respondent identity.
 - Preserves: sensitivity, expert judgment, official lock, and aggregate-report controls.
 
-- [ ] **Step 1: Write failing UI contract tests**
+- [x] **Step 1: Write failing UI contract tests**
 
 ```php
 it('shows complete run, UEQ, reliability, and SAW evidence', function () {
@@ -834,7 +834,7 @@ it('shows complete run, UEQ, reliability, and SAW evidence', function () {
 });
 ```
 
-- [ ] **Step 2: Run tests and verify failure**
+- [x] **Step 2: Run tests and verify failure**
 
 ```bash
 cd application
@@ -843,7 +843,7 @@ php artisan test tests/Feature/Admin/CalculationsTest.php tests/Feature/Admin/Te
 
 Expected: FAIL because creator/time, CI, benchmark, pooled rows, SD teknis, and SAW contributions are not all rendered.
 
-- [ ] **Step 3: Add explicit view data and columns**
+- [x] **Step 3: Add explicit view data and columns**
 
 Eager-load `creator` and `ueqPooledResults`. Build benchmark lookup only from the selected run snapshot:
 
@@ -857,11 +857,11 @@ UEQ table columns: unit, scale, n, mean, SD, SE, CI lower, CI upper, alpha, reli
 
 SAW table columns: rank/tie, unit, X1-X3, R1-R3, contribution C1-C3, and Vi. Technical table columns: unit, n informan, mean/SD days, mean/SD urgency, plus completeness reasons. Run metadata: ID, algorithm version, status, creator, calculated time, input hash, included/excluded counts, and warnings.
 
-- [ ] **Step 4: Verify privacy and Rilis 3 regression**
+- [x] **Step 4: Verify privacy and Rilis 3 regression**
 
 Assert calculations, responses, and technical pages do not display token hash, anonymous respondent ID, raw answers, cookies, IP, or user agent. Assert sensitivity, expert judgment, report, and official lock text still render for eligible Rilis 3 fixtures.
 
-- [ ] **Step 5: Run focused verification and commit**
+- [x] **Step 5: Run focused verification and commit**
 
 ```bash
 cd application
@@ -885,7 +885,7 @@ Expected: all numeric evidence is visible in tables, no sensitive fields render,
 - Consumes: Tasks 1-7, MySQL runtime, explicit 2FA-authenticated browser session, and fixture-generated non-secret data.
 - Produces: reproducible pass/fail evidence for every Rilis 2 acceptance criterion.
 
-- [ ] **Step 1: Write the browser flow with unique selectors**
+- [x] **Step 1: Write the browser flow with unique selectors**
 
 ```php
 it('reviews quality, records three informants, and opens a traceable preview', function () {
@@ -912,7 +912,7 @@ it('reviews quality, records three informants, and opens a traceable preview', f
 
 Use test-created authentication state; do not put credentials, tokens, cookies, or respondent identifiers in source or screenshots.
 
-- [ ] **Step 2: Repair the stale Rilis 3 selector and prove the failure is gone**
+- [x] **Step 2: Repair the stale Rilis 3 selector and prove the failure is gone**
 
 Replace the ambiguous selector in `ReleaseThreeFlowTest`:
 
@@ -929,7 +929,7 @@ php artisan test tests/Browser/AdminAnalysisFlowTest.php tests/Browser/ReleaseTh
 
 Expected: both browser tests pass at 1280x800. No screenshot is created under `tests/Browser/Screenshots`.
 
-- [ ] **Step 3: Verify MySQL shape without exposing secrets**
+- [x] **Step 3: Verify MySQL shape without exposing secrets**
 
 Run against the configured research database after confirming the environment name and database driver:
 
@@ -942,7 +942,7 @@ php artisan tinker --execute="dump(['periods' => App\\Models\\EvaluationPeriod::
 
 Expected: MySQL driver, all migrations ran, one study period, 13 units, 26 current-version items, and six verified benchmarks. Apply pending migrations with `php artisan migrate --force` only after confirming the target database is the intended research environment and a recoverable backup exists.
 
-- [ ] **Step 4: Execute the complete gates**
+- [x] **Step 4: Execute the complete gates**
 
 ```bash
 cd application
@@ -954,7 +954,7 @@ git diff --check
 
 Expected: Pint passes, PHPStan reports zero errors, Unit/Feature suites pass, all three browser files pass, Vite exits zero, and diff-check produces no output.
 
-- [ ] **Step 5: Record exact non-secret evidence**
+- [x] **Step 5: Record exact non-secret evidence**
 
 Update `application/docs/release-2-runbook.md` with:
 
