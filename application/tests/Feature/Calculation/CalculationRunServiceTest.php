@@ -8,6 +8,7 @@ use App\Application\Survey\SubmitSurveyData;
 use App\Domain\Quality\QualityDecision;
 use App\Domain\Study\PeriodStatus;
 use App\Domain\Survey\SurveyTokenService;
+use App\Models\AuditEvent;
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
 use App\Models\RespondentProfile;
@@ -62,6 +63,20 @@ it('writes a preview with non-negative gaps and reproducible input hash', functi
         ->and($run->input_snapshot['included_submission_ids'])->toBe([$this->submission->id, $this->secondSubmission->id])
         ->and($run->input_snapshot['excluded_submission_ids'])->toBe([$this->excludedSubmission->id])
         ->and($run->input_snapshot['included_raw_answers'][(string) $this->submission->id]['1'])->toBe(4);
+});
+
+it('audits calculation creation without copying raw answers into the audit event', function () {
+    $run = app(CalculationRunService::class)->preview($this->period, $this->admin);
+    $audit = AuditEvent::query()->where('action', 'calculation_run.created')->sole();
+
+    expect($audit->auditable_id)->toBe($run->id)
+        ->and($audit->actor_id)->toBe($this->admin->id)
+        ->and($audit->new_values)->toMatchArray([
+            'algorithm_version' => $run->algorithm_version,
+            'input_hash' => $run->input_hash,
+            'status' => $run->status,
+        ])
+        ->and(json_encode($audit->new_values))->not->toContain('included_raw_answers');
 });
 
 it('marks older preview stale after quality change', function () {

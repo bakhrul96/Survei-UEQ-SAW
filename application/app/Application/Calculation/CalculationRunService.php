@@ -3,6 +3,7 @@
 namespace App\Application\Calculation;
 
 use App\Domain\Sensitivity\SensitivityCalculator;
+use App\Models\AuditEvent;
 use App\Models\CalculationRun;
 use App\Models\EvaluationPeriod;
 use App\Models\User;
@@ -65,6 +66,22 @@ class CalculationRunService
                 );
                 $this->sensitivityWriter->write($run, $sensitivityScenarios);
             }
+
+            AuditEvent::query()->create([
+                'action' => 'calculation_run.created',
+                'auditable_type' => CalculationRun::class,
+                'auditable_id' => $run->id,
+                'actor_id' => $actor->id,
+                'old_values' => null,
+                'new_values' => [
+                    'algorithm_version' => $run->algorithm_version,
+                    'input_hash' => $run->input_hash,
+                    'status' => $run->status,
+                    'included_count' => $run->included_count,
+                    'excluded_count' => $run->excluded_count,
+                    'calculated_at' => $run->calculated_at->toIso8601String(),
+                ],
+            ]);
 
             return $run->load(['ueqResults', 'ueqPooledResults', 'sawResults', 'sensitivityResults']);
         });
