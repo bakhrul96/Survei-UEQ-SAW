@@ -231,8 +231,8 @@
             <!-- Form Penambahan Expert Judgment -->
             <form wire:submit.prevent="saveExpertJudgment" class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-zinc-50 p-3 rounded-lg border border-zinc-200">
                 <div>
-                    <label class="block text-xs font-semibold text-zinc-700 mb-1">Pilih Modul</label>
-                    <select wire:model="selectedUnitId" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <label for="expert-unit" class="block text-xs font-semibold text-zinc-700 mb-1">Pilih Modul</label>
+                    <select id="expert-unit" wire:model="selectedUnitId" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">-- Pilih Modul --</option>
                         @foreach($allUnits as $unit)
                             <option value="{{ $unit->id }}">{{ $unit->name }}</option>
@@ -240,13 +240,13 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-zinc-700 mb-1">Urutan Operasional (1-13)</label>
-                    <input type="number" wire:model="operationalOrder" min="1" max="13" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <label for="expert-operational-order" class="block text-xs font-semibold text-zinc-700 mb-1">Urutan Operasional (1-13)</label>
+                    <input id="expert-operational-order" type="number" wire:model="operationalOrder" min="1" max="13" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-semibold text-zinc-700 mb-1">Alasan Penyesuaian Expert Judgment</label>
+                    <label for="expert-reason" class="block text-xs font-semibold text-zinc-700 mb-1">Alasan Penyesuaian Expert Judgment</label>
                     <div class="flex gap-2">
-                        <input type="text" wire:model="expertReason" placeholder="Contoh: Kebutuhan regulasi mendesak..." class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <input id="expert-reason" type="text" wire:model="expertReason" placeholder="Contoh: Kebutuhan regulasi mendesak..." class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <flux:button type="submit" variant="primary" size="sm">Simpan</flux:button>
                     </div>
                 </div>
