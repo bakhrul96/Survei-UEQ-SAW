@@ -2,10 +2,9 @@
 
 namespace App\Application\Quality;
 
+use App\Application\Calculation\CalculationInputChangeRecorder;
 use App\Domain\Quality\QualityDecision;
 use App\Domain\Quality\QualityFlagger;
-use App\Models\AuditEvent;
-use App\Models\CalculationRun;
 use App\Models\EvaluationPeriod;
 use App\Models\QualityReview;
 use App\Models\SurveySubmission;
@@ -15,7 +14,10 @@ use Illuminate\Validation\ValidationException;
 
 class ReviewSubmission
 {
-    public function __construct(private readonly QualityFlagger $flagger) {}
+    public function __construct(
+        private readonly QualityFlagger $flagger,
+        private readonly CalculationInputChangeRecorder $inputChangeRecorder,
+    ) {}
 
     public function handle(
         SurveySubmission $submission,
@@ -32,11 +34,6 @@ class ReviewSubmission
         }
 
         return DB::transaction(function () use ($submission, $reviewer, $decision, $reason): QualityReview {
-            EvaluationPeriod::query()
-                ->lockForUpdate()
-                ->findOrFail($submission->evaluation_period_id)
-                ->increment('calculation_input_revision');
-
             $existing = $submission->qualityReview()->first();
             $oldValues = $existing?->only(['flags', 'decision', 'reason', 'reviewed_by', 'reviewed_at']);
             $attributes = [
@@ -51,19 +48,15 @@ class ReviewSubmission
                 ? $submission->qualityReview()->create($attributes)
                 : tap($existing)->update($attributes);
 
-            AuditEvent::query()->create([
-                'action' => 'quality_review.updated',
-                'auditable_type' => QualityReview::class,
-                'auditable_id' => $review->id,
-                'actor_id' => $reviewer->id,
-                'old_values' => $oldValues,
-                'new_values' => $review->only(['flags', 'decision', 'reason', 'reviewed_by', 'reviewed_at']),
-            ]);
-
-            CalculationRun::query()
-                ->where('evaluation_period_id', $submission->evaluation_period_id)
-                ->where('status', 'preview')
-                ->update(['status' => 'stale']);
+            $this->inputChangeRecorder->record(
+                EvaluationPeriod::query()->findOrFail($submission->evaluation_period_id),
+                $reviewer,
+                'quality_review.updated',
+                QualityReview::class,
+                $review->id,
+                $oldValues,
+                $review->only(['flags', 'decision', 'reason', 'reviewed_by', 'reviewed_at']),
+            );
 
             return $review;
         });
