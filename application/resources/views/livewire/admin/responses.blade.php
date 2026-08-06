@@ -1,3 +1,8 @@
+@php($flagLabels = [
+    'fast_completion' => 'Durasi terlalu cepat',
+    'identical_answers' => 'Jawaban identik',
+])
+
 <div class="mx-auto w-full max-w-6xl space-y-6">
     <div>
         <flux:heading size="xl">Review kualitas respons</flux:heading>
@@ -45,7 +50,7 @@
                             <td class="p-2">{{ $response->durationSeconds }} detik</td>
                             <td class="p-2">
                                 @if ($response->flags)
-                                    {{ collect($response->flags)->filter()->keys()->map(fn (string $flag) => str($flag)->replace('_', ' ')->headline())->join(', ') ?: 'Tidak ada' }}
+                                    {{ collect($response->flags)->filter()->keys()->map(fn (string $flag) => $flagLabels[$flag] ?? str($flag)->replace('_', ' ')->headline())->join(', ') ?: 'Tidak ada' }}
                                 @else
                                     Belum direview
                                 @endif

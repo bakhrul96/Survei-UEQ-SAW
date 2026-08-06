@@ -31,7 +31,8 @@ class Responses extends Component
         $review = $submission->qualityReview;
 
         $this->submissionId = $submission->id;
-        $this->decision = $review === null ? QualityDecision::Included->value : $review->decision->value;
+        $storedDecision = $review?->getRawOriginal('decision');
+        $this->decision = is_string($storedDecision) ? $storedDecision : QualityDecision::Included->value;
         $this->reason = $review === null ? '' : ($review->reason ?? '');
         $this->resetValidation();
     }

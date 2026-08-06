@@ -26,6 +26,22 @@ it('stores one submission and exactly 26 answers atomically', function () {
         ->and(SurveyAnswer::where('survey_submission_id', $submission->id)->count())->toBe(26);
 });
 
+it('persists prospective quality flags before a manual review decision', function () {
+    $fixture = surveyFixture();
+
+    $submission = app(SubmitSurvey::class)->handle(validSubmitSurveyData($fixture));
+    $review = $submission->fresh('qualityReview')->qualityReview;
+
+    expect($review)->not->toBeNull()
+        ->and($review->flags)->toBe([
+            'fast_completion' => false,
+            'identical_answers' => true,
+        ])
+        ->and($review->decision)->toBeNull()
+        ->and($review->reviewed_by)->toBeNull()
+        ->and($review->reviewed_at)->toBeNull();
+});
+
 it('returns the original submission for the same idempotency key', function () {
     $fixture = surveyFixture();
     $data = validSubmitSurveyData($fixture);

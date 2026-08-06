@@ -23,7 +23,7 @@ class ResponseReviewQuery
                 unitName: $submission->unit->name,
                 durationSeconds: $submission->duration_seconds,
                 flags: $submission->qualityReview?->flags,
-                decision: $submission->qualityReview?->decision->value,
+                decision: $submission->qualityReview?->decision?->value,
                 reason: $submission->qualityReview?->reason,
                 reviewerName: $submission->qualityReview?->reviewer?->name,
                 reviewedAt: $submission->qualityReview?->reviewed_at,

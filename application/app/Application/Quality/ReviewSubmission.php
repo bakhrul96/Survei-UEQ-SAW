@@ -40,7 +40,7 @@ class ReviewSubmission
             $existing = $submission->qualityReview()->first();
             $oldValues = $existing?->only(['flags', 'decision', 'reason', 'reviewed_by', 'reviewed_at']);
             $attributes = [
-                'flags' => $this->flagger->for($submission),
+                'flags' => $existing === null ? $this->flagger->for($submission) : $existing->flags,
                 'decision' => $decision,
                 'reason' => $reason,
                 'reviewed_by' => $reviewer->id,

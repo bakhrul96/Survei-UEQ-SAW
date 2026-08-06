@@ -74,8 +74,8 @@ class CalculationInputSnapshot
 
         foreach ($submissions as $submission) {
             $review = $submission->qualityReview;
-            $decision = $review?->decision;
-            $decisionValue = $review === null ? 'unreviewed' : $decision->value;
+            $storedDecision = $review?->getRawOriginal('decision');
+            $decisionValue = is_string($storedDecision) ? $storedDecision : 'unreviewed';
             $qualityDecisions[] = [
                 'submission_id' => $submission->id,
                 'evaluation_unit_id' => $submission->evaluation_unit_id,
@@ -86,12 +86,12 @@ class CalculationInputSnapshot
                 'reviewed_at' => $review?->reviewed_at?->toIso8601String(),
             ];
 
-            if ($decision === QualityDecision::Included) {
+            if ($decisionValue === QualityDecision::Included->value) {
                 $includedIds[] = $submission->id;
                 $includedRawAnswers[(string) $submission->id] = $submission->answers
                     ->mapWithKeys(fn ($answer): array => [(string) $answer->item_order => $answer->raw_score])
                     ->all();
-            } elseif ($decision === QualityDecision::Excluded) {
+            } elseif ($decisionValue === QualityDecision::Excluded->value) {
                 $excludedIds[] = $submission->id;
             } else {
                 $warnings[] = "Submission {$submission->id} belum direview dan tidak disertakan.";

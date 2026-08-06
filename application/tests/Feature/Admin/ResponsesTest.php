@@ -8,6 +8,16 @@ it('requires authentication to open response review', function () {
     $this->get('/admin/responses')->assertRedirect('/login');
 });
 
+it('shows prospective flags without treating the response as reviewed', function () {
+    completedSubmissionFixture();
+    $admin = User::factory()->create();
+
+    Livewire::actingAs($admin)
+        ->test(Responses::class)
+        ->assertSee('Jawaban identik')
+        ->assertSee('Belum direview');
+});
+
 it('lets an administrator exclude a submitted response with a reason', function () {
     $fixture = completedSubmissionFixture();
     $admin = User::factory()->create();

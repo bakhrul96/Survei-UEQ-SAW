@@ -2,6 +2,7 @@
 
 namespace App\Application\Survey;
 
+use App\Application\Quality\InitializeQualityReview;
 use App\Domain\Study\SurveyPeriodGate;
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
@@ -17,6 +18,7 @@ class SubmitSurvey
 {
     public function __construct(
         private readonly SurveyPeriodGate $periodGate,
+        private readonly InitializeQualityReview $qualityReviews,
     ) {}
 
     public function handle(SubmitSurveyData $data): SurveySubmission
@@ -101,6 +103,8 @@ class SubmitSurvey
                 $submission->answers()->createMany(collect($data->answers)->map(
                     fn (int $score, int $itemOrder): array => ['item_order' => $itemOrder, 'raw_score' => $score],
                 )->values()->all());
+
+                $this->qualityReviews->handle($submission);
 
                 $session->update([
                     'submitted_count' => $session->submitted_count + 1,
