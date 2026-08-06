@@ -64,3 +64,96 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* ------------------------------------------------------------------
+   Redesign 2026 — barely-there UI + calm palette + quiet micro-interactions
+   Mobile-first, accessible (prefers-reduced-motion), performance-first.
+------------------------------------------------------------------- */
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        font-feature-settings: 'ss01', 'cv11';
+        letter-spacing: -0.011em;
+    }
+
+    /* Display type untuk hero/heading: satu typeface kuat, weight yang bicara. */
+    .display-type {
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.04;
+    }
+
+    /* Hairline: struktur dari border 1px opacity rendah, bukan shadow berat. */
+    .hairline {
+        border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+    }
+
+    /* Permukaan calm: soft-white (Cloud Dancer) dengan tekstur halus. */
+    .surface-calm {
+        background:
+            radial-gradient(120% 140% at 8% 0%, color-mix(in oklab, var(--color-indigo-50, #eef2ff) 60%, transparent) 0%, transparent 55%),
+            linear-gradient(180deg, #fcfcfb 0%, #f6f6f4 100%);
+    }
+
+    .surface-tint {
+        background: linear-gradient(135deg,
+            color-mix(in oklab, var(--color-indigo-600, #4f46e5) 6%, #ffffff) 0%,
+            color-mix(in oklab, var(--color-violet-600, #7c3aed) 5%, #ffffff) 100%);
+    }
+
+    /* Kartu bento: radius lembut, hairline, hover terangkat halus. */
+    .bento-card {
+        border-radius: 1.25rem;
+        border: 1px solid color-mix(in oklab, currentColor 10%, transparent);
+        background: color-mix(in oklab, #ffffff 82%, transparent);
+        backdrop-filter: blur(6px);
+        transition: transform .28s cubic-bezier(.2,.7,.2,1), border-color .28s, background-color .28s, box-shadow .28s;
+    }
+
+    @media (hover:hover) {
+        .bento-card:hover {
+            transform: translateY(-2px);
+            border-color: color-mix(in oklab, var(--color-indigo-500, #6366f1) 40%, transparent);
+            box-shadow: 0 12px 32px -16px color-mix(in oklab, var(--color-indigo-600, #4f46e5) 30%, transparent);
+        }
+    }
+
+    /* Teks gradien untuk hero (kinetic type: satu momen kuat, bukan page-wide). */
+    .text-gradient {
+        background: linear-gradient(100deg, var(--color-indigo-700, #4338ca) 0%, var(--color-violet-600, #7c3aed) 55%, var(--color-indigo-500, #6366f1) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    /* Reveal halus saat elemen masuk (micro-interaction). */
+    .reveal {
+        animation: reveal-up .5s cubic-bezier(.2,.7,.2,1) both;
+    }
+    .reveal-delay-1 { animation-delay: .06s; }
+    .reveal-delay-2 { animation-delay: .12s; }
+    .reveal-delay-3 { animation-delay: .18s; }
+
+    @keyframes reveal-up {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Fokus terlihat jelas untuk keyboard. */
+    .focus-ring:focus-visible {
+        outline: 2px solid color-mix(in oklab, var(--color-indigo-600, #4f46e5) 80%, transparent);
+        outline-offset: 2px;
+    }
+
+    /* Hormati preferensi gerak rendah: matikan semua animasi/transisi. */
+    @media (prefers-reduced-motion: reduce) {
+        .reveal, .bento-card {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+}

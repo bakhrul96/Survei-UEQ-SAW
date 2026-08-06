@@ -3,8 +3,8 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white antialiased dark:bg-zinc-900">
-        <main class="min-h-screen">
+    <body class="surface-calm min-h-screen antialiased text-zinc-900 dark:bg-zinc-950">
+        <main class="mx-auto min-h-screen w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
             {{ $slot }}
         </main>
 

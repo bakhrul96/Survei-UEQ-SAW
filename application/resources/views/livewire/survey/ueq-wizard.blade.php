@@ -1,24 +1,30 @@
-<div class="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
-    <header class="space-y-2">
-        <p class="text-sm font-medium text-indigo-700">Langkah {{ $step }} dari 4</p>
-        <h1 class="text-2xl font-semibold text-zinc-900">{{ $unit->name }}</h1>
-        <p class="text-zinc-600">Pilih angka yang paling menggambarkan pengalaman Anda. Tidak ada skor terkonversi yang ditampilkan.</p>
+<div class="space-y-6">
+    @php($stepPct = (int) round(($step / 4) * 100))
+    <header class="reveal space-y-4">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-600">Langkah {{ $step }} dari 4</p>
+            <h1 class="display-type text-3xl text-zinc-900">{{ $unit->name }}</h1>
+            <p class="max-w-prose text-zinc-600">Pilih angka yang paling menggambarkan pengalaman Anda. Tidak ada skor terkonversi yang ditampilkan.</p>
+        </div>
+        <div class="h-1.5 overflow-hidden rounded-full bg-zinc-200" role="progressbar" aria-valuenow="{{ $stepPct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Progres langkah pengisian">
+            <div class="h-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-500 transition-all duration-500" style="width: {{ $stepPct }}%"></div>
+        </div>
     </header>
 
-    <div wire:offline class="rounded-lg bg-amber-100 p-3 text-amber-900">
+    <div wire:offline class="hairline rounded-2xl bg-amber-50 p-3.5 text-sm font-medium text-amber-900">
         Koneksi terputus. Jawaban tetap tersimpan di perangkat; kirim setelah tersambung kembali.
     </div>
 
     @if ($step === 1)
-        <label class="flex gap-3 rounded-lg border border-zinc-200 p-4 text-zinc-800">
-            <input type="checkbox" wire:model="confirmedExperience" class="mt-1 rounded border-zinc-400 text-indigo-600 focus:ring-2 focus:ring-indigo-500">
-            <span>Saya pernah menyelesaikan minimal satu proses layanan pada modul {{ $unit->name }}.</span>
+        <label class="bento-card focus-ring flex min-h-11 cursor-pointer items-start gap-3 p-4 {{ $confirmedExperience ? 'border-indigo-400 bg-indigo-50' : '' }}">
+            <input type="checkbox" wire:model.live="confirmedExperience" class="mt-0.5 h-6 w-6 shrink-0 rounded border-zinc-400 text-indigo-600 focus:ring-2 focus:ring-indigo-500">
+            <span class="text-sm font-medium text-zinc-900">Saya pernah menyelesaikan minimal satu proses layanan pada modul {{ $unit->name }}.</span>
         </label>
         @error('confirmedExperience') <p role="alert" class="text-sm text-red-700">{{ $message }}</p> @enderror
     @endif
 
     @foreach ($items as $item)
-        <fieldset wire:key="ueq-item-{{ $item->order }}" class="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <fieldset wire:key="ueq-item-{{ $item->order }}" class="bento-card space-y-3.5 p-4 sm:p-5">
             <legend class="sr-only">Item {{ $item->order }}</legend>
             <div class="flex items-start justify-between gap-4">
                 <span class="max-w-[45%] rounded-md bg-zinc-100 px-2.5 py-1.5 text-left text-sm font-semibold leading-snug text-zinc-900">{{ $item->left_label }}</span>
@@ -36,17 +42,17 @@
         </fieldset>
     @endforeach
 
-    <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center justify-between gap-3 pt-2">
         @if ($step > 1)
-            <button type="button" wire:click="previous" class="rounded-lg border border-zinc-300 px-4 py-2 font-medium text-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">Kembali</button>
+            <button type="button" wire:click="previous" class="focus-ring min-h-11 rounded-xl border border-zinc-300 bg-white px-5 font-medium text-zinc-800 transition hover:border-zinc-400">Kembali</button>
         @else
             <span></span>
         @endif
 
         @if ($step < 4)
-            <button type="button" wire:click="next" class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">Berikutnya</button>
+            <button type="button" wire:click="next" class="focus-ring min-h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 font-semibold text-white shadow-sm transition hover:from-indigo-500 hover:to-violet-500">Berikutnya</button>
         @else
-            <button type="button" wire:click="submit" wire:loading.attr="disabled" wire:offline.attr="disabled" class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">Kirim Penilaian</button>
+            <button type="button" wire:click="submit" wire:loading.attr="disabled" wire:offline.attr="disabled" class="focus-ring min-h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 font-semibold text-white shadow-sm transition hover:from-indigo-500 hover:to-violet-500 disabled:cursor-not-allowed disabled:opacity-50">Kirim Penilaian</button>
         @endif
     </div>
 

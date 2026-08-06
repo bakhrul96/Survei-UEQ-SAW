@@ -1,26 +1,27 @@
 <div class="mx-auto w-full max-w-2xl space-y-6">
-    <header class="space-y-4">
-        <div class="space-y-2">
-            <flux:heading size="xl">Informasi Penelitian</flux:heading>
-            <flux:text>{{ $period->name }} — bantu tentukan prioritas perbaikan layanan dengan menilai modul yang pernah Anda gunakan.</flux:text>
+    <header class="space-y-5">
+        <div class="reveal space-y-3">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-600">Penelitian Tugas Akhir</p>
+            <h1 class="display-type text-gradient text-3xl sm:text-4xl">Informasi Penelitian</h1>
+            <p class="max-w-prose text-base leading-relaxed text-zinc-600">{{ $period->name }} — bantu tentukan prioritas perbaikan layanan dengan menilai modul yang pernah Anda gunakan.</p>
         </div>
 
-        <div class="grid grid-cols-3 gap-2">
-            <div class="rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-center shadow-sm">
+        <div class="grid grid-cols-3 gap-2.5">
+            <div class="bento-card reveal reveal-delay-1 px-3 py-3 text-center">
                 <p class="text-lg font-bold text-indigo-700">Anonim</p>
-                <p class="text-xs text-zinc-600">Tanpa nama &amp; NIK</p>
+                <p class="mt-0.5 text-xs text-zinc-500">Tanpa nama &amp; NIK</p>
             </div>
-            <div class="rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-center shadow-sm">
+            <div class="bento-card reveal reveal-delay-2 px-3 py-3 text-center">
                 <p class="text-lg font-bold text-indigo-700">±{{ $period->consent_estimated_minutes }} mnt</p>
-                <p class="text-xs text-zinc-600">estimasi pengisian</p>
+                <p class="mt-0.5 text-xs text-zinc-500">estimasi pengisian</p>
             </div>
-            <div class="rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-center shadow-sm">
+            <div class="bento-card reveal reveal-delay-3 px-3 py-3 text-center">
                 <p class="text-lg font-bold text-indigo-700">26 pertanyaan</p>
-                <p class="text-xs text-zinc-600">per modul</p>
+                <p class="mt-0.5 text-xs text-zinc-500">per modul</p>
             </div>
         </div>
 
-        <p class="rounded-lg bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-900">Hanya modul yang pernah Anda gunakan yang dinilai — jawaban tersimpan sementara di perangkat bila koneksi terputus.</p>
+        <p class="surface-tint hairline reveal reveal-delay-3 rounded-2xl px-4 py-3 text-sm font-medium text-indigo-900">Hanya modul yang pernah Anda gunakan yang dinilai — jawaban tersimpan sementara di perangkat bila koneksi terputus.</p>
     </header>
 
     <flux:card class="space-y-4">
