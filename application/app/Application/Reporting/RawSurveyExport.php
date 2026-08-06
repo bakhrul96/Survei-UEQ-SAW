@@ -10,6 +10,7 @@ class RawSurveyExport
 {
     /** @var list<string> */
     private const HEADERS = [
+        'period_id', 'period_slug', 'period_name', 'period_status', 'exported_at',
         'submission_id', 'respondent_code', 'unit_code', 'unit_name', 'instrument_version',
         'started_at', 'completed_at', 'duration_seconds', 'session_sequence',
         'item_01', 'item_02', 'item_03', 'item_04', 'item_05', 'item_06', 'item_07', 'item_08', 'item_09',
@@ -48,6 +49,7 @@ SQL;
 
     public function spreadsheet(EvaluationPeriod $period): Spreadsheet
     {
+        $exportedAt = now()->toIso8601String();
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Raw UEQ');
@@ -56,6 +58,11 @@ SQL;
         $row = 2;
         foreach ($this->rows($period) as $submission) {
             $sheet->fromArray([
+                $period->id,
+                $period->slug,
+                $period->name,
+                $period->status->value,
+                $exportedAt,
                 $submission->submissionId,
                 'R-'.str_pad((string) $submission->profileId, 6, '0', STR_PAD_LEFT),
                 $submission->unitCode,

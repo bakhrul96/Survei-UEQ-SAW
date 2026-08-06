@@ -19,6 +19,10 @@ class RawSurveyExportRowTest extends TestCase
             'completed_at' => '2026-08-05 08:04:00',
             'duration_seconds' => '240.000000',
             'session_sequence' => '3',
+            'token_hash' => 'must-not-leak',
+            'idempotency_key' => 'must-not-leak',
+            'age' => 21,
+            'anonymous_respondent_id' => 99,
         ], collect(range(1, 26))
             ->mapWithKeys(fn (int $order): array => ['item_'.str_pad((string) $order, 2, '0', STR_PAD_LEFT) => (string) $order])
             ->all());
@@ -31,5 +35,9 @@ class RawSurveyExportRowTest extends TestCase
         $this->assertSame(240, $row->durationSeconds);
         $this->assertSame(3, $row->sessionSequence);
         $this->assertSame(range(1, 26), $row->scores);
+        $this->assertArrayNotHasKey('token_hash', get_object_vars($row));
+        $this->assertArrayNotHasKey('idempotency_key', get_object_vars($row));
+        $this->assertArrayNotHasKey('age', get_object_vars($row));
+        $this->assertArrayNotHasKey('anonymous_respondent_id', get_object_vars($row));
     }
 }
