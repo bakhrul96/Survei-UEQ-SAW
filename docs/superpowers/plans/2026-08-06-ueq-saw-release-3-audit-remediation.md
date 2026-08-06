@@ -749,7 +749,7 @@ php artisan test \
 
 Expected: PASS pada desktop dan mobile viewport.
 
-- [ ] **Step 8: Commit Task 5**
+- [x] **Step 8: Commit Task 5**
 
 ```bash
 git add application/app application/resources application/tests
@@ -771,7 +771,7 @@ git commit -m "feat: complete release three report visuals"
 - Produces: `AggregateReportExport::spreadsheet(EvaluationPeriod $period, CarbonInterface $generatedAt): Spreadsheet`.
 - CSV columns: `section`, `period_name`, `instrument_version`, `benchmark_version`, `benchmark_source`, `run_id`, `run_status`, `generated_at`, `unit_code`, `unit_name`, `scale`, `scenario`, `metric`, `value`, `rank`, `delta_rank`, `reason`.
 
-- [ ] **Step 1: Rewrite export tests to inspect content, not only headers**
+- [x] **Step 1: Rewrite export tests to inspect content, not only headers**
 
 CSV test harus membaca streamed content dengan `str_getcsv` dan membuktikan section berikut hadir:
 
@@ -796,7 +796,7 @@ XLSX test harus memeriksa sheet names `Metadata Run`, `Benchmark`, `Hasil UEQ`, 
 
 Tambahkan regression test: jika official run tersedia dan preview yang lebih baru juga ada, kedua format tetap mengekspor official run pointer.
 
-- [ ] **Step 2: Run export tests and confirm CSV contains metadata only**
+- [x] **Step 2: Run export tests and confirm CSV contains metadata only**
 
 Run:
 
@@ -807,7 +807,7 @@ php artisan test tests/Feature/Admin/AggregateReportExportTest.php
 
 Expected: FAIL karena CSV lama hanya menulis active worksheet `Metadata Run`.
 
-- [ ] **Step 3: Implement a flat multi-section CSV dataset**
+- [x] **Step 3: Implement a flat multi-section CSV dataset**
 
 Baris pertama adalah exact header interface. Setiap row wajib mengulang metadata periode/run agar dapat dianalisis tanpa state antarbaris. Untuk nilai UEQ, emit satu row per metric:
 
@@ -826,7 +826,7 @@ foreach (['n', 'mean', 'sd', 'se', 'ci95_lower', 'ci95_upper', 'alpha', 'gap'] a
 
 SAW harus emit X, R, tiga contribution, Vi, rank, tie. Sensitivity harus emit scenario weights, Vi, rank, dan delta. Backlog harus emit operational order, decision, reason, reviewer, dan waktu.
 
-- [ ] **Step 4: Stream CSV directly with `fputcsv`**
+- [x] **Step 4: Stream CSV directly with `fputcsv`**
 
 Controller tidak boleh memakai `PhpSpreadsheet\Writer\Csv`. Gunakan:
 
@@ -845,11 +845,11 @@ return response()->streamDownload(function () use ($period): void {
 ]);
 ```
 
-- [ ] **Step 5: Complete XLSX metadata and aggregate columns**
+- [x] **Step 5: Complete XLSX metadata and aggregate columns**
 
 Metadata sheet harus memuat period name/slug, instrument version, algorithm version, run ID/status/hash, included/excluded, calculated at, generated at, locked by/at, dan minimum-deviation metadata. Tambahkan Benchmark sheet berisi version, scale, good threshold, source, verified at. UEQ sheet wajib menambah SE dan CI lower/upper yang saat ini hilang.
 
-- [ ] **Step 6: Run Task 6 tests**
+- [x] **Step 6: Run Task 6 tests**
 
 Run:
 
