@@ -5,6 +5,7 @@ use App\Application\Survey\SubmitSurveyData;
 use App\Models\SurveyAnswer;
 use App\Models\SurveySubmission;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 
 it('stores one submission and exactly 26 answers atomically', function () {
     $fixture = surveyFixture();
@@ -67,6 +68,23 @@ it('stores duration in whole seconds', function () {
     $duration = DB::table('survey_submissions')->where('id', $submission->id)->value('duration_seconds');
 
     expect($duration)->toBeInt();
+});
+
+it('rolls back the submission session and answers when answer insertion fails', function () {
+    $fixture = surveyFixture();
+    $event = 'eloquent.creating: '.SurveyAnswer::class;
+    Event::listen($event, static fn () => throw new RuntimeException('Simulated answer insertion failure.'));
+
+    try {
+        expect(fn () => app(SubmitSurvey::class)->handle(validSubmitSurveyData($fixture)))
+            ->toThrow(RuntimeException::class, 'Simulated answer insertion failure.');
+    } finally {
+        Event::forget($event);
+    }
+
+    expect(SurveySubmission::count())->toBe(0)
+        ->and(SurveyAnswer::count())->toBe(0)
+        ->and($fixture->session->fresh()->submitted_count)->toBe(0);
 });
 
 it('rejects a direct submission after the survey window closes', function () {

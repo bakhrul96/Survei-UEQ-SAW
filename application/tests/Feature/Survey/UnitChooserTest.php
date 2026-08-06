@@ -1,5 +1,6 @@
 <?php
 
+use App\Application\Survey\SubmitSurvey;
 use App\Domain\Study\PeriodStatus;
 use App\Domain\Survey\SurveyTokenService;
 use App\Livewire\Survey\UnitChooser;
@@ -92,3 +93,32 @@ it('rejects selection of inactive and submitted units', function (bool $isActive
     'inactive unit' => [false, false],
     'submitted unit' => [true, true],
 ]);
+
+it('uses a new session for another module after inactivity with the same token', function () {
+    $fixture = surveyFixture();
+    $firstUnit = $fixture->unit;
+    $secondUnit = EvaluationUnit::factory()->create(['code' => 'unit-lanjutan']);
+    $fixture->period = lockStudyConfiguration($fixture->period);
+
+    app(SubmitSurvey::class)->handle(validSubmitSurveyData($fixture));
+
+    $this->travel(31)->minutes();
+
+    Livewire::withCookie('ueq_survey_token', $fixture->plainToken)
+        ->test(UnitChooser::class, ['period' => $fixture->period])
+        ->call('choose', $secondUnit->id)
+        ->assertRedirect(route('survey.wizard', ['period' => $fixture->period, 'unit' => $secondUnit->code]));
+
+    $fixture->session = SurveySession::query()->latest('started_at')->firstOrFail();
+    $fixture->unit = $secondUnit;
+    app(SubmitSurvey::class)->handle(validSubmitSurveyData($fixture));
+
+    expect(SurveySession::count())->toBe(2)
+        ->and(SurveySubmission::query()->where('evaluation_unit_id', $firstUnit->id)->count())->toBe(1)
+        ->and(SurveySubmission::query()->where('evaluation_unit_id', $secondUnit->id)->count())->toBe(1);
+
+    Livewire::withCookie('ueq_survey_token', $fixture->plainToken)
+        ->test(UnitChooser::class, ['period' => $fixture->period])
+        ->call('choose', $firstUnit->id)
+        ->assertForbidden();
+});

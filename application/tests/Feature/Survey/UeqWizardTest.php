@@ -1,6 +1,9 @@
 <?php
 
+use App\Domain\Study\PeriodStatus;
 use App\Livewire\Survey\UeqWizard;
+use App\Models\SurveyAnswer;
+use App\Models\SurveySubmission;
 use Livewire\Livewire;
 
 it('uses four steps with boundaries 7 7 6 6', function () {
@@ -55,4 +58,22 @@ it('rejects submission when the selected unit is deactivated after mount', funct
     $fixture->unit->update(['is_active' => false]);
 
     $wizard->call('submit')->assertNotFound();
+});
+
+it('rejects submission when the period closes after the wizard mounts', function () {
+    $fixture = surveyFixture();
+    $wizard = Livewire::withCookie('ueq_survey_token', $fixture->plainToken)
+        ->test(UeqWizard::class, ['period' => $fixture->period, 'unit' => $fixture->unit])
+        ->set('confirmedExperience', true);
+
+    foreach (range(1, 26) as $itemOrder) {
+        $wizard->set('answers.'.$itemOrder, 4);
+    }
+
+    $fixture->period->update(['status' => PeriodStatus::Closed]);
+
+    $wizard->call('submit')->assertNotFound();
+
+    expect(SurveySubmission::count())->toBe(0)
+        ->and(SurveyAnswer::count())->toBe(0);
 });

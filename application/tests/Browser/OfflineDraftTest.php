@@ -35,4 +35,17 @@ it('keeps a UEQ draft when the browser reports an offline interruption', functio
     $page->waitForText('Langkah 1 dari 4');
     $page->page()->waitForFunction("() => document.querySelector('#ueq-item-1-value-4')?.checked === true");
     $page->assertChecked('#ueq-item-1-value-4');
+    $page->script("() => { const key = Object.keys(localStorage).find((candidate) => candidate.startsWith('ueq-draft-v1:')); const draft = JSON.parse(localStorage.getItem(key)); for (let item = 1; item <= 26; item++) draft.answers[item] = '4'; draft.confirmedExperience = true; localStorage.setItem(key, JSON.stringify(draft)); return true; }");
+
+    $page->page()->reload();
+    $page->waitForText('Langkah 1 dari 4')
+        ->press('Berikutnya')->waitForText('Langkah 2 dari 4')
+        ->press('Berikutnya')->waitForText('Langkah 3 dari 4')
+        ->press('Berikutnya')->waitForText('Langkah 4 dari 4');
+    $page->page()->waitForFunction("() => document.querySelector('#ueq-item-21-value-4')?.checked === true");
+    $page->script("() => { window.dispatchEvent(new Event('offline')); return true; }");
+    $page->page()->waitForFunction("() => document.querySelector('[wire\\\\:click=\"submit\"]')?.disabled === true");
+    $page->script("() => { window.dispatchEvent(new Event('online')); return true; }");
+    $page->page()->waitForFunction("() => document.querySelector('[wire\\\\:click=\"submit\"]')?.disabled === false");
+    $page->assertChecked('#ueq-item-21-value-4');
 });
