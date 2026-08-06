@@ -6,6 +6,8 @@ use App\Application\Calculation\CalculationRunService;
 use App\Application\Calculation\OfficialRunEligibility;
 use App\Application\Calculation\RecordMinimumSampleDeviation;
 use App\Application\Quality\RecordExpertJudgment;
+use App\Application\Reporting\SensitivityComparisonData;
+use App\Application\Reporting\SensitivityComparisonQuery;
 use App\Models\CalculationRun;
 use App\Models\EvaluationPeriod;
 use DomainException;
@@ -114,8 +116,10 @@ class Calculations extends Component
         }
     }
 
-    public function render(OfficialRunEligibility $eligibility): View
-    {
+    public function render(
+        OfficialRunEligibility $eligibility,
+        SensitivityComparisonQuery $sensitivityComparisonQuery,
+    ): View {
         $run = $this->runId === null
             ? null
             : CalculationRun::query()
@@ -130,19 +134,31 @@ class Calculations extends Component
             ->keyBy('scale')
             ->map(fn (array $row): string => $row['good_threshold']);
 
+        $sensitivityComparison = $run === null
+            ? new SensitivityComparisonData(collect(), ['S1' => false, 'S2' => false], ['S1' => [], 'S2' => []])
+            : $sensitivityComparisonQuery->forRun($run);
         $sensitivityGrid = [];
-        if ($run && $run->sensitivityResults->isNotEmpty()) {
-            foreach ($run->sensitivityResults as $row) {
-                $unitId = $row->evaluation_unit_id;
-                $sensitivityGrid[$unitId]['name'] = $row->evaluationUnit->name ?? 'Modul';
-                $sensitivityGrid[$unitId]['code'] = $row->evaluationUnit->code ?? '';
-                $sensitivityGrid[$unitId][$row->scenario->value] = [
-                    'rank' => $row->rank,
-                    'preferenceValue' => $row->preference_value,
-                    'deltaRank' => $row->delta_rank,
-                    'isTied' => $row->is_tied,
+        foreach ($sensitivityComparison->rows as $row) {
+            if (! is_array($row) || ! is_array($row['scenarios'] ?? null)) {
+                continue;
+            }
+            $scenarioRows = [];
+            foreach ($row['scenarios'] as $scenario => $values) {
+                if (! is_string($scenario) || ! is_array($values)) {
+                    continue;
+                }
+                $scenarioRows[$scenario] = [
+                    'rank' => $values['rank'] ?? null,
+                    'preferenceValue' => $values['preference_value'] ?? null,
+                    'deltaRank' => $values['delta_rank'] ?? null,
+                    'isTied' => $values['is_tied'] ?? false,
                 ];
             }
+            $sensitivityGrid[$row['unit_id']] = [
+                'name' => $row['unit_name'],
+                'code' => $row['unit_code'],
+                ...$scenarioRows,
+            ];
         }
 
         $eligibilityIssues = $run === null ? [] : $eligibility->issues($run);
@@ -152,6 +168,8 @@ class Calculations extends Component
             'run' => $run,
             'benchmarkByScale' => $benchmarkByScale,
             'sensitivityGrid' => $sensitivityGrid,
+            'topThreeStable' => $sensitivityComparison->topThreeStable,
+            'changedTopThreeUnitIds' => $sensitivityComparison->changedTopThreeUnitIds,
             'backlogUnits' => $run?->expertJudgments
                 ->sortBy('operational_order')
                 ->map(fn ($judgment) => $judgment->evaluationUnit)

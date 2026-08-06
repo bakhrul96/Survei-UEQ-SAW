@@ -24,6 +24,7 @@ it('renders the calculation controls and release three features', function (): v
         ->call('runPreview')
         ->assertSee('Kunci Hasil Resmi (Official)')
         ->assertSee('Analisis Sensitivitas Peringkat (S0 vs S1 vs S2)')
+        ->assertSee('STABIL')
         ->assertSee('Expert Judgment & Backlog Operasional');
 });
 

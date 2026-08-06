@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 readonly class AggregateReportData
 {
     /**
+     * @param  Collection<int, mixed>  $benchmarks
      * @param  Collection<int, mixed>  $ueqSummary
      * @param  Collection<int, mixed>  $sawRanking
      * @param  Collection<int, mixed>  $sensitivityMatrix
@@ -16,11 +17,13 @@ readonly class AggregateReportData
      */
     public function __construct(
         public EvaluationPeriod $period,
-        public ?CalculationRun $officialRun,
-        public ?CalculationRun $latestRun,
+        public ?CalculationRun $selectedRun,
+        public bool $isOfficial,
+        public Collection $benchmarks,
         public Collection $ueqSummary,
         public Collection $sawRanking,
         public Collection $sensitivityMatrix,
         public Collection $operationalBacklog,
+        public SensitivityComparisonData $sensitivityComparison,
     ) {}
 }

@@ -24,14 +24,14 @@ class AggregateReportExport
             ['Nama Periode', $period->name],
             ['Slug', $period->slug],
             ['Versi Instrumen', $period->instrument_version],
-            ['Run ID', $data->latestRun->id ?? '-'],
-            ['Status Run', $data->latestRun->status ?? '-'],
-            ['Input Hash', $data->latestRun->input_hash ?? '-'],
-            ['Jumlah Response Included', $data->latestRun->included_count ?? 0],
-            ['Jumlah Response Excluded', $data->latestRun->excluded_count ?? 0],
-            ['Tanggal Ditentukan', $data->latestRun?->calculated_at?->toIso8601String() ?? '-'],
-            ['Dikunci Oleh', $data->latestRun?->lockedBy->name ?? '-'],
-            ['Waktu Kunci Official', $data->latestRun?->official_locked_at?->toIso8601String() ?? '-'],
+            ['Run ID', $data->selectedRun->id ?? '-'],
+            ['Status Run', $data->selectedRun->status ?? '-'],
+            ['Input Hash', $data->selectedRun->input_hash ?? '-'],
+            ['Jumlah Response Included', $data->selectedRun->included_count ?? 0],
+            ['Jumlah Response Excluded', $data->selectedRun->excluded_count ?? 0],
+            ['Tanggal Ditentukan', $data->selectedRun?->calculated_at?->toIso8601String() ?? '-'],
+            ['Dikunci Oleh', $data->selectedRun?->lockedBy->name ?? '-'],
+            ['Waktu Kunci Official', $data->selectedRun?->official_locked_at?->toIso8601String() ?? '-'],
         ]);
 
         // Sheet 2: Hasil UEQ
@@ -40,8 +40,8 @@ class AggregateReportExport
         $ueqRows = [
             ['Unit Code', 'Unit Name', 'Scale', 'n', 'Mean', 'SD', 'Cronbach Alpha', 'Gap'],
         ];
-        if ($data->latestRun) {
-            foreach ($data->latestRun->ueqResults as $result) {
+        if ($data->selectedRun) {
+            foreach ($data->selectedRun->ueqResults as $result) {
                 $ueqRows[] = [
                     $result->unit->code ?? '',
                     $result->unit->name ?? '',
@@ -62,8 +62,8 @@ class AggregateReportExport
         $sawRows = [
             ['Rank', 'Unit Code', 'Unit Name', 'X1 Gap', 'X2 Days', 'X3 Urgency', 'R1', 'R2', 'R3', 'Contrib C1', 'Contrib C2', 'Contrib C3', 'Preference Vi', 'Is Tied'],
         ];
-        if ($data->latestRun) {
-            foreach ($data->latestRun->sawResults->sortBy('rank') as $result) {
+        if ($data->selectedRun) {
+            foreach ($data->selectedRun->sawResults->sortBy('rank') as $result) {
                 $sawRows[] = [
                     $result->rank,
                     $result->unit->code ?? '',
@@ -90,8 +90,8 @@ class AggregateReportExport
         $sensRows = [
             ['Skenario', 'Unit Code', 'Unit Name', 'Nilai Preferensi', 'Rank', 'Delta Rank', 'Is Tied'],
         ];
-        if ($data->latestRun) {
-            foreach ($data->latestRun->sensitivityResults as $result) {
+        if ($data->selectedRun) {
+            foreach ($data->selectedRun->sensitivityResults as $result) {
                 $sensRows[] = [
                     $result->scenario->value,
                     $result->evaluationUnit->code ?? '',
@@ -111,8 +111,8 @@ class AggregateReportExport
         $ejRows = [
             ['Urutan Backlog', 'Unit Code', 'Unit Name', 'Keputusan', 'Alasan Expert Judgment', 'Reviewer', 'Waktu Ditinjau'],
         ];
-        if ($data->latestRun) {
-            foreach ($data->latestRun->expertJudgments->sortBy('operational_order') as $ej) {
+        if ($data->selectedRun) {
+            foreach ($data->selectedRun->expertJudgments->sortBy('operational_order') as $ej) {
                 $ejRows[] = [
                     $ej->operational_order,
                     $ej->evaluationUnit->code ?? '',

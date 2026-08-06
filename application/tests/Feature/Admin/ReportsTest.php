@@ -1,28 +1,54 @@
 <?php
 
+use App\Application\Calculation\CalculationRunService;
 use App\Livewire\Admin\Reports;
-use App\Models\EvaluationPeriod;
-use App\Models\User;
-use Database\Seeders\WongReangStudySeeder;
+use App\Models\EvaluationUnit;
+use App\Models\SensitivityResult;
 use Livewire\Livewire;
+use Tests\Support\ReleaseTwoFixture;
 
-beforeEach(function () {
-    $this->seed(WongReangStudySeeder::class);
-    $this->admin = User::factory()->create([
-        'email_verified_at' => now(),
-        'two_factor_secret' => 'secret',
-        'two_factor_confirmed_at' => now(),
+beforeEach(function (): void {
+    $scenario = ReleaseTwoFixture::scenario();
+    $this->admin = $scenario->admin;
+    $this->period = $scenario->period;
+    $this->run = app(CalculationRunService::class)->preview($this->period, $this->admin);
+
+    $outsideUnit = EvaluationUnit::query()
+        ->whereNotIn('id', $this->run->sawResults->pluck('evaluation_unit_id'))
+        ->firstOrFail();
+    SensitivityResult::query()->create([
+        'calculation_run_id' => $this->run->id,
+        'scenario' => 'S1',
+        'evaluation_unit_id' => $outsideUnit->id,
+        'preference_value' => 0.5,
+        'rank' => 3,
+        'delta_rank' => 0,
+        'is_tied' => false,
     ]);
-    $this->period = EvaluationPeriod::firstOrFail();
 });
 
-it('requires authentication for reports page', function () {
+it('requires authentication for reports page', function (): void {
     $this->get('/admin/reports')->assertRedirect('/login');
 });
 
-it('renders reports page for authenticated admin', function () {
+it('renders all accessible release three charts numeric tables and stability labels', function (): void {
     Livewire::actingAs($this->admin)
         ->test(Reports::class, ['periodId' => $this->period->id])
-        ->assertSee('Laporan Agregat Penelitian (Bab IV)')
-        ->assertSee('Status Run Acuan Laporan');
+        ->assertSeeHtml('data-chart="ueq-mean"')
+        ->assertSeeHtml('data-chart="gap-by-scale"')
+        ->assertSeeHtml('data-chart="saw-contribution"')
+        ->assertSeeHtml('data-chart="rank-change"')
+        ->assertSee('Tabel angka UEQ')
+        ->assertSee('Tabel kontribusi SAW')
+        ->assertSee('STABIL')
+        ->assertSee('BERUBAH');
+});
+
+it('does not select stale runs as report fallback', function (): void {
+    $this->run->update(['status' => 'stale']);
+
+    Livewire::actingAs($this->admin)
+        ->test(Reports::class, ['periodId' => $this->period->id])
+        ->assertSee('BELUM ADA KALKULASI')
+        ->assertDontSee($this->run->input_hash);
 });

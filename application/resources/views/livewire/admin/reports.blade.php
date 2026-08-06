@@ -1,186 +1,136 @@
-<div class="mx-auto w-full max-w-7xl space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
+<div class="mx-auto w-full max-w-7xl space-y-6 overflow-x-clip">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="min-w-0">
             <flux:heading size="xl">Laporan Agregat Penelitian (Bab IV)</flux:heading>
             <flux:text>{{ $period->name }} · Visualisasi &amp; Ekspor Data Hasil Penelitian</flux:text>
         </div>
-        <div class="flex items-center gap-3">
-            <a href="{{ route('admin.exports.aggregate.xlsx', $period) }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
-                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Ekspor XLSX Agregat
-            </a>
-            <a href="{{ route('admin.exports.aggregate.csv', $period) }}" class="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-900 transition">
-                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Ekspor CSV
-            </a>
+        <div class="flex flex-col gap-2 sm:flex-row">
+            <a href="{{ route('admin.exports.aggregate.xlsx', $period) }}" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Ekspor XLSX Agregat</a>
+            <a href="{{ route('admin.exports.aggregate.csv', $period) }}" class="inline-flex items-center justify-center rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white">Ekspor CSV</a>
         </div>
     </div>
 
-    <!-- Status Metadata Run -->
-    <flux:card class="space-y-2">
-        <div class="flex items-center justify-between">
-            <flux:heading size="lg">
-                Status Run Acuan Laporan
-                @if($reportData->officialRun)
-                    <span class="inline-flex items-center rounded-md bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">OFFICIAL / LOCKED (ACUAN PENELITIAN)</span>
-                @elseif($reportData->latestRun)
-                    <span class="inline-flex items-center rounded-md bg-sky-100 px-2.5 py-0.5 text-xs font-bold text-sky-800">PREVIEW TERAKHIR</span>
-                @else
-                    <span class="inline-flex items-center rounded-md bg-zinc-100 px-2.5 py-0.5 text-xs font-bold text-zinc-800">BELUM ADA KALKULASI</span>
-                @endif
-            </flux:heading>
-            @if($reportData->officialRun && $reportData->officialRun->lockedBy)
-                <flux:text class="text-xs text-zinc-500">Dikunci oleh {{ $reportData->officialRun->lockedBy->name }} pada {{ $reportData->officialRun->official_locked_at?->format('d M Y H:i') }}</flux:text>
+    <flux:card class="space-y-3">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <flux:heading size="lg">Status Run Acuan Laporan</flux:heading>
+            @if($reportData->isOfficial)
+                <span class="w-fit rounded-md bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">OFFICIAL / LOCKED (ACUAN PENELITIAN)</span>
+            @elseif($reportData->selectedRun)
+                <span class="w-fit rounded-md bg-sky-100 px-2.5 py-1 text-xs font-bold text-sky-800">PREVIEW TERAKHIR</span>
+            @else
+                <span class="w-fit rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-bold text-zinc-800">BELUM ADA KALKULASI</span>
             @endif
         </div>
-        @if($reportData->latestRun)
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-zinc-600 bg-zinc-50 p-3 rounded-lg border border-zinc-200">
-                <div><span class="font-semibold text-zinc-800">Run ID:</span> #{{ $reportData->latestRun->id }}</div>
-                <div><span class="font-semibold text-zinc-800">Algoritma:</span> {{ $reportData->latestRun->algorithm_version }}</div>
-                <div><span class="font-semibold text-zinc-800">Respons Included:</span> {{ $reportData->latestRun->included_count }}</div>
-                <div><span class="font-semibold text-zinc-800">Respons Excluded:</span> {{ $reportData->latestRun->excluded_count }}</div>
-                <div class="col-span-2 md:col-span-4 font-mono text-[11px] truncate"><span class="font-semibold font-sans text-zinc-800">Input Hash:</span> {{ $reportData->latestRun->input_hash }}</div>
-            </div>
+        @if($reportData->selectedRun)
+            <dl class="grid gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-xs sm:grid-cols-2 lg:grid-cols-4">
+                <div><dt class="font-semibold">Run ID</dt><dd>#{{ $reportData->selectedRun->id }}</dd></div>
+                <div><dt class="font-semibold">Algoritma</dt><dd>{{ $reportData->selectedRun->algorithm_version }}</dd></div>
+                <div><dt class="font-semibold">Included / Excluded</dt><dd>{{ $reportData->selectedRun->included_count }} / {{ $reportData->selectedRun->excluded_count }}</dd></div>
+                <div><dt class="font-semibold">Status</dt><dd>{{ strtoupper($reportData->selectedRun->status) }}</dd></div>
+                <div class="min-w-0 sm:col-span-2 lg:col-span-4"><dt class="font-semibold">Input Hash</dt><dd class="break-all font-mono">{{ $reportData->selectedRun->input_hash }}</dd></div>
+            </dl>
         @endif
     </flux:card>
 
-    @if($reportData->sawRanking->isNotEmpty())
-        <!-- Visualisasi Ringkasan Gap UEQ per Modul -->
+    @if($reportData->selectedRun)
         <flux:card class="space-y-4">
             <div>
-                <flux:heading size="lg">Visualisasi Gap UEQ per Modul (C1 Benefit)</flux:heading>
-                <flux:text class="text-xs text-zinc-500">
-                    Makin besar gap terhadap batas Good, makin tinggi kebutuhan perbaikan pengalaman pengguna pada modul tersebut.
-                </flux:text>
+                <flux:heading size="lg">Mean UEQ per Modul dan Skala</flux:heading>
+                <flux:text>Domain UEQ -3 sampai +3; garis tengah menunjukkan nilai nol.</flux:text>
             </div>
-            <div class="space-y-3">
-                @php
-                    $maxGapVal = max(1, $reportData->sawRanking->max('x1_gap') ?: 1);
-                @endphp
+            <div data-chart="ueq-mean" role="img" aria-label="Grafik mean UEQ per unit dan skala pada rentang minus tiga sampai plus tiga" class="space-y-3">
+                @foreach($reportData->ueqSummary as $unit)
+                    @foreach($unit['scales'] as $scale => $values)
+                        @php($mean = $values['mean'] === null ? 0.0 : (float) $values['mean'])
+                        @php($meanPosition = min(100, max(0, (($mean + 3) / 6) * 100)))
+                        <div role="img" aria-label="{{ $unit['unit_name'] }}, {{ $scale }}, mean {{ number_format($mean, 4) }}" class="space-y-1">
+                            <div class="flex flex-wrap justify-between gap-2 text-xs"><span>{{ $unit['unit_code'] }} · {{ $scale }}</span><span class="font-mono">{{ number_format($mean, 4) }}</span></div>
+                            <div class="relative h-3 rounded bg-zinc-100">
+                                <div class="absolute inset-y-0 left-1/2 w-px bg-zinc-500"></div>
+                                <div class="absolute top-0 size-3 -translate-x-1/2 rounded-full bg-indigo-600" style="left: {{ $meanPosition }}%"></div>
+                            </div>
+                        </div>
+                    @endforeach
+                @endforeach
+            </div>
+            <div data-report-table role="region" tabindex="0" aria-label="Tabel angka UEQ" class="overflow-x-auto rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
+                <flux:heading size="sm" class="mb-2">Tabel angka UEQ</flux:heading>
+                <table class="min-w-[900px] w-full text-left text-xs"><thead><tr class="border-b"><th class="p-2">Modul</th><th class="p-2">Skala</th><th class="p-2">n</th><th class="p-2">Mean</th><th class="p-2">SD</th><th class="p-2">SE</th><th class="p-2">CI bawah</th><th class="p-2">CI atas</th><th class="p-2">Alpha</th></tr></thead><tbody>
+                    @foreach($reportData->ueqSummary as $unit) @foreach($unit['scales'] as $scale => $values)
+                        <tr class="border-b"><td class="p-2">{{ $unit['unit_code'] }}</td><td class="p-2">{{ $scale }}</td><td class="p-2">{{ $values['n'] }}</td><td class="p-2 font-mono">{{ $values['mean'] === null ? '-' : number_format((float) $values['mean'], 4) }}</td><td class="p-2 font-mono">{{ $values['standard_deviation'] === null ? '-' : number_format((float) $values['standard_deviation'], 4) }}</td><td class="p-2 font-mono">{{ $values['standard_error'] === null ? '-' : number_format((float) $values['standard_error'], 4) }}</td><td class="p-2 font-mono">{{ $values['ci95_lower'] === null ? '-' : number_format((float) $values['ci95_lower'], 4) }}</td><td class="p-2 font-mono">{{ $values['ci95_upper'] === null ? '-' : number_format((float) $values['ci95_upper'], 4) }}</td><td class="p-2 font-mono">{{ $values['cronbach_alpha'] === null ? '-' : number_format((float) $values['cronbach_alpha'], 4) }}</td></tr>
+                    @endforeach @endforeach
+                </tbody></table>
+            </div>
+        </flux:card>
+
+        <flux:card class="space-y-4">
+            <div><flux:heading size="lg">Gap UEQ per Skala</flux:heading><flux:text>Gap positif menunjukkan jarak mean dari benchmark Good.</flux:text></div>
+            @php($maximumGap = max(1.0, (float) $reportData->ueqSummary->flatMap(fn ($unit) => collect($unit['scales'])->pluck('gap'))->filter()->max()))
+            <div data-chart="gap-by-scale" role="img" aria-label="Grafik gap UEQ enam skala per unit" class="space-y-3">
+                @foreach($reportData->ueqSummary as $unit) @foreach($unit['scales'] as $scale => $values)
+                    @php($gap = $values['gap'] === null ? 0.0 : (float) $values['gap'])
+                    <div role="img" aria-label="{{ $unit['unit_name'] }}, {{ $scale }}, gap {{ number_format($gap, 4) }}">
+                        <div class="flex justify-between gap-2 text-xs"><span>{{ $unit['unit_code'] }} · {{ $scale }}</span><span class="font-mono">{{ number_format($gap, 4) }}</span></div>
+                        <div class="mt-1 h-3 rounded bg-zinc-100"><div class="h-3 rounded bg-emerald-500" style="width: {{ min(100, ($gap / $maximumGap) * 100) }}%"></div></div>
+                    </div>
+                @endforeach @endforeach
+            </div>
+            <div data-report-table role="region" tabindex="0" aria-label="Tabel gap UEQ per skala" class="overflow-x-auto rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
+                <table class="min-w-[520px] w-full text-left text-xs"><thead><tr class="border-b"><th class="p-2">Modul</th><th class="p-2">Skala</th><th class="p-2">Benchmark</th><th class="p-2">Mean</th><th class="p-2">Gap</th></tr></thead><tbody>
+                    @foreach($reportData->ueqSummary as $unit) @foreach($unit['scales'] as $scale => $values)
+                        @php($benchmark = $reportData->benchmarks->firstWhere('scale', $scale))
+                        <tr class="border-b"><td class="p-2">{{ $unit['unit_code'] }}</td><td class="p-2">{{ $scale }}</td><td class="p-2 font-mono">{{ $benchmark ? number_format((float) $benchmark['good_threshold'], 4) : '-' }}</td><td class="p-2 font-mono">{{ $values['mean'] === null ? '-' : number_format((float) $values['mean'], 4) }}</td><td class="p-2 font-mono">{{ $values['gap'] === null ? '-' : number_format((float) $values['gap'], 4) }}</td></tr>
+                    @endforeach @endforeach
+                </tbody></table>
+            </div>
+        </flux:card>
+
+        <flux:card class="space-y-4">
+            <div><flux:heading size="lg">Kontribusi Kriteria SAW</flux:heading><flux:text>Segmen C1, C2, dan C3 berjumlah sama dengan nilai preferensi Vi.</flux:text></div>
+            <div data-chart="saw-contribution" role="img" aria-label="Grafik kontribusi C1 C2 C3 terhadap nilai preferensi SAW setiap unit" class="space-y-4">
                 @foreach($reportData->sawRanking as $row)
-                    @php
-                        $percentage = min(100, max(5, ($row['x1_gap'] / $maxGapVal) * 100));
-                    @endphp
-                    <div>
-                        <div class="flex justify-between text-xs font-semibold mb-1">
-                            <span>{{ $row['unit_name'] }} ({{ $row['unit_code'] }})</span>
-                            <span class="font-mono text-emerald-700">Gap: {{ number_format($row['x1_gap'], 4) }}</span>
-                        </div>
-                        <div class="w-full bg-zinc-100 rounded-full h-3 overflow-hidden">
-                            <div class="bg-emerald-500 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
-                        </div>
+                    @php($vi = max(0.000001, (float) $row['vi']))
+                    <div role="img" aria-label="{{ $row['unit_name'] }}, C1 {{ number_format((float) $row['contribution_c1'], 6) }}, C2 {{ number_format((float) $row['contribution_c2'], 6) }}, C3 {{ number_format((float) $row['contribution_c3'], 6) }}, Vi {{ number_format((float) $row['vi'], 6) }}">
+                        <div class="flex justify-between text-xs"><span>#{{ $row['rank'] }} · {{ $row['unit_code'] }}</span><span class="font-mono">Vi {{ number_format((float) $row['vi'], 6) }}</span></div>
+                        <div class="mt-1 flex h-4 overflow-hidden rounded bg-zinc-100"><div class="bg-indigo-500" style="width: {{ ((float) $row['contribution_c1'] / $vi) * 100 }}%"></div><div class="bg-sky-500" style="width: {{ ((float) $row['contribution_c2'] / $vi) * 100 }}%"></div><div class="bg-amber-500" style="width: {{ ((float) $row['contribution_c3'] / $vi) * 100 }}%"></div></div>
                     </div>
                 @endforeach
             </div>
+            <div data-report-table role="region" tabindex="0" aria-label="Tabel kontribusi SAW" class="overflow-x-auto rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
+                <flux:heading size="sm" class="mb-2">Tabel kontribusi SAW</flux:heading>
+                <table class="min-w-[620px] w-full text-left text-xs"><thead><tr class="border-b"><th class="p-2">Rank</th><th class="p-2">Modul</th><th class="p-2">C1</th><th class="p-2">C2</th><th class="p-2">C3</th><th class="p-2">Vi</th></tr></thead><tbody>@foreach($reportData->sawRanking as $row)<tr class="border-b"><td class="p-2">#{{ $row['rank'] }}</td><td class="p-2">{{ $row['unit_code'] }}</td><td class="p-2 font-mono">{{ number_format((float) $row['contribution_c1'], 6) }}</td><td class="p-2 font-mono">{{ number_format((float) $row['contribution_c2'], 6) }}</td><td class="p-2 font-mono">{{ number_format((float) $row['contribution_c3'], 6) }}</td><td class="p-2 font-mono">{{ number_format((float) $row['vi'], 6) }}</td></tr>@endforeach</tbody></table>
+            </div>
         </flux:card>
 
-        <!-- Perbandingan Peringkat SAW (S0) vs Backlog Operasional (Expert Judgment) -->
         <flux:card class="space-y-4">
             <div>
-                <flux:heading size="lg">Peringkat Analitis SAW vs Backlog Operasional</flux:heading>
-                <flux:text class="text-xs text-zinc-500">
-                    Membandingkan hasil matematis SAW (S0) dengan urutan prioritas operasional yang telah disesuaikan oleh pertimbangan ahli.
-                </flux:text>
+                <flux:heading size="lg">Perubahan Peringkat Sensitivitas</flux:heading>
+                <div class="mt-2 flex flex-wrap gap-2 text-xs font-bold">
+                    @foreach(['S1', 'S2'] as $scenario)
+                        <span @class(['rounded px-2 py-1', 'bg-emerald-100 text-emerald-800' => $reportData->sensitivityComparison->topThreeStable[$scenario], 'bg-amber-100 text-amber-800' => ! $reportData->sensitivityComparison->topThreeStable[$scenario]])>{{ $scenario }} TOP 3: {{ $reportData->sensitivityComparison->topThreeStable[$scenario] ? 'STABIL' : 'BERUBAH' }}</span>
+                    @endforeach
+                </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm border-collapse">
-                    <thead>
-                        <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700">
-                            <th class="py-2 px-3 text-center">Rank SAW (S0)</th>
-                            <th class="py-2 px-3">Modul</th>
-                            <th class="py-2 px-3 text-right">Nilai Preferensi (Vi)</th>
-                            <th class="py-2 px-3 text-center">Urutan Backlog Operasional</th>
-                            <th class="py-2 px-3">Catatan / Alasan Penyesuaian</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-zinc-200">
-                        @foreach($reportData->sawRanking as $saw)
-                            @php
-                                $ej = $reportData->operationalBacklog->firstWhere('unit_id', $saw['unit_id']);
-                            @endphp
-                            <tr class="hover:bg-zinc-50/50">
-                                <td class="py-2 px-3 text-center font-bold text-indigo-700">#{{ $saw['rank'] }}{{ $saw['is_tied'] ? ' (Seri)' : '' }}</td>
-                                <td class="py-2 px-3 font-semibold">{{ $saw['unit_name'] }}</td>
-                                <td class="py-2 px-3 text-right font-mono font-bold">{{ number_format($saw['vi'], 6) }}</td>
-                                <td class="py-2 px-3 text-center font-bold">
-                                    @if($ej)
-                                        <span class="inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
-                                            #{{ $ej['operational_order'] }}
-                                        </span>
-                                    @else
-                                        <span class="text-zinc-400">#{{ $saw['rank'] }} (Sama)</span>
-                                    @endif
-                                </td>
-                                <td class="py-2 px-3 text-xs text-zinc-600">
-                                    {{ $ej['reason'] ?? 'Mengikuti hasil matematis SAW S0' }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div data-chart="rank-change" role="img" aria-label="Grafik perubahan rank S1 dan S2 dibanding S0 untuk setiap unit" class="space-y-3">
+                @foreach($reportData->sensitivityMatrix as $row)
+                    @php($changed = in_array($row['unit_id'], [...$reportData->sensitivityComparison->changedTopThreeUnitIds['S1'], ...$reportData->sensitivityComparison->changedTopThreeUnitIds['S2']], true))
+                    <div role="img" aria-label="{{ $row['unit_name'] }}, rank S0 {{ $row['scenarios']['S0']['rank'] ?? 'tidak ada' }}, delta S1 {{ $row['scenarios']['S1']['delta_rank'] ?? 0 }}, delta S2 {{ $row['scenarios']['S2']['delta_rank'] ?? 0 }}" @class(['rounded border p-3', 'border-amber-400 bg-amber-50' => $changed, 'border-zinc-200' => ! $changed])>
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs"><span class="font-semibold">{{ $row['unit_code'] }}</span><span>S0 #{{ $row['scenarios']['S0']['rank'] ?? '-' }} · S1 Δ {{ $row['scenarios']['S1']['delta_rank'] ?? 0 }} · S2 Δ {{ $row['scenarios']['S2']['delta_rank'] ?? 0 }}</span></div>
+                    </div>
+                @endforeach
+            </div>
+            <div data-report-table role="region" tabindex="0" aria-label="Tabel perubahan peringkat sensitivitas" class="overflow-x-auto rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
+                <table class="min-w-[620px] w-full text-left text-xs"><thead><tr class="border-b"><th class="p-2">Modul</th><th class="p-2">S0 rank</th><th class="p-2">S1 rank</th><th class="p-2">S1 delta</th><th class="p-2">S2 rank</th><th class="p-2">S2 delta</th></tr></thead><tbody>@foreach($reportData->sensitivityMatrix as $row)<tr class="border-b"><td class="p-2">{{ $row['unit_code'] }}</td><td class="p-2">{{ $row['scenarios']['S0']['rank'] ?? '-' }}</td><td class="p-2">{{ $row['scenarios']['S1']['rank'] ?? '-' }}</td><td class="p-2">{{ $row['scenarios']['S1']['delta_rank'] ?? 0 }}</td><td class="p-2">{{ $row['scenarios']['S2']['rank'] ?? '-' }}</td><td class="p-2">{{ $row['scenarios']['S2']['delta_rank'] ?? 0 }}</td></tr>@endforeach</tbody></table>
             </div>
         </flux:card>
 
-        <!-- Matriks Analisis Sensitivitas S0 vs S1 vs S2 -->
-        @if($reportData->sensitivityMatrix->isNotEmpty())
-            <flux:card class="space-y-4">
-                <div>
-                    <flux:heading size="lg">Matriks Analisis Sensitivitas (S0, S1, S2)</flux:heading>
-                    <flux:text class="text-xs text-zinc-500">
-                        S0 (Baseline Informan) · S1 (Dominasi UX: 0.6 C1, 0.2 C2, 0.2 C3) · S2 (Dominasi Teknis: 0.2 C1, 0.4 C2, 0.4 C3)
-                    </flux:text>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead>
-                            <tr class="border-b border-zinc-200 bg-zinc-50 text-zinc-700">
-                                <th class="py-2 px-3">Modul</th>
-                                <th class="py-2 px-3 text-center">Rank S0 (Baseline)</th>
-                                <th class="py-2 px-3 text-center">Rank S1 (Dominasi UX)</th>
-                                <th class="py-2 px-3 text-center">Δ Rank S1</th>
-                                <th class="py-2 px-3 text-center">Rank S2 (Dominasi Teknis)</th>
-                                <th class="py-2 px-3 text-center">Δ Rank S2</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-zinc-200">
-                            @foreach($reportData->sensitivityMatrix as $row)
-                                <tr class="hover:bg-zinc-50/50">
-                                    <td class="py-2 px-3 font-semibold">{{ $row['unit_name'] }}</td>
-                                    <td class="py-2 px-3 text-center font-bold">#{{ $row['scenarios']['S0']['rank'] ?? '-' }}</td>
-                                    <td class="py-2 px-3 text-center font-mono">#{{ $row['scenarios']['S1']['rank'] ?? '-' }}</td>
-                                    <td class="py-2 px-3 text-center font-mono font-bold text-xs">
-                                        @php $d1 = $row['scenarios']['S1']['delta_rank'] ?? 0; @endphp
-                                        @if($d1 > 0)
-                                            <span class="text-emerald-600">▲ +{{ $d1 }}</span>
-                                        @elseif($d1 < 0)
-                                            <span class="text-rose-600">▼ {{ $d1 }}</span>
-                                        @else
-                                            <span class="text-zinc-400">= 0</span>
-                                        @endif
-                                    </td>
-                                    <td class="py-2 px-3 text-center font-mono">#{{ $row['scenarios']['S2']['rank'] ?? '-' }}</td>
-                                    <td class="py-2 px-3 text-center font-mono font-bold text-xs">
-                                        @php $d2 = $row['scenarios']['S2']['delta_rank'] ?? 0; @endphp
-                                        @if($d2 > 0)
-                                            <span class="text-emerald-600">▲ +{{ $d2 }}</span>
-                                        @elseif($d2 < 0)
-                                            <span class="text-rose-600">▼ {{ $d2 }}</span>
-                                        @else
-                                            <span class="text-zinc-400">= 0</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </flux:card>
-        @endif
-    @else
-        <flux:card>
-            <flux:text class="text-center text-zinc-500 py-6">
-                Belum ada data kalkulasi acuan untuk laporan. Silakan jalankan kalkulasi dan kumpulkan data informan teknis pada menu Kalkulasi.
-            </flux:text>
+        <flux:card class="space-y-3">
+            <flux:heading size="lg">Backlog Operasional</flux:heading>
+            <div data-report-table role="region" tabindex="0" aria-label="Tabel backlog operasional" class="overflow-x-auto rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
+                <table class="min-w-[680px] w-full text-left text-xs"><thead><tr class="border-b"><th class="p-2">Urutan</th><th class="p-2">Modul</th><th class="p-2">Keputusan</th><th class="p-2">Alasan</th><th class="p-2">Reviewer</th></tr></thead><tbody>@foreach($reportData->operationalBacklog as $row)<tr class="border-b"><td class="p-2">#{{ $row['operational_order'] }}</td><td class="p-2">{{ $row['unit_code'] }}</td><td class="p-2">{{ strtoupper($row['decision']) }}</td><td class="p-2">{{ $row['reason'] }}</td><td class="p-2">{{ $row['reviewer_name'] }}</td></tr>@endforeach</tbody></table>
+            </div>
         </flux:card>
+    @else
+        <flux:card><flux:text class="py-6 text-center">Belum ada data kalkulasi acuan untuk laporan.</flux:text></flux:card>
     @endif
 </div>

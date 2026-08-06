@@ -222,6 +222,15 @@
                     <flux:text class="text-xs text-zinc-500">
                         S0 = Baseline Informan · S1 = Dominasi UX (0.6 C1, 0.2 C2, 0.2 C3) · S2 = Dominasi Pertimbangan Teknis (0.2 C1, 0.4 C2, 0.4 C3)
                     </flux:text>
+                    <div class="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
+                        @foreach(['S1', 'S2'] as $scenario)
+                            <span @class([
+                                'rounded px-2 py-1',
+                                'bg-emerald-100 text-emerald-800' => $topThreeStable[$scenario],
+                                'bg-amber-100 text-amber-800' => ! $topThreeStable[$scenario],
+                            ])>{{ $scenario }} TOP 3: {{ $topThreeStable[$scenario] ? 'STABIL' : 'BERUBAH' }}</span>
+                        @endforeach
+                    </div>
                 </div>
                 <div
                     data-release-two-scroll-region
@@ -243,7 +252,10 @@
                         </thead>
                         <tbody class="divide-y divide-zinc-200">
                             @foreach($sensitivityGrid as $unitId => $data)
-                                <tr class="hover:bg-zinc-50/50">
+                                <tr @class([
+                                    'hover:bg-zinc-50/50',
+                                    'bg-amber-50 dark:bg-amber-950/20' => in_array($unitId, [...$changedTopThreeUnitIds['S1'], ...$changedTopThreeUnitIds['S2']], true),
+                                ])>
                                     <td class="py-2 px-3 font-semibold">{{ $data['name'] }}</td>
                                     <td class="py-2 px-3 text-center font-bold">#{{ $data['S0']['rank'] ?? '-' }}</td>
                                     <td class="py-2 px-3 text-center font-mono">#{{ $data['S1']['rank'] ?? '-' }}</td>

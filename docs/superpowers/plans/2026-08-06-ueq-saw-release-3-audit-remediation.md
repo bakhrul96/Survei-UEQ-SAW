@@ -622,7 +622,7 @@ php artisan test \
 
 Expected: PASS; database tidak dapat menyimpan dua order yang sama untuk satu run.
 
-- [ ] **Step 9: Commit Task 4**
+- [x] **Step 9: Commit Task 4**
 
 ```bash
 git add application/database application/app application/resources application/tests
@@ -651,7 +651,7 @@ git commit -m "fix: persist a coherent operational backlog"
 - `SensitivityComparisonData` properties: `Collection $rows`, `array{S1: bool, S2: bool} $topThreeStable`, `array{S1: list<int>, S2: list<int>} $changedTopThreeUnitIds`.
 - `AggregateReportData` mempunyai property `EvaluationPeriod $period`, `?CalculationRun $selectedRun`, `bool $isOfficial`, `Collection $benchmarks`, `Collection $ueqSummary`, `Collection $sawRanking`, `Collection $sensitivityMatrix`, `Collection $operationalBacklog`, dan `SensitivityComparisonData $sensitivityComparison`. Property lama `officialRun` dan `latestRun` dihapus; official pointer dipilih lebih dahulu, fallback hanya ke latest `preview`, tidak pernah `stale` atau `archived`.
 
-- [ ] **Step 1: Write failing query and rendering tests**
+- [x] **Step 1: Write failing query and rendering tests**
 
 Test stability harus memakai set unit id dengan rank `<= 3`, bukan tiga row pertama:
 
@@ -677,7 +677,7 @@ Livewire::actingAs($this->admin)
     ->assertSee('BERUBAH');
 ```
 
-- [ ] **Step 2: Run focused tests and confirm missing charts/stability labels**
+- [x] **Step 2: Run focused tests and confirm missing charts/stability labels**
 
 Run:
 
@@ -690,7 +690,7 @@ php artisan test \
 
 Expected: FAIL karena hanya gap chart yang ada dan stability data belum tersedia.
 
-- [ ] **Step 3: Build one selected-run reporting query**
+- [x] **Step 3: Build one selected-run reporting query**
 
 Selection rule:
 
@@ -705,7 +705,7 @@ $selectedRun = $period->officialRun()->first()
 
 Tambahkan benchmark rows dari `selectedRun.input_snapshot.benchmarks`, UEQ rows lengkap termasuk SD/SE/CI/alpha/gap, SAW contributions, sensitivity comparison, serta backlog lengkap. Semua consumer—Calculations, Reports, XLSX, CSV—harus memakai selected run yang sama.
 
-- [ ] **Step 4: Implement top-three stability and highlight data**
+- [x] **Step 4: Implement top-three stability and highlight data**
 
 Untuk S0/S1/S2, buat set unit id dengan rank `<= 3`. Skenario stabil hanya jika set scenario identik dengan set S0. `changedTopThreeUnitIds` adalah symmetric difference. Calculations dan Reports menampilkan:
 
@@ -714,7 +714,7 @@ Untuk S0/S1/S2, buat set unit id dengan rank `<= 3`. Skenario stabil hanya jika 
 - highlight row jika unit id berada dalam changed set;
 - delta seluruh modul tetap ditampilkan.
 
-- [ ] **Step 5: Render four accessible HTML/CSS visualizations**
+- [x] **Step 5: Render four accessible HTML/CSS visualizations**
 
 Implementasikan:
 
@@ -725,7 +725,7 @@ Implementasikan:
 
 Setiap region harus mempunyai `role="img"` dan `aria-label` yang menyebut unit, metrik, serta nilai. Di bawah grafik, tampilkan tabel angka lengkap dalam region keyboard-focusable dengan visible focus ring.
 
-- [ ] **Step 6: Add the browser accessibility test**
+- [x] **Step 6: Add the browser accessibility test**
 
 Browser test pada viewport `1280x800` dan `360x800` harus memastikan:
 
@@ -735,7 +735,7 @@ Browser test pada viewport `1280x800` dan `360x800` harus memastikan:
 - tidak ada horizontal overflow pada page root di 360 px;
 - badge stability dapat dibaca sebagai teks, bukan hanya warna.
 
-- [ ] **Step 7: Run Task 5 tests**
+- [x] **Step 7: Run Task 5 tests**
 
 Run:
 

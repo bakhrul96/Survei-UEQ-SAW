@@ -7,107 +7,116 @@ use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
 use App\Models\ExpertJudgment;
 use App\Models\SawResult;
-use App\Models\SensitivityResult;
 use App\Models\UeqResult;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use LogicException;
 
-class AggregateReportQuery
+final class AggregateReportQuery
 {
+    public function __construct(
+        private readonly SensitivityComparisonQuery $sensitivityComparison = new SensitivityComparisonQuery,
+    ) {}
+
     public function for(EvaluationPeriod $period): AggregateReportData
     {
-        $officialRun = CalculationRun::query()
-            ->where('evaluation_period_id', $period->id)
-            ->where('status', 'official')
-            ->with(['ueqResults.unit', 'sawResults.unit', 'sensitivityResults.evaluationUnit', 'expertJudgments.evaluationUnit', 'expertJudgments.reviewer', 'lockedBy'])
-            ->latest('id')
-            ->first();
+        $relations = [
+            'ueqResults.unit',
+            'sawResults.unit',
+            'sensitivityResults.evaluationUnit',
+            'expertJudgments.evaluationUnit',
+            'expertJudgments.reviewer',
+            'lockedBy',
+        ];
+        $selectedRun = $period->officialRun()->with($relations)->first()
+            ?? CalculationRun::query()
+                ->where('evaluation_period_id', $period->id)
+                ->where('status', 'preview')
+                ->with($relations)
+                ->latest('id')
+                ->first();
 
-        $latestRun = $officialRun ?? CalculationRun::query()
-            ->where('evaluation_period_id', $period->id)
-            ->with(['ueqResults.unit', 'sawResults.unit', 'sensitivityResults.evaluationUnit', 'expertJudgments.evaluationUnit', 'expertJudgments.reviewer', 'lockedBy'])
-            ->latest('id')
-            ->first();
+        $emptyComparison = new SensitivityComparisonData(
+            collect(),
+            ['S1' => false, 'S2' => false],
+            ['S1' => [], 'S2' => []],
+        );
+        if ($selectedRun === null) {
+            return new AggregateReportData(
+                $period,
+                null,
+                false,
+                collect(),
+                collect(),
+                collect(),
+                collect(),
+                collect(),
+                $emptyComparison,
+            );
+        }
 
-        $targetRun = $officialRun ?? $latestRun;
+        $snapshot = $selectedRun->getAttribute('input_snapshot');
+        $benchmarkRows = is_array($snapshot) && is_array($snapshot['benchmarks'] ?? null)
+            ? array_values(array_filter($snapshot['benchmarks'], is_array(...)))
+            : [];
+        $benchmarks = collect($benchmarkRows)->sortBy('scale')->values();
 
-        $ueqSummary = collect();
-        $sawRanking = collect();
-        $sensitivityMatrix = collect();
-        $operationalBacklog = collect();
+        $ueqSummary = $selectedRun->ueqResults->groupBy('evaluation_unit_id')->map(function (EloquentCollection $results): array {
+            $first = $results->first();
+            if (! $first instanceof UeqResult || ! $first->unit instanceof EvaluationUnit) {
+                throw new LogicException('Hasil UEQ tersimpan tanpa relasi unit yang valid.');
+            }
 
-        if ($targetRun) {
-            $ueqSummary = $targetRun->ueqResults->groupBy('evaluation_unit_id')->map(function (EloquentCollection $results): array {
-                $firstResult = $results->first();
-                if (! $firstResult instanceof UeqResult || ! $firstResult->unit instanceof EvaluationUnit) {
-                    throw new LogicException('Hasil UEQ tersimpan tanpa relasi unit yang valid.');
-                }
-                $unit = $firstResult->unit;
+            return [
+                'unit_id' => $first->unit->id,
+                'unit_code' => $first->unit->code,
+                'unit_name' => $first->unit->name,
+                'scales' => $results->mapWithKeys(fn (UeqResult $result): array => [
+                    $result->scale => [
+                        'n' => $result->n,
+                        'mean' => $result->mean,
+                        'standard_deviation' => $result->standard_deviation,
+                        'standard_error' => $result->standard_error,
+                        'ci95_lower' => $result->ci95_lower,
+                        'ci95_upper' => $result->ci95_upper,
+                        'cronbach_alpha' => $result->cronbach_alpha,
+                        'gap' => $result->gap,
+                    ],
+                ])->sortKeys()->all(),
+                'overall_gap' => $results->whereNotNull('gap')->avg('gap'),
+            ];
+        })->sortBy('unit_code')->values();
 
-                return [
-                    'unit_id' => $unit->id,
-                    'unit_code' => $unit->code,
-                    'unit_name' => $unit->name,
-                    'scales' => $results->mapWithKeys(fn (UeqResult $r): array => [
-                        $r->scale => [
-                            'n' => $r->n,
-                            'mean' => $r->mean,
-                            'sd' => $r->standard_deviation,
-                            'alpha' => $r->cronbach_alpha,
-                            'gap' => $r->gap,
-                        ],
-                    ])->all(),
-                    'overall_gap' => $results->whereNotNull('gap')->avg('gap'),
-                ];
-            })->values();
+        $sawRanking = $selectedRun->sawResults->sortBy([
+            ['rank', 'asc'],
+            ['evaluation_unit_id', 'asc'],
+        ])->map(function (SawResult $result): array {
+            if (! $result->unit instanceof EvaluationUnit) {
+                throw new LogicException('Hasil SAW tersimpan tanpa relasi unit yang valid.');
+            }
 
-            $sawRanking = $targetRun->sawResults->sortBy('rank')->map(function (SawResult $result): array {
-                if (! $result->unit instanceof EvaluationUnit) {
-                    throw new LogicException('Hasil SAW tersimpan tanpa relasi unit yang valid.');
-                }
+            return [
+                'unit_id' => $result->evaluation_unit_id,
+                'unit_code' => $result->unit->code,
+                'unit_name' => $result->unit->name,
+                'x1_gap' => $result->x1_gap,
+                'x2_days' => $result->x2_days,
+                'x3_urgency' => $result->x3_urgency,
+                'r1' => $result->r1,
+                'r2' => $result->r2,
+                'r3' => $result->r3,
+                'contribution_c1' => $result->contribution_c1,
+                'contribution_c2' => $result->contribution_c2,
+                'contribution_c3' => $result->contribution_c3,
+                'vi' => $result->preference_value,
+                'rank' => $result->rank,
+                'is_tied' => $result->is_tied,
+            ];
+        })->values();
 
-                return [
-                    'unit_id' => $result->evaluation_unit_id,
-                    'unit_code' => $result->unit->code,
-                    'unit_name' => $result->unit->name,
-                    'x1_gap' => $result->x1_gap,
-                    'x2_days' => $result->x2_days,
-                    'x3_urgency' => $result->x3_urgency,
-                    'r1' => $result->r1,
-                    'r2' => $result->r2,
-                    'r3' => $result->r3,
-                    'contribution_c1' => $result->contribution_c1,
-                    'contribution_c2' => $result->contribution_c2,
-                    'contribution_c3' => $result->contribution_c3,
-                    'vi' => $result->preference_value,
-                    'rank' => $result->rank,
-                    'is_tied' => $result->is_tied,
-                ];
-            })->values();
-
-            $sensByUnit = $targetRun->sensitivityResults->groupBy('evaluation_unit_id');
-            $sensitivityMatrix = $sensByUnit->map(function (EloquentCollection $results): array {
-                $firstResult = $results->first();
-                if (! $firstResult instanceof SensitivityResult || ! $firstResult->evaluationUnit instanceof EvaluationUnit) {
-                    throw new LogicException('Hasil sensitivitas tersimpan tanpa relasi unit yang valid.');
-                }
-                $unit = $firstResult->evaluationUnit;
-
-                return [
-                    'unit_id' => $unit->id,
-                    'unit_code' => $unit->code,
-                    'unit_name' => $unit->name,
-                    'scenarios' => $results->mapWithKeys(fn (SensitivityResult $r): array => [
-                        $r->scenario->value => [
-                            'preference_value' => $r->preference_value,
-                            'rank' => $r->rank,
-                            'delta_rank' => $r->delta_rank,
-                        ],
-                    ])->all(),
-                ];
-            })->values();
-
-            $operationalBacklog = $targetRun->expertJudgments->sortBy('operational_order')->map(function (ExpertJudgment $judgment): array {
+        $comparison = $this->sensitivityComparison->forRun($selectedRun);
+        $operationalBacklog = $selectedRun->expertJudgments
+            ->sortBy('operational_order')
+            ->map(function (ExpertJudgment $judgment): array {
                 if (! $judgment->evaluationUnit instanceof EvaluationUnit) {
                     throw new LogicException('Expert judgment tersimpan tanpa relasi unit yang valid.');
                 }
@@ -123,16 +132,17 @@ class AggregateReportQuery
                     'updated_at' => $judgment->updated_at?->toIso8601String(),
                 ];
             })->values();
-        }
 
         return new AggregateReportData(
             period: $period,
-            officialRun: $officialRun,
-            latestRun: $latestRun,
+            selectedRun: $selectedRun,
+            isOfficial: $selectedRun->status === 'official',
+            benchmarks: $benchmarks,
             ueqSummary: $ueqSummary,
             sawRanking: $sawRanking,
-            sensitivityMatrix: $sensitivityMatrix,
+            sensitivityMatrix: $comparison->rows,
             operationalBacklog: $operationalBacklog,
+            sensitivityComparison: $comparison,
         );
     }
 }
