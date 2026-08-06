@@ -7,6 +7,8 @@ use DomainException;
 
 final class SurveyPeriodGate
 {
+    public function __construct(private readonly StudyConfigurationHasher $hasher) {}
+
     /** @return list<string> */
     public function issues(EvaluationPeriod $period): array
     {
@@ -26,6 +28,11 @@ final class SurveyPeriodGate
 
         if ($period->configuration_locked_at === null) {
             $issues[] = 'Konfigurasi periode belum dikunci.';
+        }
+
+        if ($period->configuration_hash === null
+            || ! hash_equals($period->configuration_hash, $this->hasher->hash($period))) {
+            $issues[] = 'Konfigurasi periode berubah setelah dikunci.';
         }
 
         return array_values(array_unique($issues));

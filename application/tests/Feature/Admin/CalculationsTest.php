@@ -37,6 +37,7 @@ beforeEach(function () {
 
     $unit1 = $this->fixture1->unit;
     $unit2 = EvaluationUnit::factory()->create(['code' => 'unit-two', 'display_order' => 999]);
+    $this->period = lockStudyConfiguration($this->period);
 
     $issued2 = app(SurveyTokenService::class)->issue();
     RespondentProfile::factory()->create([

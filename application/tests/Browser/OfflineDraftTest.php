@@ -11,6 +11,7 @@ it('keeps a UEQ draft when the browser reports an offline interruption', functio
         'configuration_locked_at' => now(),
     ]);
     $fixture->unit->update(['code' => 'ibadah-yu', 'name' => 'Ibadah-Yu']);
+    $fixture->period = lockStudyConfiguration($fixture->period);
 
     $page = visit(route('survey.entry', $fixture->period))
         ->resize(360, 800)

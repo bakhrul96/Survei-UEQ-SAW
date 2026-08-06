@@ -5,11 +5,12 @@ use App\Models\AnonymousRespondent;
 use App\Models\EvaluationPeriod;
 
 it('issues an encrypted cookie while storing only a keyed hash', function () {
-    EvaluationPeriod::factory()->create([
+    $period = EvaluationPeriod::factory()->create([
         'slug' => 'riset-2026',
         'status' => PeriodStatus::Active,
         'configuration_locked_at' => now(),
     ]);
+    lockStudyConfiguration($period);
 
     $response = $this->get('/s/wong-reang/riset-2026');
 
@@ -22,11 +23,12 @@ it('issues an encrypted cookie while storing only a keyed hash', function () {
 });
 
 it('reuses a valid survey token instead of creating a second respondent', function () {
-    EvaluationPeriod::factory()->create([
+    $period = EvaluationPeriod::factory()->create([
         'slug' => 'riset-2026',
         'status' => PeriodStatus::Active,
         'configuration_locked_at' => now(),
     ]);
+    lockStudyConfiguration($period);
     $first = $this->get('/s/wong-reang/riset-2026');
     $plainToken = $first->getCookie('ueq_survey_token')->getValue();
 

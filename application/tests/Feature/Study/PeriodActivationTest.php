@@ -3,6 +3,7 @@
 use App\Domain\Study\PeriodReadinessService;
 use App\Domain\Study\PeriodStatus;
 use App\Domain\Study\ReadinessEvidenceKind;
+use App\Domain\Study\StudyConfigurationHasher;
 use App\Livewire\Admin\StudySettings;
 use App\Models\EvaluationPeriod;
 use App\Models\PeriodReadinessEvidence;
@@ -65,7 +66,8 @@ it('locks configuration when every readiness rule passes', function () {
     $activated = app(PeriodReadinessService::class)->activate($period->fresh());
 
     expect($activated->status)->toBe(PeriodStatus::Active)
-        ->and($activated->configuration_locked_at)->not->toBeNull();
+        ->and($activated->configuration_locked_at)->not->toBeNull()
+        ->and($activated->configuration_hash)->toBe(app(StudyConfigurationHasher::class)->hash($activated));
 });
 
 it('does not activate when readiness issues exist', function () {

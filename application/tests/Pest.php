@@ -4,6 +4,7 @@ use App\Application\Survey\SubmitSurvey;
 use App\Application\Survey\SubmitSurveyData;
 use App\Domain\Study\PeriodStatus;
 use App\Domain\Study\ReadinessEvidenceKind;
+use App\Domain\Study\StudyConfigurationHasher;
 use App\Domain\Survey\SurveyTokenService;
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationUnit;
@@ -63,11 +64,10 @@ function surveyFixture(): object
 {
     $version = 'UEQ-TEST-'.Str::uuid();
     $period = EvaluationPeriod::factory()->create([
-        'status' => PeriodStatus::Active,
+        'status' => PeriodStatus::Draft,
         'instrument_version' => $version,
         'opens_at' => now()->subDay(),
         'closes_at' => now()->addMonth(),
-        'configuration_locked_at' => now(),
     ]);
     $unit = EvaluationUnit::factory()->create(['code' => 'unit-'.Str::lower(Str::random(8))]);
     foreach (range(1, 26) as $order) {
@@ -83,6 +83,7 @@ function surveyFixture(): object
         'evaluation_period_id' => $period->id,
         'anonymous_respondent_id' => $issued->respondent->id,
     ]);
+    $period = lockStudyConfiguration($period);
 
     return (object) [
         'period' => $period,
@@ -91,6 +92,17 @@ function surveyFixture(): object
         'plainToken' => $issued->plainToken,
         'session' => $session,
     ];
+}
+
+function lockStudyConfiguration(EvaluationPeriod $period): EvaluationPeriod
+{
+    $period->forceFill([
+        'status' => PeriodStatus::Active,
+        'configuration_locked_at' => now(),
+        'configuration_hash' => app(StudyConfigurationHasher::class)->hash($period->fresh()),
+    ])->save();
+
+    return $period->fresh();
 }
 
 function validSubmitSurveyData(object $fixture, ?string $idempotencyKey = null): SubmitSurveyData

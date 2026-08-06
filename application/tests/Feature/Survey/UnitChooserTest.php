@@ -13,6 +13,7 @@ use Livewire\Livewire;
 it('shows active units and marks an already submitted unit complete', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
     $unit = EvaluationUnit::factory()->create(['name' => 'Ibadah-Yu']);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
     RespondentProfile::factory()->create([
         'evaluation_period_id' => $period->id,
@@ -34,6 +35,7 @@ it('shows active units and marks an already submitted unit complete', function (
 
 it('rejects direct selection by an ineligible respondent', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
 
     Livewire::withCookie('ueq_survey_token', $issued->plainToken)
@@ -44,6 +46,7 @@ it('rejects direct selection by an ineligible respondent', function () {
 it('starts a session and redirects an eligible respondent to an available unit', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
     $unit = EvaluationUnit::factory()->create(['code' => 'ibadah-yu']);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
     RespondentProfile::factory()->create([
         'evaluation_period_id' => $period->id,
@@ -65,6 +68,7 @@ it('starts a session and redirects an eligible respondent to an available unit',
 it('rejects selection of inactive and submitted units', function (bool $isActive, bool $submitted) {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
     $unit = EvaluationUnit::factory()->create(['is_active' => $isActive]);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
     RespondentProfile::factory()->create([
         'evaluation_period_id' => $period->id,

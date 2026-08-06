@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property PeriodStatus $status
  * @property CarbonInterface|null $opens_at
  * @property CarbonInterface|null $closes_at
+ * @property string|null $configuration_hash
  */
 class EvaluationPeriod extends Model
 {

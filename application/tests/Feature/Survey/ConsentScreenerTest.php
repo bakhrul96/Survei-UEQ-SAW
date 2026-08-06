@@ -9,6 +9,7 @@ use Livewire\Livewire;
 
 it('renders survey entry and consent for an unauthenticated respondent', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
 
     $this->get(route('survey.entry', $period))
         ->assertRedirect(route('survey.consent', $period));
@@ -32,7 +33,8 @@ it('renders every required research consent element', function () {
         'consent_estimated_minutes' => 10,
         'consent_withdrawal_description' => 'Anda dapat berhenti sebelum mengirim jawaban.',
         'research_contact' => 'peneliti@example.test',
-    ]);
+    ])->save();
+    $period = lockStudyConfiguration($period);
 
     Livewire::test(ConsentScreener::class, ['period' => $period])
         ->assertSee('Tujuan penelitian adalah mengevaluasi pengalaman pengguna Wong Reang.')
@@ -45,6 +47,7 @@ it('renders every required research consent element', function () {
 
 it('stores consent and allows only eligible respondents', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'minimum_age' => 17, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
 
     Livewire::withCookie('ueq_survey_token', $issued->plainToken)
@@ -61,6 +64,7 @@ it('stores consent and allows only eligible respondents', function () {
 
 it('rejects screening when an active period closes after the component mounts', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
 
     $component = Livewire::withCookie('ueq_survey_token', $issued->plainToken)
@@ -80,6 +84,7 @@ it('rejects screening when an active period closes after the component mounts', 
 
 it('does not store a profile when consent or age is invalid', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
 
     Livewire::withCookie('ueq_survey_token', $issued->plainToken)
@@ -96,6 +101,7 @@ it('does not store a profile when consent or age is invalid', function () {
 
 it('stores an ineligible profile and redirects to the ineligible page', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
 
     Livewire::withCookie('ueq_survey_token', $issued->plainToken)
@@ -112,6 +118,7 @@ it('stores an ineligible profile and redirects to the ineligible page', function
 
 it('stores eligibility only once when an ineligible respondent resubmits the screener', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
 
     Livewire::withCookie('ueq_survey_token', $issued->plainToken)
@@ -141,6 +148,7 @@ it('stores eligibility only once when an ineligible respondent resubmits the scr
 
 it('does not let an eligible respondent replace the original screener result', function () {
     $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
     $issued = app(SurveyTokenService::class)->issue();
 
     Livewire::withCookie('ueq_survey_token', $issued->plainToken)

@@ -33,6 +33,7 @@ beforeEach(function () {
     UeqBenchmark::query()
         ->where('version', $this->period->instrument_version)
         ->update(['verified_at' => now()]);
+    $this->period = lockStudyConfiguration($this->period);
 
     $this->admin = User::factory()->create();
     $this->unit = EvaluationUnit::query()->firstOrFail();

@@ -11,6 +11,7 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
         'configuration_locked_at' => now(),
     ]);
     $fixture->unit->update(['code' => 'ibadah-yu', 'name' => 'Ibadah-Yu']);
+    $fixture->period = lockStudyConfiguration($fixture->period);
 
     $page = visit(route('survey.entry', $fixture->period))
         ->resize(360, 800)

@@ -15,6 +15,8 @@ class PeriodReadinessService
 {
     private const UEQ_SCALES = ['Attractiveness', 'Perspicuity', 'Efficiency', 'Dependability', 'Stimulation', 'Novelty'];
 
+    public function __construct(private readonly StudyConfigurationHasher $hasher) {}
+
     /**
      * @return array<string>
      */
@@ -144,6 +146,7 @@ class PeriodReadinessService
             $lockedPeriod->update([
                 'status' => PeriodStatus::Active,
                 'configuration_locked_at' => now(),
+                'configuration_hash' => $this->hasher->hash($lockedPeriod),
             ]);
 
             $lockedPeriod->refresh();
