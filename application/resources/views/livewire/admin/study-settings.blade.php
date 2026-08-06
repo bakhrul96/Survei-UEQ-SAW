@@ -1,8 +1,8 @@
 <div class="mx-auto w-full max-w-4xl space-y-6">
-    <div>
-        <flux:heading size="xl">Pengaturan Studi</flux:heading>
-        <flux:text>{{ $period->name }} · Status: {{ $period->status->value }}</flux:text>
-    </div>
+    <header class="reveal space-y-1.5">
+        <h1 class="display-type text-gradient text-3xl">Pengaturan Studi</h1>
+        <p class="max-w-prose text-zinc-600">{{ $period->name }} · Status: <span class="font-semibold text-indigo-700">{{ str($period->status->value)->headline() }}</span></p>
+    </header>
 
     @if (session('status'))
         <flux:callout variant="success" icon="check-circle">{{ session('status') }}</flux:callout>
@@ -15,10 +15,10 @@
         </flux:callout>
     @endif
 
-    <flux:card>
+    <div class="bento-card p-5 sm:p-6 {{ $issues === [] ? 'border-emerald-200 bg-emerald-50/60' : 'border-amber-200 bg-amber-50/60' }}">
         <flux:heading size="lg">Kesiapan aktivasi</flux:heading>
         @if ($issues === [])
-            <flux:text class="mt-2">Semua syarat aktivasi telah terpenuhi.</flux:text>
+            <flux:text class="mt-2 flex items-center gap-2 font-medium text-emerald-800">✓ Semua syarat aktivasi telah terpenuhi.</flux:text>
         @else
             <ul class="mt-3 list-disc space-y-1 ps-5 text-sm text-red-700 dark:text-red-300">
                 @foreach ($issues as $issue)
@@ -26,10 +26,10 @@
                 @endforeach
             </ul>
         @endif
-    </flux:card>
+    </div>
 
     <form wire:submit="save" class="space-y-6">
-        <flux:card class="space-y-4">
+        <div class="bento-card space-y-4 p-5 sm:p-6">
             <flux:heading size="lg">Konfigurasi periode</flux:heading>
             <div class="grid gap-4 md:grid-cols-2">
                 <flux:input wire:model="opensAt" type="datetime-local" label="Tanggal buka" :disabled="! $isDraft" />
@@ -96,10 +96,10 @@
             @else
                 <flux:callout variant="warning" icon="lock-closed">Konfigurasi terkunci sejak {{ $period->configuration_locked_at?->format('d M Y H:i') }}.</flux:callout>
             @endif
-        </flux:card>
+        </div>
     </form>
 
-    <flux:card class="space-y-4">
+    <div class="bento-card space-y-4 p-5 sm:p-6">
         <div>
             <flux:heading size="lg">Bukti kesiapan operasional</flux:heading>
             <flux:text>Setiap verifikasi mencatat admin, waktu, referensi, dan catatan pemeriksaan.</flux:text>
@@ -112,7 +112,7 @@
         <div class="space-y-5">
             @foreach ($evidenceDefinitions as $kind => $definition)
                 @php($evidence = $evidenceByKind->get($kind))
-                <section class="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-700" wire:key="evidence-{{ $kind }}">
+                <section class="bento-card space-y-3 p-4" wire:key="evidence-{{ $kind }}">
                     <div>
                         <flux:heading size="md">{{ $definition['label'] }}</flux:heading>
                         @if ($evidence)
@@ -147,9 +147,9 @@
                 </section>
             @endforeach
         </div>
-    </flux:card>
+    </div>
 
-    <flux:card class="space-y-3">
+    <div class="bento-card space-y-3 p-5 sm:p-6">
         <flux:heading size="lg">Verifikasi</flux:heading>
         <dl class="grid gap-3 text-sm md:grid-cols-2">
             <div><dt class="font-medium">Versi instrumen</dt><dd>{{ $period->instrument_version }}</dd></div>
@@ -165,7 +165,7 @@
         @enderror
         <ul class="divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
             @foreach ($benchmarks as $benchmark)
-                <li class="flex justify-between gap-4 py-2">
+                <li class="flex justify-between gap-4 py-2.5 transition hover:bg-indigo-50/40 -mx-2 px-2 rounded-lg">
                     <span>{{ $benchmark->scale }}</span>
                     <span class="flex items-center gap-2">
                         {{ $benchmark->verified_at?->format('d M Y H:i') ?? 'Belum diverifikasi' }}
@@ -176,7 +176,7 @@
                 </li>
             @endforeach
         </ul>
-    </flux:card>
+    </div>
 
     @if ($isDraft)
         <flux:button wire:click="activate" wire:confirm="Aktifkan periode ini? Konfigurasi tidak dapat diubah setelah aktivasi." variant="primary">
