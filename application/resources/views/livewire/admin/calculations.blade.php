@@ -1,13 +1,13 @@
 <div class="mx-auto w-full max-w-7xl space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
+    <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0">
             <flux:heading size="xl">Kalkulasi UEQ dan SAW</flux:heading>
             <flux:text>{{ $period->name }} · Analisis Sensitivitas &amp; Penguncian Hasil Resmi</flux:text>
         </div>
-        <div class="flex items-center gap-3">
-            <flux:button wire:click="runPreview" variant="primary">Jalankan preview</flux:button>
+        <div data-release-two-actions class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+            <flux:button class="w-full sm:w-auto" wire:click="runPreview" variant="primary">Jalankan preview</flux:button>
             @if($run && $run->status !== 'official')
-                <flux:button wire:click="lockOfficial" variant="filled" color="teal">Kunci Hasil Resmi (Official)</flux:button>
+                <flux:button class="w-full sm:w-auto" wire:click="lockOfficial" variant="filled" color="teal">Kunci Hasil Resmi (Official)</flux:button>
             @endif
         </div>
     </div>

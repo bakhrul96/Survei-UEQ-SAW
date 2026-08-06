@@ -78,3 +78,32 @@ it('makes every calculation table a named keyboard region', function (): void {
         ->assertNoJavaScriptErrors()
         ->assertNoBrokenImages();
 });
+
+it('keeps calculation actions and the document inside 360 pixels', function (): void {
+    $scenario = ReleaseTwoFixture::scenario();
+    $this->actingAs($scenario->admin);
+
+    visit(route('admin.calculations'))
+        ->resize(360, 800)
+        ->waitForText('Kalkulasi UEQ dan SAW')
+        ->assertVisible('[data-flux-sidebar-toggle]')
+        ->press('Jalankan preview')
+        ->waitForText('Input hash')
+        ->assertSee('Pooled reliability')
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
+        ->assertScript(<<<'JS'
+            (() => {
+                const actions = document.querySelector('[data-release-two-actions]');
+                const viewportWidth = window.innerWidth;
+
+                return actions !== null
+                    && Array.from(actions.querySelectorAll('button')).every((button) => {
+                        const rect = button.getBoundingClientRect();
+
+                        return rect.left >= 0 && rect.right <= viewportWidth;
+                    });
+            })()
+        JS)
+        ->assertNoJavaScriptErrors()
+        ->assertNoBrokenImages();
+});
