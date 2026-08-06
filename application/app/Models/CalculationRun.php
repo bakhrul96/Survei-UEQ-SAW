@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 
+/**
+ * @property CarbonInterface|null $calculated_at
+ * @property CarbonInterface|null $official_locked_at
+ */
 class CalculationRun extends Model
 {
     protected $guarded = [];

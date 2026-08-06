@@ -6,6 +6,7 @@ use App\Domain\Study\ReadinessEvidenceKind;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/** @property ReadinessEvidenceKind $kind */
 class PeriodReadinessEvidence extends Model
 {
     protected $table = 'period_readiness_evidence';

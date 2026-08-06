@@ -20,16 +20,19 @@ class ExpertJudgment extends Model
         'operational_order' => 'integer',
     ];
 
+    /** @return BelongsTo<CalculationRun, $this> */
     public function calculationRun(): BelongsTo
     {
         return $this->belongsTo(CalculationRun::class);
     }
 
+    /** @return BelongsTo<EvaluationUnit, $this> */
     public function evaluationUnit(): BelongsTo
     {
         return $this->belongsTo(EvaluationUnit::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewer_id');

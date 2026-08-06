@@ -7,6 +7,7 @@ use App\Domain\Study\PeriodReadinessService;
 use App\Domain\Study\PeriodStatus;
 use App\Domain\Study\ReadinessEvidenceKind;
 use App\Models\EvaluationPeriod;
+use App\Models\PeriodReadinessEvidence;
 use App\Models\UeqBenchmark;
 use App\Models\User;
 use DomainException;
@@ -224,7 +225,7 @@ class StudySettings extends Component
                 ],
             ],
             'evidenceByKind' => $period->readinessEvidence->keyBy(
-                fn ($evidence): string => $evidence->kind->value,
+                fn (PeriodReadinessEvidence $evidence): string => $evidence->kind->value,
             ),
         ])->layout('layouts.app', ['title' => 'Pengaturan Studi']);
     }

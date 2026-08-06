@@ -25,31 +25,16 @@ class SensitivityCalculator
             $s0Ranks[$result->alternative->unitId] = $result->rank;
         }
 
-        $s1Weights = SensitivityScenario::S1->fixedWeights();
-        $s2Weights = SensitivityScenario::S2->fixedWeights();
-
         $scenarios = [
-            SensitivityScenario::S0->value => [
-                'enum' => SensitivityScenario::S0,
-                'weights' => $consensusWeights,
-            ],
-            SensitivityScenario::S1->value => [
-                'enum' => SensitivityScenario::S1,
-                'weights' => $s1Weights ?? ['c1' => 0.60, 'c2' => 0.20, 'c3' => 0.20],
-            ],
-            SensitivityScenario::S2->value => [
-                'enum' => SensitivityScenario::S2,
-                'weights' => $s2Weights ?? ['c1' => 0.20, 'c2' => 0.40, 'c3' => 0.40],
-            ],
+            [SensitivityScenario::S0, SensitivityScenario::S0->resolvedWeights($consensusWeights)],
+            [SensitivityScenario::S1, SensitivityScenario::S1->resolvedWeights($consensusWeights)],
+            [SensitivityScenario::S2, SensitivityScenario::S2->resolvedWeights($consensusWeights)],
         ];
 
         $output = [];
 
-        foreach ($scenarios as $key => $config) {
-            /** @var SensitivityScenario $scenarioEnum */
-            $scenarioEnum = $config['enum'];
-            /** @var array{c1: float, c2: float, c3: float} $weights */
-            $weights = $config['weights'];
+        foreach ($scenarios as [$scenarioEnum, $weights]) {
+            $key = $scenarioEnum->value;
 
             $sawResults = $scenarioEnum === SensitivityScenario::S0
                 ? $s0Results

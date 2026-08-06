@@ -28,4 +28,13 @@ enum SensitivityScenario: string
             self::S2 => ['c1' => 0.20, 'c2' => 0.40, 'c3' => 0.40],
         };
     }
+
+    /**
+     * @param  array{c1: float, c2: float, c3: float}  $consensusWeights
+     * @return array{c1: float, c2: float, c3: float}
+     */
+    public function resolvedWeights(array $consensusWeights): array
+    {
+        return $this->fixedWeights() ?? $consensusWeights;
+    }
 }
