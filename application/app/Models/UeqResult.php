@@ -20,6 +20,7 @@ class UeqResult extends Model
             'ci95_lower' => 'decimal:10',
             'ci95_upper' => 'decimal:10',
             'cronbach_alpha' => 'decimal:10',
+            'reliability_warnings' => 'array',
             'gap' => 'decimal:10',
         ];
     }

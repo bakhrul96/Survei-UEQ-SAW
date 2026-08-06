@@ -83,31 +83,59 @@ final class UeqStatisticsCalculator
         }
 
         $n = count($respondentMeans);
+        $reliabilityWarnings = $n < 20 ? ['n_below_20'] : [];
 
-        if ($n < 2) {
-            return UeqScaleStatistics::unavailable($n, 'n_below_2');
+        if ($n === 0) {
+            return new UeqScaleStatistics(
+                $n,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                'n_below_2',
+                'n_below_2',
+                $reliabilityWarnings,
+            );
         }
 
         $mean = array_sum($respondentMeans) / $n;
-        $meanVariance = $this->sampleVariance($respondentMeans);
 
-        if ($meanVariance <= self::ZERO_VARIANCE_EPSILON) {
-            return UeqScaleStatistics::unavailable($n, 'zero_variance');
+        if ($n < 2) {
+            return new UeqScaleStatistics(
+                $n,
+                $mean,
+                null,
+                null,
+                null,
+                null,
+                null,
+                'n_below_2',
+                'n_below_2',
+                $reliabilityWarnings,
+            );
         }
 
+        $meanVariance = $this->sampleVariance($respondentMeans);
         $standardDeviation = sqrt($meanVariance);
         $standardError = $standardDeviation / sqrt($n);
         $criticalT = $this->criticalT95($n - 1);
         $interval = $criticalT * $standardError;
         $totalVariance = $this->sampleVariance($totalScores);
-
+        $cronbachAlpha = null;
+        $reliabilityUnavailableReason = null;
         if ($totalVariance <= self::ZERO_VARIANCE_EPSILON) {
-            return UeqScaleStatistics::unavailable($n, 'zero_variance');
-        }
+            $reliabilityUnavailableReason = 'zero_total_variance';
+        } else {
+            $itemVarianceSum = array_sum(array_map($this->sampleVariance(...), $itemScores));
+            $itemCount = count($scaleItems);
+            $cronbachAlpha = ($itemCount / ($itemCount - 1)) * (1 - ($itemVarianceSum / $totalVariance));
 
-        $itemVarianceSum = array_sum(array_map($this->sampleVariance(...), $itemScores));
-        $itemCount = count($scaleItems);
-        $cronbachAlpha = ($itemCount / ($itemCount - 1)) * (1 - ($itemVarianceSum / $totalVariance));
+            if ($cronbachAlpha < 0.70) {
+                $reliabilityWarnings[] = 'alpha_below_0_70';
+            }
+        }
 
         return new UeqScaleStatistics(
             $n,
@@ -118,6 +146,8 @@ final class UeqStatisticsCalculator
             $mean + $interval,
             $cronbachAlpha,
             null,
+            $reliabilityUnavailableReason,
+            $reliabilityWarnings,
         );
     }
 

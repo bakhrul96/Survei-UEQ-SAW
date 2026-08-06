@@ -55,7 +55,7 @@ class CalculationRunService
                 'calculated_at' => now(),
             ]);
 
-            $this->resultWriter->write($run, $calculation['rows']);
+            $this->resultWriter->write($run, $calculation['rows'], $calculation['pooledRows']);
             $this->sawWriter->write($run, $sawCalculation['rows']);
 
             if ($sawCalculation['alternatives'] !== []) {
@@ -66,7 +66,7 @@ class CalculationRunService
                 $this->sensitivityWriter->write($run, $sensitivityScenarios);
             }
 
-            return $run->load(['ueqResults', 'sawResults', 'sensitivityResults']);
+            return $run->load(['ueqResults', 'ueqPooledResults', 'sawResults', 'sensitivityResults']);
         });
     }
 

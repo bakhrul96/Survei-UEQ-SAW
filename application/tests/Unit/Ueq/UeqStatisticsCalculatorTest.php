@@ -50,36 +50,39 @@ it('matches all golden UEQ scale statistics for included answers', function (str
     }
 })->with(['ibadah-yu', 'info-yu']);
 
-it('marks a scale with fewer than two included responses unavailable', function (): void {
+it('keeps a one-response mean while marking inferential statistics unavailable', function (): void {
     $fixture = ueqGoldenFixture();
     $answers = [includedAnswersForUnit($fixture, 'ibadah-yu')[0]];
 
     $result = app(UeqStatisticsCalculator::class)->forScale($fixture['items'], $answers, 'Attractiveness');
 
     expect($result->n)->toBe(1)
-        ->and($result->mean)->toBeNull()
+        ->and($result->mean)->not->toBeNull()
         ->and($result->standardDeviation)->toBeNull()
         ->and($result->standardError)->toBeNull()
         ->and($result->ci95Lower)->toBeNull()
         ->and($result->ci95Upper)->toBeNull()
         ->and($result->cronbachAlpha)->toBeNull()
-        ->and($result->unavailableReason)->toBe('n_below_2');
+        ->and($result->unavailableReason)->toBe('n_below_2')
+        ->and($result->reliabilityUnavailableReason)->toBe('n_below_2')
+        ->and($result->reliabilityWarnings)->toContain('n_below_20');
 });
 
-it('marks a scale with no response variation unavailable instead of using zero statistics', function (): void {
+it('keeps zero descriptive variance as zero but leaves alpha unavailable', function (): void {
     $fixture = ueqGoldenFixture();
-    $answers = array_fill(0, 2, array_fill_keys(range(1, 26), 4));
+    $answers = array_fill(0, 3, array_fill_keys(range(1, 26), 4));
 
     $result = app(UeqStatisticsCalculator::class)->forScale($fixture['items'], $answers, 'Attractiveness');
 
-    expect($result->n)->toBe(2)
-        ->and($result->mean)->toBeNull()
-        ->and($result->standardDeviation)->toBeNull()
-        ->and($result->standardError)->toBeNull()
-        ->and($result->ci95Lower)->toBeNull()
-        ->and($result->ci95Upper)->toBeNull()
+    expect($result->n)->toBe(3)
+        ->and($result->mean)->toBe(0.0)
+        ->and($result->standardDeviation)->toBe(0.0)
+        ->and($result->standardError)->toBe(0.0)
+        ->and($result->ci95Lower)->toBe(0.0)
+        ->and($result->ci95Upper)->toBe(0.0)
         ->and($result->cronbachAlpha)->toBeNull()
-        ->and($result->unavailableReason)->toBe('zero_variance');
+        ->and($result->unavailableReason)->toBeNull()
+        ->and($result->reliabilityUnavailableReason)->toBe('zero_total_variance');
 });
 
 it('uses scale-specific fixture answers instead of treating all 26 items as one scale', function (string $unit): void {
