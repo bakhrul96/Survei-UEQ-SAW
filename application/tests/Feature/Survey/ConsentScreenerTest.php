@@ -175,3 +175,15 @@ it('does not let an eligible respondent replace the original screener result', f
         ->and($profile->is_indramayu_resident)->toBeTrue()
         ->and($profile->has_used_wong_reang)->toBeTrue();
 });
+
+it('renders large easy-to-tap consent checkboxes bound to their models', function () {
+    $period = EvaluationPeriod::factory()->create(['status' => PeriodStatus::Active, 'configuration_locked_at' => now()]);
+    $period = lockStudyConfiguration($period);
+
+    Livewire::test(ConsentScreener::class, ['period' => $period])
+        // Ketiga persetujuan memakai kartu tap-target besar (min-h-11) dengan checkbox nyata yang terikat model.
+        ->assertSee('min-h-11', escape: false)
+        ->assertSee('wire:model.live="consent"', escape: false)
+        ->assertSee('wire:model.live="isIndramayuResident"', escape: false)
+        ->assertSee('wire:model.live="hasUsedWongReang"', escape: false);
+});

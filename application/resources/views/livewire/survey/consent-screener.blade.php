@@ -27,12 +27,32 @@
         </div>
 
         <form wire:submit="submit" class="space-y-5">
-            <flux:checkbox wire:model="consent" label="Saya telah membaca informasi penelitian dan bersedia berpartisipasi." />
-            <flux:input wire:model="age" type="number" min="17" max="100" label="Usia" />
-            <flux:checkbox wire:model="isIndramayuResident" label="Saya berdomisili di Kabupaten Indramayu." />
-            <flux:checkbox wire:model="hasUsedWongReang" label="Saya pernah menggunakan aplikasi Wong Reang." />
+            @php
+                $checkboxCard = 'flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border p-4 text-left transition focus-within:ring-2 focus-within:ring-indigo-500';
+                $checkboxBox = 'mt-0.5 h-6 w-6 shrink-0 rounded border-zinc-400 text-indigo-600 focus:ring-2 focus:ring-indigo-500';
+            @endphp
 
-            <flux:button type="submit" variant="primary">Lanjutkan</flux:button>
+            <label class="{{ $checkboxCard }} {{ $consent ? 'border-indigo-500 bg-indigo-50' : 'border-zinc-300 bg-white hover:border-indigo-400' }}">
+                <input type="checkbox" wire:model.live="consent" class="{{ $checkboxBox }}">
+                <span class="text-sm font-medium text-zinc-900">Saya telah membaca informasi penelitian dan bersedia berpartisipasi.</span>
+            </label>
+            @error('consent') <p role="alert" class="text-sm font-medium text-red-600">{{ $message }}</p> @enderror
+
+            <flux:input wire:model="age" type="number" min="17" max="100" label="Usia" />
+
+            <label class="{{ $checkboxCard }} {{ $isIndramayuResident ? 'border-indigo-500 bg-indigo-50' : 'border-zinc-300 bg-white hover:border-indigo-400' }}">
+                <input type="checkbox" wire:model.live="isIndramayuResident" class="{{ $checkboxBox }}">
+                <span class="text-sm font-medium text-zinc-900">Saya berdomisili di Kabupaten Indramayu.</span>
+            </label>
+            @error('isIndramayuResident') <p role="alert" class="text-sm font-medium text-red-600">{{ $message }}</p> @enderror
+
+            <label class="{{ $checkboxCard }} {{ $hasUsedWongReang ? 'border-indigo-500 bg-indigo-50' : 'border-zinc-300 bg-white hover:border-indigo-400' }}">
+                <input type="checkbox" wire:model.live="hasUsedWongReang" class="{{ $checkboxBox }}">
+                <span class="text-sm font-medium text-zinc-900">Saya pernah menggunakan aplikasi Wong Reang.</span>
+            </label>
+            @error('hasUsedWongReang') <p role="alert" class="text-sm font-medium text-red-600">{{ $message }}</p> @enderror
+
+            <flux:button type="submit" variant="primary" class="min-h-11 w-full text-base">Lanjutkan</flux:button>
         </form>
     </flux:card>
 </div>

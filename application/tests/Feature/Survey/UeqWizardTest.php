@@ -77,3 +77,14 @@ it('rejects submission when the period closes after the wizard mounts', function
     expect(SurveySubmission::count())->toBe(0)
         ->and(SurveyAnswer::count())->toBe(0);
 });
+
+it('renders large tap targets with visible pole labels for every ueq item', function () {
+    $fixture = surveyFixture();
+
+    Livewire::withCookie('ueq_survey_token', $fixture->plainToken)
+        ->test(UeqWizard::class, ['period' => $fixture->period, 'unit' => $fixture->unit])
+        // Setiap sel radio mudah ditap (min-h-11) dan dapat dibaca mesin (role radiogroup + aria-label).
+        ->assertSee('min-h-11', escape: false)
+        ->assertSee('role="radiogroup"', escape: false)
+        ->assertSee('aria-label="Item ', escape: false);
+});

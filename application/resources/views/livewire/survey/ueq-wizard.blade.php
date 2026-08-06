@@ -20,13 +20,13 @@
     @foreach ($items as $item)
         <fieldset wire:key="ueq-item-{{ $item->order }}" class="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
             <legend class="sr-only">Item {{ $item->order }}</legend>
-            <div class="flex justify-between gap-4 text-sm font-medium text-zinc-800">
-                <span>{{ $item->left_label }}</span>
-                <span>{{ $item->right_label }}</span>
+            <div class="flex items-start justify-between gap-4">
+                <span class="max-w-[45%] rounded-md bg-zinc-100 px-2.5 py-1.5 text-left text-sm font-semibold leading-snug text-zinc-900">{{ $item->left_label }}</span>
+                <span class="max-w-[45%] rounded-md bg-zinc-100 px-2.5 py-1.5 text-right text-sm font-semibold leading-snug text-zinc-900">{{ $item->right_label }}</span>
             </div>
             <div class="grid grid-cols-7 gap-2" role="radiogroup" aria-label="Item {{ $item->order }}">
                 @foreach (range(1, 7) as $value)
-                    <label for="ueq-item-{{ $item->order }}-value-{{ $value }}" class="flex min-h-11 cursor-pointer items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-900 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50 focus-within:ring-2 focus-within:ring-indigo-500">
+                    <label for="ueq-item-{{ $item->order }}-value-{{ $value }}" class="flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-zinc-300 bg-white text-base font-semibold text-zinc-900 transition has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:shadow focus-within:ring-2 focus-within:ring-indigo-500">
                         <input id="ueq-item-{{ $item->order }}-value-{{ $value }}" name="ueq-item-{{ $item->order }}" type="radio" wire:model="answers.{{ $item->order }}" value="{{ $value }}" aria-label="Item {{ $item->order }} nilai {{ $value }}" class="sr-only">
                         <span aria-hidden="true">{{ $value }}</span>
                     </label>
