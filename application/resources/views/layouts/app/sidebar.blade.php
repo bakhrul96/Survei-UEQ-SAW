@@ -11,27 +11,41 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
+                <flux:sidebar.group :heading="__('Ikhtisar')" class="grid">
                     <flux:sidebar.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Pengumpulan Data')" class="grid">
+                    <flux:sidebar.item icon="adjustments-horizontal" :href="route('admin.study-settings')" :current="request()->routeIs('admin.study-settings')" wire:navigate>
+                        {{ __('Pengaturan Studi') }}
+                    </flux:sidebar.item>
                     <flux:sidebar.item icon="clipboard-document-check" :href="route('admin.responses')" :current="request()->routeIs('admin.responses')" wire:navigate>
                         {{ __('Respons') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="document-chart-bar" :href="route('admin.reports')" :current="request()->routeIs('admin.reports')" wire:navigate>
+                        {{ __('Laporan & Ekspor') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Analisis')" class="grid">
+                    <flux:sidebar.item icon="calculator" :href="route('admin.calculations')" :current="request()->routeIs('admin.calculations')" wire:navigate>
+                        {{ __('Perhitungan') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="wrench-screwdriver" :href="route('admin.technical-assessments')" :current="request()->routeIs('admin.technical-assessments')" wire:navigate>
+                        {{ __('Penilaian Teknis') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Akun')" class="grid">
+                    <flux:sidebar.item icon="cog-6-tooth" :href="route('profile.edit')" :current="request()->routeIs('profile.edit', 'security.edit', 'appearance.edit')" wire:navigate>
+                        {{ __('Pengaturan Akun') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
             <flux:spacer />
-
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
