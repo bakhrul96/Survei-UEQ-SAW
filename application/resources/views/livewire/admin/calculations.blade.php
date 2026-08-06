@@ -1,8 +1,8 @@
 <div class="mx-auto w-full max-w-7xl space-y-6">
-    <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="min-w-0">
-            <flux:heading size="xl">Kalkulasi UEQ dan SAW</flux:heading>
-            <flux:text>{{ $period->name }} · Analisis Sensitivitas &amp; Penguncian Hasil Resmi</flux:text>
+    <div class="reveal flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0 space-y-1.5">
+            <h1 class="display-type text-gradient text-3xl">Kalkulasi UEQ dan SAW</h1>
+            <p class="max-w-prose text-zinc-600">{{ $period->name }} · Analisis Sensitivitas &amp; Penguncian Hasil Resmi</p>
         </div>
         <div data-release-two-actions class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
             <flux:button data-testid="run-preview" class="w-full sm:w-auto" wire:click="runPreview" variant="primary" :disabled="$period->status === \App\Domain\Study\PeriodStatus::Locked">Jalankan preview</flux:button>
@@ -20,7 +20,7 @@
     @endif
 
     @if($run)
-        <flux:card class="space-y-2">
+        <div class="bento-card space-y-3 p-5 sm:p-6">
             <div class="flex items-center justify-between">
                 <flux:heading size="lg">
                     Calculation Run #{{ $run->id }}
@@ -48,9 +48,9 @@
             @foreach($run->warnings as $warning)
                 <flux:text class="text-amber-700 text-xs font-medium">⚠️ {{ $warning }}</flux:text>
             @endforeach
-        </flux:card>
+        </div>
 
-        <flux:card class="space-y-4">
+        <div class="bento-card space-y-4 p-5 sm:p-6">
             <div>
                 <flux:heading size="lg">Kelayakan hasil resmi</flux:heading>
                 <flux:text class="text-xs text-zinc-500">Seluruh gate final harus terpenuhi sebelum run dapat dikunci.</flux:text>
@@ -81,10 +81,10 @@
                     <div><dt class="font-medium">Referensi persetujuan</dt><dd>{{ $run->minimum_deviation_approval_reference }}</dd></div>
                 </dl>
             @endif
-        </flux:card>
+        </div>
 
         <!-- Hasil UEQ -->
-        <flux:card class="space-y-4">
+        <div class="bento-card space-y-4 p-5 sm:p-6">
             <flux:heading size="lg">Hasil UEQ per Modul &amp; Skala</flux:heading>
             <div
                 data-release-two-scroll-region
@@ -134,9 +134,9 @@
                     </tbody>
                 </table>
             </div>
-        </flux:card>
+        </div>
 
-        <flux:card class="space-y-4">
+        <div class="bento-card space-y-4 p-5 sm:p-6">
             <div>
                 <flux:heading size="lg">Pooled reliability</flux:heading>
                 <flux:text class="text-xs text-zinc-500">Diagnostik pooled lintas modul; bukan pengganti reliabilitas per modul.</flux:text>
@@ -157,10 +157,10 @@
                     </tbody>
                 </table>
             </div>
-        </flux:card>
+        </div>
 
         <!-- Peringkat SAW -->
-        <flux:card class="space-y-4">
+        <div class="bento-card space-y-4 p-5 sm:p-6">
             <flux:heading size="lg">Peringkat SAW (S0 Baseline Informan)</flux:heading>
             <div
                 data-release-two-scroll-region
@@ -212,7 +212,7 @@
                     </tbody>
                 </table>
             </div>
-        </flux:card>
+        </div>
 
         <!-- Analisis Sensitivitas -->
         @if($sensitivityGrid !== [])
@@ -285,11 +285,11 @@
                         </tbody>
                     </table>
                 </div>
-            </flux:card>
+            </div>
         @endif
 
         <!-- Expert Judgment & Backlog Operasional -->
-        <flux:card class="space-y-4">
+        <div class="bento-card space-y-4 p-5 sm:p-6">
             <div>
                 <flux:heading size="lg">Expert Judgment &amp; Backlog Operasional</flux:heading>
                 <flux:text class="text-xs text-zinc-500">
@@ -368,6 +368,6 @@
             @else
                 <flux:text class="text-xs text-zinc-500">Belum ada penyesuaian Expert Judgment pada calculation run ini.</flux:text>
             @endif
-        </flux:card>
+        </div>
     @endif
 </div>
