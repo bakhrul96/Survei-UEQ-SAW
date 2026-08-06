@@ -55,7 +55,7 @@ it('makes every calculation table a named keyboard region', function (): void {
             const regions = Array.from(document.querySelectorAll('[data-release-two-scroll-region]'))
                 .filter((region) => region.offsetParent !== null);
 
-            return regions.length === 4
+            return regions.length === 5
                 && regions.every((region) =>
                     region.getAttribute('role') === 'region'
                     && region.tabIndex === 0

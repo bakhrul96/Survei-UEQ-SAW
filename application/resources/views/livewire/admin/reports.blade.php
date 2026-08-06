@@ -5,8 +5,8 @@
             <flux:text>{{ $period->name }} · Visualisasi &amp; Ekspor Data Hasil Penelitian</flux:text>
         </div>
         <div class="flex flex-col gap-2 sm:flex-row">
-            <a href="{{ route('admin.exports.aggregate.xlsx', $period) }}" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Ekspor XLSX Agregat</a>
-            <a href="{{ route('admin.exports.aggregate.csv', $period) }}" class="inline-flex items-center justify-center rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white">Ekspor CSV</a>
+            <a data-testid="export-xlsx" href="{{ route('admin.exports.aggregate.xlsx', $period) }}" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Ekspor XLSX Agregat</a>
+            <a data-testid="export-csv" href="{{ route('admin.exports.aggregate.csv', $period) }}" class="inline-flex items-center justify-center rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white">Ekspor CSV</a>
         </div>
     </div>
 
@@ -125,9 +125,9 @@
         </flux:card>
 
         <flux:card class="space-y-3">
-            <flux:heading size="lg">Backlog Operasional</flux:heading>
+            <flux:heading size="lg">Peringkat Analitis SAW vs Backlog Operasional</flux:heading>
             <div data-report-table role="region" tabindex="0" aria-label="Tabel backlog operasional" class="overflow-x-auto rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
-                <table class="min-w-[680px] w-full text-left text-xs"><thead><tr class="border-b"><th class="p-2">Urutan</th><th class="p-2">Modul</th><th class="p-2">Keputusan</th><th class="p-2">Alasan</th><th class="p-2">Reviewer</th></tr></thead><tbody>@foreach($reportData->operationalBacklog as $row)<tr class="border-b"><td class="p-2">#{{ $row['operational_order'] }}</td><td class="p-2">{{ $row['unit_code'] }}</td><td class="p-2">{{ strtoupper($row['decision']) }}</td><td class="p-2">{{ $row['reason'] }}</td><td class="p-2">{{ $row['reviewer_name'] }}</td></tr>@endforeach</tbody></table>
+                <table class="min-w-[760px] w-full text-left text-xs"><thead><tr class="border-b"><th class="p-2">Rank SAW</th><th class="p-2">Urutan operasional</th><th class="p-2">Modul</th><th class="p-2">Keputusan</th><th class="p-2">Alasan</th><th class="p-2">Reviewer</th></tr></thead><tbody>@foreach($reportData->operationalBacklog as $row) @php($saw = $reportData->sawRanking->firstWhere('unit_id', $row['unit_id']))<tr class="border-b"><td class="p-2">#{{ $saw['rank'] ?? '-' }}</td><td class="p-2">#{{ $row['operational_order'] }}</td><td class="p-2">{{ $row['unit_code'] }}</td><td class="p-2">{{ strtoupper($row['decision']) }}</td><td class="p-2">{{ $row['reason'] }}</td><td class="p-2">{{ $row['reviewer_name'] }}</td></tr>@endforeach</tbody></table>
             </div>
         </flux:card>
     @else

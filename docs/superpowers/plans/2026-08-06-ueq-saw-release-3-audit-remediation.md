@@ -860,7 +860,7 @@ php artisan test tests/Feature/Admin/AggregateReportExportTest.php
 
 Expected: PASS dan CSV mengandung semua section, bukan hanya metadata.
 
-- [ ] **Step 7: Commit Task 6**
+- [x] **Step 7: Commit Task 6**
 
 ```bash
 git add application/app application/tests
@@ -882,7 +882,7 @@ git commit -m "fix: export complete aggregate research results"
 - Produces: `ReleaseThreeFixture::eligibleScenario(): object{period: EvaluationPeriod, admin: User, run: CalculationRun}` dengan 13 unit, minimum dua included submissions per unit, tiga informan lengkap, periode closed, dan preview yang eligible.
 - Produces bukti E2E: review hasil → preview → reorder backlog → official lock → reopen → report → export.
 
-- [ ] **Step 1: Build a deterministic eligible Rilis 3 fixture**
+- [x] **Step 1: Build a deterministic eligible Rilis 3 fixture**
 
 Fixture harus:
 
@@ -893,7 +893,7 @@ Fixture harus:
 5. tutup periode melalui state `active → closed`;
 6. jalankan preview dan assert 13 SAW rows, 39 sensitivity rows, serta 13 backlog rows.
 
-- [ ] **Step 2: Rewrite the browser flow to exercise actual Rilis 3 behavior**
+- [x] **Step 2: Rewrite the browser flow to exercise actual Rilis 3 behavior**
 
 Alur browser harus:
 
@@ -912,7 +912,7 @@ Login → Calculations → open eligible preview
 
 Gunakan selectors stabil `data-testid`, bukan text selector untuk action kritis.
 
-- [ ] **Step 3: Run the rewritten E2E test**
+- [x] **Step 3: Run the rewritten E2E test**
 
 Run:
 
@@ -923,7 +923,7 @@ php artisan test tests/Browser/ReleaseThreeFlowTest.php
 
 Expected: PASS dan tidak lagi mengunci run kosong dari periode draft.
 
-- [ ] **Step 4: Rewrite the operational runbook from verified behavior**
+- [x] **Step 4: Rewrite the operational runbook from verified behavior**
 
 Runbook harus:
 
@@ -935,7 +935,7 @@ Runbook harus:
 - mencantumkan prosedur membuka kembali official run dan mencocokkan hash/angka;
 - tidak mempertahankan angka test lama `132/544`.
 
-- [ ] **Step 5: Run the full fresh verification gate**
+- [x] **Step 5: Run the full fresh verification gate**
 
 Run:
 
@@ -954,7 +954,7 @@ Expected:
 
 Catat jumlah test dan assertion yang benar-benar keluar dari command ini pada bagian `Bukti Pengujian Rilis 3` di runbook. Jangan menyalin angka dari run sebelumnya.
 
-- [ ] **Step 6: Run migration round-trip verification**
+- [x] **Step 6: Run migration round-trip verification**
 
 Gunakan file SQLite sementara yang eksplisit agar tiga command artisan memakai database yang sama:
 
@@ -969,7 +969,7 @@ rm -f "$release3_db_path"
 
 Expected: ketiga migration remediasi dapat di-rollback dan diaplikasikan ulang tanpa error.
 
-- [ ] **Step 7: Confirm repository scope and absence of unrelated changes**
+- [x] **Step 7: Confirm repository scope and absence of unrelated changes**
 
 Run:
 
@@ -981,7 +981,7 @@ git diff --stat HEAD~7..HEAD
 
 Expected: hanya file Rilis 3, shared configuration/snapshot yang diperlukan, golden fixture, tests, dan runbook yang berubah; `git diff --check` tidak menghasilkan output.
 
-- [ ] **Step 8: Commit verified runbook and E2E evidence**
+- [x] **Step 8: Commit verified runbook and E2E evidence**
 
 ```bash
 git add application/tests application/docs/release-3-runbook.md
@@ -1010,13 +1010,13 @@ git commit -m "test: verify the complete release three workflow"
 
 ## Final Definition of Done
 
-- [ ] Seluruh acceptance traceability row mempunyai test yang lulus.
-- [ ] Tidak ada run `draft`, `active`, `stale`, kosong, atau incomplete yang dapat menjadi official.
-- [ ] Satu periode locked menunjuk tepat satu official run dan lock kedua ditolak.
-- [ ] UEQ, SAW, sensitivity, backlog, input hash, dan lock metadata official tidak berubah setelah reload atau input change lain.
-- [ ] Backlog mempunyai tepat satu row per SAW alternative dan order unik kontinu `1..N`.
-- [ ] Reports menampilkan empat visualisasi beserta tabel/label angka yang accessible.
-- [ ] CSV mengandung enam section agregat dan XLSX mengandung enam worksheet.
-- [ ] `composer test` dan `npm run build` selesai dengan exit code `0`.
-- [ ] Runbook memuat jumlah test/assertion dari verifikasi terakhir, bukan angka historis.
-- [ ] `git diff --check` bersih dan tidak ada perubahan di luar scope remediasi Rilis 3.
+- [x] Seluruh acceptance traceability row mempunyai test yang lulus.
+- [x] Tidak ada run `draft`, `active`, `stale`, kosong, atau incomplete yang dapat menjadi official.
+- [x] Satu periode locked menunjuk tepat satu official run dan lock kedua ditolak.
+- [x] UEQ, SAW, sensitivity, backlog, input hash, dan lock metadata official tidak berubah setelah reload atau input change lain.
+- [x] Backlog mempunyai tepat satu row per SAW alternative dan order unik kontinu `1..N`.
+- [x] Reports menampilkan empat visualisasi beserta tabel/label angka yang accessible.
+- [x] CSV mengandung enam section agregat dan XLSX mengandung enam worksheet.
+- [x] `composer test` dan `npm run build` selesai dengan exit code `0`.
+- [x] Runbook memuat jumlah test/assertion dari verifikasi terakhir, bukan angka historis.
+- [x] `git diff --check` bersih dan tidak ada perubahan di luar scope remediasi Rilis 3.

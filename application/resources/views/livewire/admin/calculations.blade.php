@@ -5,9 +5,9 @@
             <flux:text>{{ $period->name }} · Analisis Sensitivitas &amp; Penguncian Hasil Resmi</flux:text>
         </div>
         <div data-release-two-actions class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-            <flux:button class="w-full sm:w-auto" wire:click="runPreview" variant="primary" :disabled="$period->status === \App\Domain\Study\PeriodStatus::Locked">Jalankan preview</flux:button>
+            <flux:button data-testid="run-preview" class="w-full sm:w-auto" wire:click="runPreview" variant="primary" :disabled="$period->status === \App\Domain\Study\PeriodStatus::Locked">Jalankan preview</flux:button>
             @if($run && $run->status !== 'official')
-                <flux:button class="w-full sm:w-auto" wire:click="lockOfficial" variant="filled" color="teal">Kunci Hasil Resmi (Official)</flux:button>
+                <flux:button data-testid="lock-official" class="w-full sm:w-auto" wire:click="lockOfficial" variant="filled" color="teal">Kunci Hasil Resmi (Official)</flux:button>
             @endif
         </div>
     </div>
@@ -202,7 +202,7 @@
                                 <td class="py-2 px-3 text-right font-mono">{{ number_format($row->contribution_c1, 6) }}</td>
                                 <td class="py-2 px-3 text-right font-mono">{{ number_format($row->contribution_c2, 6) }}</td>
                                 <td class="py-2 px-3 text-right font-mono">{{ number_format($row->contribution_c3, 6) }}</td>
-                                <td class="py-2 px-3 text-right font-mono font-bold text-indigo-600">{{ number_format($row->preference_value, 6) }}</td>
+                                <td data-testid="saw-vi-{{ $row->evaluation_unit_id }}" class="py-2 px-3 text-right font-mono font-bold text-indigo-600">{{ number_format($row->preference_value, 6) }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -216,7 +216,7 @@
 
         <!-- Analisis Sensitivitas -->
         @if($sensitivityGrid !== [])
-            <flux:card class="space-y-4">
+            <flux:card data-testid="sensitivity-results" class="space-y-4">
                 <div>
                     <flux:heading size="lg">Analisis Sensitivitas Peringkat (S0 vs S1 vs S2)</flux:heading>
                     <flux:text class="text-xs text-zinc-500">
@@ -258,7 +258,7 @@
                                 ])>
                                     <td class="py-2 px-3 font-semibold">{{ $data['name'] }}</td>
                                     <td class="py-2 px-3 text-center font-bold">#{{ $data['S0']['rank'] ?? '-' }}</td>
-                                    <td class="py-2 px-3 text-center font-mono">#{{ $data['S1']['rank'] ?? '-' }}</td>
+                                    <td data-testid="s1-rank-{{ $unitId }}" class="py-2 px-3 text-center font-mono">#{{ $data['S1']['rank'] ?? '-' }}</td>
                                     <td class="py-2 px-3 text-center font-mono font-bold text-xs">
                                         @php $d1 = $data['S1']['deltaRank'] ?? 0; @endphp
                                         @if($d1 > 0)
@@ -302,7 +302,7 @@
             <form wire:submit.prevent="saveExpertJudgment" class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-zinc-50 p-3 rounded-lg border border-zinc-200">
                 <div>
                     <label for="expert-unit" class="block text-xs font-semibold text-zinc-700 mb-1">Pilih Modul</label>
-                    <select id="expert-unit" wire:model="selectedUnitId" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <select id="expert-unit" data-testid="backlog-unit" wire:model="selectedUnitId" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">-- Pilih Modul --</option>
                         @foreach($backlogUnits as $unit)
                             <option value="{{ $unit->id }}">{{ $unit->name }}</option>
@@ -311,13 +311,13 @@
                 </div>
                 <div>
                     <label for="expert-operational-order" class="block text-xs font-semibold text-zinc-700 mb-1">Urutan Operasional (1-13)</label>
-                    <input id="expert-operational-order" type="number" wire:model="operationalOrder" min="1" max="13" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <input id="expert-operational-order" data-testid="backlog-order" type="number" wire:model="operationalOrder" min="1" max="13" class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
                 <div class="md:col-span-2">
                     <label for="expert-reason" class="block text-xs font-semibold text-zinc-700 mb-1">Alasan Penyesuaian Expert Judgment</label>
                     <div class="flex gap-2">
-                        <input id="expert-reason" type="text" wire:model="expertReason" placeholder="Contoh: Kebutuhan regulasi mendesak..." class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <flux:button type="submit" variant="primary" size="sm">Simpan</flux:button>
+                        <input id="expert-reason" data-testid="backlog-reason" type="text" wire:model="expertReason" placeholder="Contoh: Kebutuhan regulasi mendesak..." class="w-full rounded-md border-zinc-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <flux:button data-testid="backlog-save" type="submit" variant="primary" size="sm">Simpan</flux:button>
                     </div>
                 </div>
             </form>
