@@ -4,6 +4,17 @@
         <p class="max-w-prose text-zinc-600">{{ $period->name }} · Status: <span class="font-semibold text-indigo-700">{{ str($period->status->value)->headline() }}</span></p>
     </header>
 
+    <div class="surface-tint hairline reveal rounded-2xl p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="min-w-0 space-y-1">
+                <p class="text-sm font-semibold text-indigo-900">Tautan survei periode ini (untuk dibagikan ke responden)</p>
+                <code class="block truncate font-mono text-sm text-indigo-800">{{ url('/s/wong-reang/'.$period->slug) }}</code>
+            </div>
+            <button type="button" data-copy="{{ url('/s/wong-reang/'.$period->slug) }}" onclick="navigator.clipboard.writeText(this.dataset.copy)" class="focus-ring min-h-11 shrink-0 rounded-xl border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 transition hover:border-zinc-400">Salin tautan</button>
+        </div>
+        <p class="mt-2 text-xs text-zinc-500">Tautan aktif untuk responden selama periode berstatus aktif.</p>
+    </div>
+
     <div class="bento-card space-y-4 p-5 sm:p-6">
         <div class="space-y-1">
             <h2 class="display-type text-xl text-zinc-900">Buat periode baru</h2>
