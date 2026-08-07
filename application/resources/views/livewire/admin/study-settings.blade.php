@@ -8,11 +8,19 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="min-w-0 space-y-1">
                 <p class="text-sm font-semibold text-indigo-900">Tautan survei periode ini (untuk dibagikan ke responden)</p>
-                <code class="block truncate font-mono text-sm text-indigo-800">{{ url('/s/wong-reang/'.$period->slug) }}</code>
+                @if ($period->status === \App\Domain\Study\PeriodStatus::Active)
+                    <a href="{{ url('/s/wong-reang/'.$period->slug) }}" target="_blank" rel="noopener noreferrer" class="block truncate font-mono text-sm font-medium text-indigo-700 underline decoration-indigo-300 underline-offset-2 transition hover:text-indigo-900">{{ url('/s/wong-reang/'.$period->slug) }}</a>
+                @else
+                    <code class="block truncate font-mono text-sm text-zinc-600">{{ url('/s/wong-reang/'.$period->slug) }}</code>
+                @endif
             </div>
             <button type="button" data-copy="{{ url('/s/wong-reang/'.$period->slug) }}" onclick="navigator.clipboard.writeText(this.dataset.copy)" class="focus-ring min-h-11 shrink-0 rounded-xl border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 transition hover:border-zinc-400">Salin tautan</button>
         </div>
-        <p class="mt-2 text-xs text-zinc-500">Tautan aktif untuk responden selama periode berstatus aktif.</p>
+        @if ($period->status === \App\Domain\Study\PeriodStatus::Active)
+            <p class="mt-2 text-xs font-medium text-emerald-700">Tautan aktif — responden dapat mengisi sekarang.</p>
+        @else
+            <p class="mt-2 text-xs text-zinc-500">Aktif setelah periode diaktifkan.</p>
+        @endif
     </div>
 
     <div class="bento-card space-y-4 p-5 sm:p-6">
@@ -37,7 +45,7 @@
                     <code class="min-w-0 flex-1 truncate rounded-lg border border-indigo-200 bg-white px-3 py-2 font-mono text-sm text-indigo-800">{{ url('/s/wong-reang/'.$createdPeriodSlug) }}</code>
                     <button type="button" data-copy="{{ url('/s/wong-reang/'.$createdPeriodSlug) }}" onclick="navigator.clipboard.writeText(this.dataset.copy)" class="focus-ring min-h-11 shrink-0 rounded-xl border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 transition hover:border-zinc-400">Salin</button>
                 </div>
-                <p class="mt-2 text-xs text-zinc-500">Tautan aktif untuk responden setelah periode diaktifkan.</p>
+                <p class="mt-2 text-xs text-zinc-500">Aktif setelah periode diaktifkan.</p>
             </div>
         @endif
     </div>
