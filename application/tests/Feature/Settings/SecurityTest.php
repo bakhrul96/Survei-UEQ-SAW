@@ -44,14 +44,16 @@ class SecurityTest extends TestCase
         $response->assertSee('Enable 2FA');
     }
 
-    public function test_security_settings_page_requires_password_confirmation_when_enabled(): void
+    public function test_security_settings_page_opens_without_eager_password_confirmation(): void
     {
         $user = User::factory()->create();
 
+        // Halaman terbuka tanpa redirect konfirmasi; konfirmasi dipindahkan ke aksi sensitif.
         $response = $this->actingAs($user)
             ->get(route('security.edit'));
 
-        $response->assertRedirect(route('password.confirm'));
+        $response->assertOk();
+        $response->assertSee('Update password');
     }
 
     public function test_security_settings_page_renders_without_two_factor_when_feature_is_disabled(): void

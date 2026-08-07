@@ -124,6 +124,8 @@ new #[Title('Security settings')] class extends Component {
      */
     public function deletePasskey(DeletePasskey $deletePasskey): void
     {
+        $this->assertPasswordRecentlyConfirmed();
+
         if (! $this->deletingPasskeyId) {
             return;
         }
@@ -160,9 +162,28 @@ new #[Title('Security settings')] class extends Component {
      */
     public function disable(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
     {
+        $this->assertPasswordRecentlyConfirmed();
+
         $disableTwoFactorAuthentication(auth()->user());
 
         $this->twoFactorEnabled = false;
+    }
+
+    /**
+     * Ensure the user has confirmed their password recently before a sensitive action.
+     */
+    protected function assertPasswordRecentlyConfirmed(): void
+    {
+        $confirmedAt = session('auth.password_confirmed_at');
+        $timeout = (int) config('auth.password_timeout', 10800);
+
+        if (! is_numeric($confirmedAt) || (time() - (int) $confirmedAt) > $timeout) {
+            session(['url.intended' => route('security.edit')]);
+            $this->redirect(route('password.confirm'), navigate: true);
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'security' => __('Konfirmasi password diperlukan untuk tindakan ini.'),
+            ]);
+        }
     }
 }; ?>
 
