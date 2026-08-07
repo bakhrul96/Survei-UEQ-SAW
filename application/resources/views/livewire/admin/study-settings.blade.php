@@ -18,6 +18,17 @@
                 <flux:button type="submit" variant="primary" icon="plus">Buat periode draft</flux:button>
             </div>
         </form>
+
+        @if ($createdPeriodSlug)
+            <div class="surface-tint hairline mt-4 rounded-2xl p-4">
+                <p class="text-sm font-semibold text-indigo-900">Tautan untuk dibagikan ke responden:</p>
+                <div class="mt-2 flex items-center gap-2">
+                    <code class="min-w-0 flex-1 truncate rounded-lg border border-indigo-200 bg-white px-3 py-2 font-mono text-sm text-indigo-800">{{ url('/s/wong-reang/'.$createdPeriodSlug) }}</code>
+                    <button type="button" data-copy="{{ url('/s/wong-reang/'.$createdPeriodSlug) }}" onclick="navigator.clipboard.writeText(this.dataset.copy)" class="focus-ring min-h-11 shrink-0 rounded-xl border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 transition hover:border-zinc-400">Salin</button>
+                </div>
+                <p class="mt-2 text-xs text-zinc-500">Tautan aktif untuk responden setelah periode diaktifkan.</p>
+            </div>
+        @endif
     </div>
 
     @if (session('status'))

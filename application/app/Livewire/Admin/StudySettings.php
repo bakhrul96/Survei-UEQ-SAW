@@ -70,6 +70,8 @@ class StudySettings extends Component
 
     public string $newPeriodClosesAt = '';
 
+    public ?string $createdPeriodSlug = null;
+
     /** @var array<string, string> */
     public array $evidenceReferences = [
         'https' => '',
@@ -262,8 +264,9 @@ class StudySettings extends Component
             $validated['newPeriodClosesAt'],
         );
 
+        $this->createdPeriodSlug = $period->slug;
         $this->reset('newPeriodName', 'newPeriodSlug', 'newPeriodOpensAt', 'newPeriodClosesAt');
-        session()->flash('status', 'Periode baru "'.$period->name.'" dibuat sebagai draft. Lengkapi konfigurasi lalu aktifkan.');
+        session()->flash('status', 'Periode baru "'.$period->name.'" dibuat sebagai draft. Bagikan tautan survei di bawah lalu lengkapi konfigurasi.');
     }
 
     public function close(): void
