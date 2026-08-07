@@ -10,12 +10,9 @@ class EnsureAdminTwoFactor
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
-
-        if ($user === null || ! $user->two_factor_secret || ! $user->two_factor_confirmed_at) {
-            return redirect()->route('security.edit');
-        }
-
+        // Admin tanpa 2FA tetap dapat mengakses area admin. Syarat 2FA untuk
+        // mengaktifkan periode ditegakkan terpisah oleh PeriodReadinessService,
+        // sehingga middleware ini tidak lagi memaksa redirect ke pengaturan keamanan.
         return $next($request);
     }
 }
