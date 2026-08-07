@@ -11,7 +11,12 @@ class Dashboard extends Component
 {
     public function render(ReleaseOneDashboardQuery $dashboard): View
     {
-        $period = EvaluationPeriod::query()->firstOrFail();
+        $period = EvaluationPeriod::query()->first();
+
+        if ($period === null) {
+            return view('livewire.admin.empty-period')
+                ->layout('layouts.app', ['title' => 'Dashboard Studi']);
+        }
 
         return view('livewire.admin.dashboard', [
             'period' => $period,

@@ -16,7 +16,7 @@ use Livewire\Component;
 
 class StudySettings extends Component
 {
-    public int $periodId;
+    public ?int $periodId = null;
 
     public string $opensAt = '';
 
@@ -88,10 +88,13 @@ class StudySettings extends Component
 
     public function mount(): void
     {
-        $period = EvaluationPeriod::query()->firstOrFail();
+        $period = EvaluationPeriod::query()->first();
 
-        $this->periodId = $period->id;
-        $this->fillFromPeriod($period);
+        $this->periodId = $period?->id;
+
+        if ($period !== null) {
+            $this->fillFromPeriod($period);
+        }
     }
 
     public function save(): void
@@ -281,6 +284,11 @@ class StudySettings extends Component
 
     public function render(PeriodReadinessService $readiness): View
     {
+        if ($this->periodId === null) {
+            return view('livewire.admin.empty-study-settings')
+                ->layout('layouts.app', ['title' => 'Pengaturan Studi']);
+        }
+
         $period = $this->period()->load('readinessEvidence.verifier');
 
         return view('livewire.admin.study-settings', [

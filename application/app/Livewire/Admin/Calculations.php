@@ -16,7 +16,7 @@ use Livewire\Component;
 
 class Calculations extends Component
 {
-    public int $periodId;
+    public ?int $periodId = null;
 
     public ?int $runId = null;
 
@@ -33,7 +33,7 @@ class Calculations extends Component
 
     public function mount(?int $periodId = null): void
     {
-        $this->periodId = $periodId ?? EvaluationPeriod::query()->firstOrFail()->id;
+        $this->periodId = $periodId ?? EvaluationPeriod::query()->first()?->id;
 
         $latestRun = CalculationRun::query()
             ->where('evaluation_period_id', $this->periodId)
@@ -120,6 +120,11 @@ class Calculations extends Component
         OfficialRunEligibility $eligibility,
         SensitivityComparisonQuery $sensitivityComparisonQuery,
     ): View {
+        if ($this->periodId === null) {
+            return view('livewire.admin.empty-period')
+                ->layout('layouts.app', ['title' => 'Kalkulasi UEQ dan SAW']);
+        }
+
         $run = $this->runId === null
             ? null
             : CalculationRun::query()

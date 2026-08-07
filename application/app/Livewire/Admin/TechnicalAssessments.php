@@ -14,7 +14,7 @@ use Livewire\Component;
 
 class TechnicalAssessments extends Component
 {
-    public int $periodId;
+    public ?int $periodId = null;
 
     public string $anonymousCode = '';
 
@@ -26,7 +26,7 @@ class TechnicalAssessments extends Component
 
     public function mount(): void
     {
-        $this->periodId = EvaluationPeriod::query()->firstOrFail()->id;
+        $this->periodId = EvaluationPeriod::query()->first()?->id;
         $this->assessments = $this->units()->mapWithKeys(fn (EvaluationUnit $unit) => [$unit->id => [
             'days' => null,
             'urgency' => null,
@@ -71,6 +71,11 @@ class TechnicalAssessments extends Component
 
     public function render(TechnicalConsensus $consensus): View
     {
+        if ($this->periodId === null) {
+            return view('livewire.admin.empty-period')
+                ->layout('layouts.app', ['title' => 'Penilaian Informan Teknis']);
+        }
+
         $period = $this->period();
 
         return view('livewire.admin.technical-assessments', [

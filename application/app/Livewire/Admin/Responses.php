@@ -12,7 +12,7 @@ use Livewire\Component;
 
 class Responses extends Component
 {
-    public int $periodId;
+    public ?int $periodId = null;
 
     public ?int $submissionId = null;
 
@@ -22,7 +22,7 @@ class Responses extends Component
 
     public function mount(): void
     {
-        $this->periodId = EvaluationPeriod::query()->firstOrFail()->id;
+        $this->periodId = EvaluationPeriod::query()->first()?->id;
     }
 
     public function openReview(int $submissionId): void
@@ -59,6 +59,11 @@ class Responses extends Component
 
     public function render(ResponseReviewQuery $responses): View
     {
+        if ($this->periodId === null) {
+            return view('livewire.admin.empty-period')
+                ->layout('layouts.app', ['title' => 'Review Kualitas Respons']);
+        }
+
         $period = EvaluationPeriod::query()->findOrFail($this->periodId);
 
         return view('livewire.admin.responses', [
