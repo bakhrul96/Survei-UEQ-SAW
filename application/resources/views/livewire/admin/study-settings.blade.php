@@ -4,6 +4,22 @@
         <p class="max-w-prose text-zinc-600">{{ $period->name }} · Status: <span class="font-semibold text-indigo-700">{{ str($period->status->value)->headline() }}</span></p>
     </header>
 
+    <div class="bento-card space-y-4 p-5 sm:p-6">
+        <div class="space-y-1">
+            <h2 class="display-type text-xl text-zinc-900">Buat periode baru</h2>
+            <p class="text-sm text-zinc-500">Mulai sesi penelitian baru sebagai draft. Konfigurasi disalin dari periode terakhir sebagai template; lengkapi lalu aktifkan.</p>
+        </div>
+        <form wire:submit="createPeriod" class="grid gap-4 md:grid-cols-2">
+            <flux:input wire:model="newPeriodName" label="Nama periode" placeholder="Contoh: Evaluasi Wong Reang Apps 2027" />
+            <flux:input wire:model="newPeriodSlug" label="Slug (opsional)" placeholder="otomatis dari nama" />
+            <flux:input wire:model="newPeriodOpensAt" type="datetime-local" label="Tanggal buka" />
+            <flux:input wire:model="newPeriodClosesAt" type="datetime-local" label="Tanggal tutup" />
+            <div class="md:col-span-2">
+                <flux:button type="submit" variant="primary" icon="plus">Buat periode draft</flux:button>
+            </div>
+        </form>
+    </div>
+
     @if (session('status'))
         <flux:callout variant="success" icon="check-circle">{{ session('status') }}</flux:callout>
     @endif

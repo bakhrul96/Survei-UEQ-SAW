@@ -62,6 +62,14 @@ class StudySettings extends Component
 
     public string $instrumentSource = '';
 
+    public string $newPeriodName = '';
+
+    public string $newPeriodSlug = '';
+
+    public string $newPeriodOpensAt = '';
+
+    public string $newPeriodClosesAt = '';
+
     /** @var array<string, string> */
     public array $evidenceReferences = [
         'https' => '',
@@ -236,6 +244,26 @@ class StudySettings extends Component
         } catch (DomainException $exception) {
             $this->addError("evidence.{$kind}", $exception->getMessage());
         }
+    }
+
+    public function createPeriod(\App\Application\Study\CreateStudyPeriod $create): void
+    {
+        $validated = $this->validate([
+            'newPeriodName' => ['required', 'string', 'max:255'],
+            'newPeriodSlug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:evaluation_periods,slug'],
+            'newPeriodOpensAt' => ['required', 'date'],
+            'newPeriodClosesAt' => ['required', 'date', 'after:newPeriodOpensAt'],
+        ]);
+
+        $period = $create->handle(
+            $validated['newPeriodName'],
+            $validated['newPeriodSlug'] ?? null,
+            $validated['newPeriodOpensAt'],
+            $validated['newPeriodClosesAt'],
+        );
+
+        $this->reset('newPeriodName', 'newPeriodSlug', 'newPeriodOpensAt', 'newPeriodClosesAt');
+        session()->flash('status', 'Periode baru "'.$period->name.'" dibuat sebagai draft. Lengkapi konfigurasi lalu aktifkan.');
     }
 
     public function close(): void
