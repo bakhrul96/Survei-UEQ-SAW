@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
@@ -46,6 +46,8 @@
             </flux:sidebar.nav>
 
             <flux:spacer />
+
+            <div class="hidden px-2 pb-2 lg:block"><x-appearance-toggle /></div>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>

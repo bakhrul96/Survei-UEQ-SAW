@@ -157,3 +157,8 @@ select:focus[data-flux-control] {
         }
     }
 }
+
+/* Sembunyikan elemen x-cloak sampai Alpine siap (untuk toggle appearance). */
+[x-cloak] {
+    display: none !important;
+}
