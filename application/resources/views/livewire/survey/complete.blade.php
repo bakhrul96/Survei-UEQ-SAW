@@ -5,6 +5,7 @@
         </div>
         <h1 class="display-type text-2xl text-emerald-950">Penilaian berhasil disimpan</h1>
         <p class="text-emerald-800">Terima kasih atas waktu dan pengalaman yang Anda bagikan.</p>
+        <p class="text-emerald-800">Modul yang Anda nilai: <span class="font-semibold">{{ $submission->unit->name }}</span></p>
         @if ($submission->session_sequence >= 3)
             <p class="hairline rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-900">Anda telah menilai tiga modul pada sesi ini. Sebaiknya beristirahat sebelum melanjutkan.</p>
         @endif

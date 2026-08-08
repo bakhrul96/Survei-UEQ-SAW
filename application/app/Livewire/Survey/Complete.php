@@ -20,6 +20,7 @@ class Complete extends Component
         $respondent = $context->respondent();
         $this->period = $period;
         $this->submission = SurveySubmission::query()
+            ->with('unit')
             ->where('evaluation_period_id', $period->id)
             ->where('anonymous_respondent_id', $respondent->id)
             ->latest('completed_at')
