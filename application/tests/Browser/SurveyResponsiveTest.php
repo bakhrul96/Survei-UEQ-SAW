@@ -18,17 +18,17 @@ it('keeps every survey page inside 360 pixels without overflow or accessibility 
         ->waitForText('Informasi Penelitian')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
         ->assertNoAccessibilityIssues(1)
-        ->click('ui-checkbox[wire\\:model="consent"]')
+        ->click('input[type="checkbox"][wire\\:model.live="consent"]')
         ->fill('[wire\\:model="age"]', '20')
-        ->click('ui-checkbox[wire\\:model="isIndramayuResident"]')
-        ->click('ui-checkbox[wire\\:model="hasUsedWongReang"]')
+        ->click('input[type="checkbox"][wire\\:model.live="isIndramayuResident"]')
+        ->click('input[type="checkbox"][wire\\:model.live="hasUsedWongReang"]')
         ->press('Lanjutkan')
         ->waitForText('Pilih Modul')
         ->press('Ibadah-Yu')
         ->waitForText('Langkah 1 dari 4')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
         ->assertNoAccessibilityIssues(1)
-        ->check('[wire\\:model="confirmedExperience"]');
+        ->check('[wire\\:model.live="confirmedExperience"]');
 
     $step = 1;
 

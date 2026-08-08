@@ -16,10 +16,10 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
     $page = visit(route('survey.entry', $fixture->period))
         ->resize(360, 800)
         ->assertSee('Informasi Penelitian')
-        ->click('ui-checkbox[wire\\:model="consent"]')
+        ->click('input[type="checkbox"][wire\\:model.live="consent"]')
         ->fill('[wire\\:model="age"]', '20')
-        ->click('ui-checkbox[wire\\:model="isIndramayuResident"]')
-        ->click('ui-checkbox[wire\\:model="hasUsedWongReang"]')
+        ->click('input[type="checkbox"][wire\\:model.live="isIndramayuResident"]')
+        ->click('input[type="checkbox"][wire\\:model.live="hasUsedWongReang"]')
         ->press('Lanjutkan')
         ->waitForText('Pilih Modul')
         ->press('Ibadah-Yu')
@@ -38,7 +38,7 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
         $page->page()->keyUp('Tab');
     }
     $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"next\"]') && document.activeElement.className.includes('focus:ring-2')")
-        ->check('[wire\\:model="confirmedExperience"]');
+        ->check('[wire\\:model.live="confirmedExperience"]');
 
     foreach (range(1, 26) as $itemOrder) {
         $page->click('label[for="ueq-item-'.$itemOrder.'-value-4"]');
