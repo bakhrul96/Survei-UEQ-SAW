@@ -216,7 +216,7 @@
 
         <!-- Analisis Sensitivitas -->
         @if($sensitivityGrid !== [])
-            <flux:card data-testid="sensitivity-results" class="space-y-4">
+            <div data-testid="sensitivity-results" class="bento-card space-y-4 p-5 sm:p-6">
                 <div>
                     <flux:heading size="lg">Analisis Sensitivitas Peringkat (S0 vs S1 vs S2)</flux:heading>
                     <flux:text class="text-xs text-zinc-500">

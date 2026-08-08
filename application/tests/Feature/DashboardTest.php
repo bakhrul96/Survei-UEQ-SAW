@@ -32,10 +32,12 @@ class DashboardTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_admin_without_confirmed_two_factor_is_redirected_to_security_setup(): void
+    public function test_admin_without_confirmed_two_factor_can_visit_the_dashboard(): void
     {
+        $this->seed(WongReangStudySeeder::class);
+
         $this->actingAs(User::factory()->create(['email_verified_at' => now()]))
             ->get(route('admin.dashboard'))
-            ->assertRedirect(route('security.edit'));
+            ->assertOk();
     }
 }
