@@ -27,7 +27,7 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
 
     $page->page()->keyDown('Tab');
     $page->page()->keyUp('Tab');
-    $page->assertScript("document.activeElement.matches('[wire\\\\:model=\"confirmedExperience\"]') && document.activeElement.className.includes('focus:ring-2')");
+    $page->assertScript("document.activeElement.matches('[wire\\\\:model.live=\"confirmedExperience\"]') && document.activeElement.className.includes('focus:ring-2')");
 
     $page->page()->keyDown('Tab');
     $page->page()->keyUp('Tab');
