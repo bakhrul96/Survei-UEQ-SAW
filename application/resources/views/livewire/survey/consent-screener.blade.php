@@ -6,7 +6,7 @@
             <p class="max-w-prose text-base leading-relaxed text-zinc-600">{{ $period->name }} — bantu tentukan prioritas perbaikan layanan dengan menilai modul yang pernah Anda gunakan.</p>
         </div>
 
-        <div class="grid grid-cols-3 gap-2.5">
+        <div class="grid gap-2.5 sm:grid-cols-3">
             <div class="bento-card reveal reveal-delay-1 px-3 py-3 text-center">
                 <p class="text-lg font-bold text-indigo-700">Anonim</p>
                 <p class="mt-0.5 text-xs text-zinc-500">Tanpa nama &amp; NIK</p>
