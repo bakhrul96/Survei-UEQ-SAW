@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function forcePublicUrlWhenBehindProxy(): void
     {
-        if (! env('FORCE_PUBLIC_URL', false)) {
+        if (! config('app.force_public_url', false)) {
             return;
         }
 

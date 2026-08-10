@@ -14,16 +14,26 @@ it('keeps a UEQ draft when the browser reports an offline interruption', functio
     $fixture->period = lockStudyConfiguration($fixture->period);
 
     $page = visit(route('survey.entry', $fixture->period))
-        ->resize(360, 800)
-        ->click('ui-checkbox[wire\\:model="consent"]')
-        ->fill('[wire\\:model="age"]', '20')
-        ->click('ui-checkbox[wire\\:model="isIndramayuResident"]')
-        ->click('ui-checkbox[wire\\:model="hasUsedWongReang"]')
-        ->press('Lanjutkan')
-        ->waitForText('Pilih Modul')
-        ->press('Ibadah-Yu')
-        ->waitForText('Langkah 1 dari 4')
-        ->check('[wire\\:model="confirmedExperience"]')
+        ->resize(360, 800);
+
+    $page->click('input[type="checkbox"][wire\\:model\\.live="consent"]');
+    $page->page()->waitForFunction("() => document.querySelector('input[wire\\\\:model\\\\.live=\"consent\"]')?.closest('label')?.classList.contains('border-indigo-500')");
+
+    $page->fill('[wire\\:model="age"]', '20')
+        ->click('input[type="checkbox"][wire\\:model\\.live="isIndramayuResident"]');
+    $page->page()->waitForFunction("() => document.querySelector('input[wire\\\\:model\\\\.live=\"isIndramayuResident\"]')?.closest('label')?.classList.contains('border-indigo-500')");
+
+    $page->click('input[type="checkbox"][wire\\:model\\.live="hasUsedWongReang"]');
+    $page->page()->waitForFunction("() => document.querySelector('input[wire\\\\:model\\\\.live=\"hasUsedWongReang\"]')?.closest('label')?.classList.contains('border-indigo-500')");
+
+    $page->page()->waitForFunction("() => { const id = document.querySelector('[wire\\\\:id]')?.getAttribute('wire:id'); const component = id ? Livewire.find(id) : null; return component?.get('consent') === true && component?.get('age') == 20 && component?.get('isIndramayuResident') === true && component?.get('hasUsedWongReang') === true; }");
+
+    $page->press('Lanjutkan')->waitForText('Pilih Modul');
+
+    $page->press('Ibadah-Yu')->waitForText('Langkah 1 dari 4');
+
+    $page
+        ->check('[wire\\:model\\.live="confirmedExperience"]')
         ->click('label[for="ueq-item-1-value-4"]')
         ->wait(1)
         ->assertScript("Object.keys(localStorage).some((key) => key.startsWith('ueq-draft-v1:') && JSON.parse(localStorage.getItem(key)).answers['1'] === '4')");

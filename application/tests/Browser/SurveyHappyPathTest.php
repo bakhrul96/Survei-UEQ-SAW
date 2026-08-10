@@ -16,10 +16,19 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
     $page = visit(route('survey.entry', $fixture->period))
         ->resize(360, 800)
         ->assertSee('Informasi Penelitian')
-        ->click('input[type="checkbox"][wire\\:model\\.live="consent"]')
-        ->fill('[wire\\:model="age"]', '20')
-        ->click('input[type="checkbox"][wire\\:model\\.live="isIndramayuResident"]')
-        ->click('input[type="checkbox"][wire\\:model\\.live="hasUsedWongReang"]')
+        ->click('input[type="checkbox"][wire\\:model\\.live="consent"]');
+    $page->page()->waitForFunction("() => document.querySelector('input[wire\\\\:model\\\\.live=\"consent\"]')?.closest('label')?.classList.contains('border-indigo-500')");
+
+    $page->fill('[wire\\:model="age"]', '20')
+        ->click('input[type="checkbox"][wire\\:model\\.live="isIndramayuResident"]');
+    $page->page()->waitForFunction("() => document.querySelector('input[wire\\\\:model\\\\.live=\"isIndramayuResident\"]')?.closest('label')?.classList.contains('border-indigo-500')");
+
+    $page->click('input[type="checkbox"][wire\\:model\\.live="hasUsedWongReang"]');
+    $page->page()->waitForFunction("() => document.querySelector('input[wire\\\\:model\\\\.live=\"hasUsedWongReang\"]')?.closest('label')?.classList.contains('border-indigo-500')");
+
+    $page->page()->waitForFunction("() => { const id = document.querySelector('[wire\\\\:id]')?.getAttribute('wire:id'); const component = id ? Livewire.find(id) : null; return component?.get('consent') === true && component?.get('age') == 20 && component?.get('isIndramayuResident') === true && component?.get('hasUsedWongReang') === true; }");
+
+    $page
         ->press('Lanjutkan')
         ->waitForText('Pilih Modul')
         ->press('Ibadah-Yu')
@@ -37,7 +46,7 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
         $page->page()->keyDown('Tab');
         $page->page()->keyUp('Tab');
     }
-    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"next\"]') && document.activeElement.className.includes('focus:ring-2')")
+    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"next\"]') && getComputedStyle(document.activeElement).outlineStyle !== 'none' && parseFloat(getComputedStyle(document.activeElement).outlineWidth) >= 2")
         ->check('[wire\\:model\\.live="confirmedExperience"]');
 
     foreach (range(1, 26) as $itemOrder) {
@@ -50,10 +59,10 @@ it('submits an eligible respondent evaluation on a 360 by 800 viewport', functio
 
     $page->page()->keyDown('Tab');
     $page->page()->keyUp('Tab');
-    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"previous\"]') && document.activeElement.className.includes('focus:ring-2')");
+    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"previous\"]') && getComputedStyle(document.activeElement).outlineStyle !== 'none' && parseFloat(getComputedStyle(document.activeElement).outlineWidth) >= 2");
     $page->page()->keyDown('Tab');
     $page->page()->keyUp('Tab');
-    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"submit\"]') && document.activeElement.className.includes('focus:ring-2')");
+    $page->assertScript("document.activeElement.matches('button[wire\\\\:click=\"submit\"]') && getComputedStyle(document.activeElement).outlineStyle !== 'none' && parseFloat(getComputedStyle(document.activeElement).outlineWidth) >= 2");
 
     $page->press('Kirim Penilaian')
         ->waitForText('Penilaian berhasil disimpan')
